@@ -1,0 +1,14 @@
+#TeXlipse project settings
+#Fri Apr 22 21:54:20 EDT 2016
+markTmpDer=true
+builderNum=2
+outputDir=
+makeIndSty=
+bibrefDir=
+outputFormat=pdf
+tempDir=tmp
+mainTexFile=tile.tex
+outputFile=tile.pdf
+langSpell=en
+markDer=true
+srcDir=
