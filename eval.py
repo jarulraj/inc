@@ -434,12 +434,6 @@ def collect_stats(result_dir,
 
         if(operator == "1"):
             operator = "direct"
-        elif(operator == "2"):
-            operator = "aggregate"
-        elif(operator == "3"):
-            operator = "arithmetic"
-        elif(operator == "4"):
-            operator = "join"
 
         # MAKE RESULTS FILE DIR
         if category == ADAPT_EXPERIMENT:
@@ -455,40 +449,6 @@ def collect_stats(result_dir,
         if category == ADAPT_EXPERIMENT:
             result_file.write(str(txn_itr) + " , " + str(stat) + "\n")
 
-        result_file.close()
-
-# COLLECT STATS
-def collect_ycsb_stats(result_dir,
-                       result_file_name):
-
-    fp = open(OUTPUT_FILE)
-    lines = fp.readlines()
-    fp.close()
-
-    for line in lines:
-        data = line.split()
-
-        # Collect info
-        layout = data[0]
-        operator = data[1]
-        column_count = data[2]
-        stat = data[3]
-
-        if(layout == "0"):
-            layout = "row"
-        elif(layout == "1"):
-            layout = "column"
-        elif(layout == "2"):
-            layout = "hybrid"
-
-        result_directory = result_dir + "/" + layout + "/" + column_count
-
-        if not os.path.exists(result_directory):
-            os.makedirs(result_directory)
-        file_name = result_directory + "/" + result_file_name
-
-        result_file = open(file_name, "a")
-        result_file.write(str(operator) + " , " + str(stat) + "\n")
         result_file.close()
 
 ###################################################################################
