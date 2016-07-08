@@ -123,7 +123,7 @@ ADAPT_DIR = BASE_DIR + "/results/adapt/"
 LAYOUTS = ("row", "column", "hybrid")
 OPERATORS = ("direct", "aggregate")
 
-SCALE_FACTOR = 1000.0
+SCALE_FACTOR = 100.0
 
 SELECTIVITY = (0.2, 0.4, 0.6, 0.8, 1.0)
 PROJECTIVITY = (0.01, 0.1, 0.5)
@@ -135,7 +135,7 @@ NUM_GROUPS = 5
 
 TRANSACTION_COUNT = 3
 
-NUM_ADAPT_TESTS = 4
+NUM_ADAPT_TESTS = 8
 REPEAT_ADAPT_TEST = 100
 ADAPT_QUERY_COUNT = NUM_ADAPT_TESTS * REPEAT_ADAPT_TEST
 
@@ -412,7 +412,7 @@ def collect_stats(result_dir,
         # Collect info
         layout = data[0]
         operator = data[1]
-        
+
         selectivity = data[2]
         projectivity = data[3]
         txn_itr = data[4]
@@ -476,7 +476,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Run Tilegroup Experiments')
 
     parser.add_argument("-a", "--adapt", help='eval adapt', action='store_true')
-    
+
     parser.add_argument("-m", "--adapt_plot", help='plot adapt', action='store_true')
 
     args = parser.parse_args()
