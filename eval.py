@@ -120,7 +120,7 @@ OUTPUT_FILE = "outputfile.summary"
 
 ADAPT_DIR = BASE_DIR + "/results/adapt/"
 
-LAYOUTS = ("row", "column", "hybrid")
+LAYOUTS = ("row", "hybrid")
 OPERATORS = ("direct", "aggregate")
 
 SCALE_FACTOR = 100.0
