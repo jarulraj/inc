@@ -293,8 +293,6 @@ def create_adapt_line_chart(datasets):
 
     group_data = []
     
-    pprint.pprint(datasets)
-
     # LINE
     for line_index, line in enumerate(x_values):
         group_data.append(datasets[0][line_index][1])
