@@ -17,6 +17,7 @@ from matplotlib.ticker import LinearLocator
 import os
 import pylab
 import subprocess
+import pprint
 
 import matplotlib.pyplot as plot
 import numpy as np
@@ -120,7 +121,7 @@ OUTPUT_FILE = "outputfile.summary"
 
 ADAPT_DIR = BASE_DIR + "/results/adapt/"
 
-LAYOUTS = ("row", "hybrid")
+LAYOUTS = ("hybrid")
 OPERATORS = ("direct", "aggregate")
 
 SCALE_FACTOR = 100.0
@@ -128,7 +129,7 @@ SCALE_FACTOR = 100.0
 SELECTIVITY = (0.2, 0.4, 0.6, 0.8, 1.0)
 PROJECTIVITY = (0.01, 0.1, 0.5)
 
-COLUMN_COUNTS = (50, 500)
+COLUMN_COUNTS = (50, 50)
 WRITE_RATIOS = (0, 1)
 TUPLES_PER_TILEGROUP = (100, 1000, 10000, 100000)
 NUM_GROUPS = 5
@@ -290,21 +291,20 @@ def create_adapt_line_chart(datasets):
     ADAPT_OPT_MARKER_SIZE = 5.0
     ADAPT_OPT_MARKER_FREQUENCY = 10
 
-    # GROUP
-    for group_index, group in enumerate(LAYOUTS):
-        group_data = []
+    group_data = []
+    
+    pprint.pprint(datasets)
 
-        # LINE
-        for line_index, line in enumerate(x_values):
-            group_data.append(datasets[group_index][line_index][1])
+    # LINE
+    for line_index, line in enumerate(x_values):
+        group_data.append(datasets[0][line_index][1])
 
-        LOG.info("%s group_data = %s ", group, str(group_data))
+    LOG.info("data = %s ", str(group_data))
 
-        ax1.plot(x_values, group_data, color=OPT_LINE_COLORS[idx], linewidth=ADAPT_OPT_LINE_WIDTH,
-                 marker=OPT_MARKERS[idx], markersize=ADAPT_OPT_MARKER_SIZE,
-                 markevery=ADAPT_OPT_MARKER_FREQUENCY, label=str(group))
+    ax1.plot(x_values, group_data, color=OPT_LINE_COLORS[idx], linewidth=ADAPT_OPT_LINE_WIDTH,
+             marker=OPT_MARKERS[idx], markersize=ADAPT_OPT_MARKER_SIZE,
+             markevery=ADAPT_OPT_MARKER_FREQUENCY)
 
-        idx = idx + 1
 
     # GRID
     axes = ax1.get_axes()
@@ -355,16 +355,14 @@ def create_adapt_line_chart(datasets):
 def adapt_plot():
 
     ADAPT_COLUMN_COUNT = COLUMN_COUNTS[1]
-    #ADAPT_SEED = 0
-    #random.seed(ADAPT_SEED)
     datasets = []
+    layout = "hybrid"
 
-    for layout in LAYOUTS:
-        data_file = ADAPT_DIR + "/" + str(ADAPT_COLUMN_COUNT) + "/" + layout + "/" + "adapt.csv"
+    data_file = ADAPT_DIR + "/" + str(ADAPT_COLUMN_COUNT) + "/" + str(layout) + "/" + "adapt.csv"
 
-        dataset = loadDataFile(ADAPT_QUERY_COUNT, 2, data_file)
-        #random.shuffle(dataset)
-        datasets.append(dataset)
+    dataset = loadDataFile(ADAPT_QUERY_COUNT, 2, data_file)
+    #random.shuffle(dataset)
+    datasets.append(dataset)
 
     fig = create_adapt_line_chart(datasets)
 
