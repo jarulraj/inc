@@ -124,7 +124,7 @@ ADAPT_DIR = BASE_DIR + "/results/adapt/"
 LAYOUTS = ("hybrid")
 OPERATORS = ("direct", "aggregate")
 
-SCALE_FACTOR = 100.0
+SCALE_FACTOR = 10.0
 
 SELECTIVITY = (0.2, 0.4, 0.6, 0.8, 1.0)
 PROJECTIVITY = (0.01, 0.1, 0.5)
@@ -136,8 +136,8 @@ NUM_GROUPS = 5
 
 TRANSACTION_COUNT = 3
 
-NUM_ADAPT_TESTS = 8
-REPEAT_ADAPT_TEST = 100
+NUM_ADAPT_TESTS = 30
+REPEAT_ADAPT_TEST = 400
 ADAPT_QUERY_COUNT = NUM_ADAPT_TESTS * REPEAT_ADAPT_TEST
 
 ADAPT_EXPERIMENT = 1
@@ -328,13 +328,12 @@ def create_adapt_line_chart(datasets):
     x_mark_offset = x_mark_count/2 - x_mark_count/4
     x_marks = np.arange(0, 1, x_mark_count)
 
-    ADAPT_LABELS = (["Scan", "Insert", "Scan", "Insert",
-                     "Scan", "Insert", "Scan", "Insert"])
+    ADAPT_LABELS = (["Scan", "Insert"])
 
     for idx, x_mark in enumerate(x_marks):
             ax1.text(x_mark + x_mark_offset,
                      y_mark,
-                     ADAPT_LABELS[idx],
+                     ADAPT_LABELS[idx%2],
                      transform=ax1.transAxes,
                      bbox=dict(facecolor='skyblue', alpha=0.5))
 
