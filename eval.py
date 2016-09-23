@@ -10,17 +10,17 @@ import argparse
 import csv
 import logging
 import math
+import os
+import subprocess
+import pprint
 import matplotlib
+import numpy as np
+
 matplotlib.use('Agg')
+import matplotlib.pyplot as plot
 from matplotlib.backends.backend_pdf import PdfPages
 from matplotlib.font_manager import FontProperties
 from matplotlib.ticker import LinearLocator
-import os
-import pylab
-import subprocess
-import pprint
-import matplotlib.pyplot as plot
-import numpy as np
 
 ###################################################################################
 # LOGGING CONFIGURATION
@@ -144,7 +144,7 @@ ADAPT_QUERY_COUNT = NUM_ADAPT_TESTS * REPEAT_ADAPT_TEST
 ADAPT_EXPERIMENT = 1
 QUERY_EXPERIMENT = 2
 
-# index usage types
+## INDEX USAGE TYPES
 INDEX_USAGE_TYPE_INC   = 1
 INDEX_USAGE_TYPE_FULL  = 2
 INDEX_USAGE_TYPE_NEVER = 3
@@ -155,7 +155,7 @@ INDEX_USAGE_TYPE_STRINGS = {
     3 : "never"
 }
 
-# query complexity types
+## QUERY COMPLEXITY TYPES
 QUERY_COMLEXITY_TYPE_SIMPLE   = 1
 QUERY_COMLEXITY_TYPE_MODERATE = 2
 QUERY_COMLEXITY_TYPE_COMPLEX  = 3
@@ -166,7 +166,7 @@ QUERY_COMLEXITY_TYPE_STRINGS = {
     3 : "complexq"
 }
 
-## QUERY
+## QUERY EXPERIMENT
 QUERY_INDEX_USAGE_TYPES = [INDEX_USAGE_TYPE_INC, INDEX_USAGE_TYPE_FULL, INDEX_USAGE_TYPE_NEVER]
 QUERY_WRITE_RATIOS = [0.0]
 QUERY_QUERY_COMLEXITY_TYPES = [QUERY_COMLEXITY_TYPE_SIMPLE]
@@ -401,9 +401,6 @@ def create_adapt_line_chart(datasets):
     major_ticks = np.arange(0, ADAPT_QUERY_COUNT + 1, REPEAT_ADAPT_TEST)
     ax1.set_xticks(major_ticks)
 
-    #for major_tick in major_ticks[1:-1]:
-    #    ax1.axvline(major_tick, color='0.5', linestyle='dashed', linewidth=ADAPT_OPT_LINE_WIDTH)
-
     # LABELS
     y_mark = 0.9
     x_mark_count = 1.0/NUM_ADAPT_TESTS
@@ -449,21 +446,25 @@ def adapt_plot():
 
     saveGraph(fig, fileName, width= OPT_GRAPH_WIDTH * 3, height=OPT_GRAPH_HEIGHT/1.5)
 
+# QUERY -- PLOT
 def query_plot():
+    
     for query_complexity_type in QUERY_QUERY_COMLEXITY_TYPES:
         for write_ratio in QUERY_WRITE_RATIOS:
             datasets = []
+
             for index_usage_type in QUERY_INDEX_USAGE_TYPES:
                 result_file_name = make_query_result_file_name(index_usage_type, write_ratio, query_complexity_type)
                 result_file_path = QUERY_DIR + '/' + result_file_name
+            
                 if os.path.exists(result_file_path):
                     dataset = loadDataFile(QUERY_DIR + '/' + result_file_name)
                     datasets.append(dataset)
+
             fig = create_query_line_chart(datasets)
 
-            fileName = "query" + "_" + \
-                INDEX_USAGE_TYPE_STRINGS[query_complexity_type] + \
-                "_" + str(write_ratio) + ".pdf"
+            fileName = "query" + "_" + INDEX_USAGE_TYPE_STRINGS[query_complexity_type] + \
+                       "_" + str(write_ratio) + ".pdf"
 
             saveGraph(fig, fileName, width=OPT_GRAPH_WIDTH, height=OPT_GRAPH_HEIGHT)
 
@@ -483,14 +484,14 @@ def run_experiment(
     program=SDBENCH,
     index_usage_type=INDEX_USAGE_TYPE_INC,
     query_complexity_type=QUERY_COMLEXITY_TYPE_SIMPLE,
-    scale_factor=100.0,
-    column_count=10,
-    write_ratio=0.0,
-    tuples_per_tg=1000,
-    phase_length=40,
-    phase_count=10,
-    selectivity=0.1,
-    projectivity=0.1):
+    scale_factor = 100.0,
+    column_count = 10,
+    write_ratio = 0.0,
+    tuples_per_tg = 1000,
+    phase_length = 40,
+    phase_count = 10,
+    selectivity = 0.1,
+    projectivity = 0.1):
 
     subprocess.call(["rm -f " + OUTPUT_FILE], shell=True)
     subprocess.call([program,
@@ -508,11 +509,14 @@ def run_experiment(
 # COLLECT STATS
 
 # Collect result to a given file
-def collect_stats2(result_dir, result_file_name):
+def collect_stats2(result_dir, 
+                   result_file_name):
+    
     if not os.path.exists(result_dir):
-        os.path.makedirs(result_dir)
+        os.makedirs(result_dir)
 
     result_f = open(result_dir + "/" + result_file_name, "w")
+
     itr = 1
     with open(OUTPUT_FILE) as fp:
         for line in fp:
@@ -523,7 +527,6 @@ def collect_stats2(result_dir, result_file_name):
             itr += 1
 
     result_f.close()
-
 
 def collect_stats(result_dir,
                   result_file_name,
@@ -596,14 +599,16 @@ def adapt_eval():
     collect_stats(ADAPT_DIR, "adapt.csv", ADAPT_EXPERIMENT)
 
 def query_eval():
+    
     for index_usage_type in QUERY_INDEX_USAGE_TYPES:
         for write_ratio in QUERY_WRITE_RATIOS:
             for query_complexity_type in QUERY_QUERY_COMLEXITY_TYPES:
+
                 result_file_name = make_query_result_file_name(index_usage_type, write_ratio, query_complexity_type)
 
                 run_experiment(phase_count=10, phase_length=10,
-                    index_usage_type=index_usage_type, write_ratio=write_ratio,
-                    query_complexity_type=query_complexity_type)
+                               index_usage_type=index_usage_type, write_ratio=write_ratio,
+                               query_complexity_type=query_complexity_type)
 
                 collect_stats2(QUERY_DIR, result_file_name)
 
@@ -615,12 +620,10 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Run Incremental Experiments')
 
     parser.add_argument("-a", "--adapt", help='eval adapt', action='store_true')
+    parser.add_argument("-b", "--query", help="eval query", action='store_true')
 
     parser.add_argument("-m", "--adapt_plot", help='plot adapt', action='store_true')
-
-    parser.add_argument("--query", help="run query experiment", action='store_true')
-
-    parser.add_argument("--query_plot", help="plot query experiment result", action='store_true')
+    parser.add_argument("-n", "--query_plot", help="plot query", action='store_true')
 
     args = parser.parse_args()
 
