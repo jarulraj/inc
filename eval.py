@@ -57,39 +57,26 @@ OPT_LEGEND_SHADOW = False
 OPT_MARKERS = (['o', 's', 'v', "^", "h", "v", ">", "x", "d", "<", "|", "", "|", "_"])
 OPT_PATTERNS = ([ "////", "////", "o", "o", "\\\\" , "\\\\" , "//////", "//////", ".", "." , "\\\\\\" , "\\\\\\" ])
 
+OPT_STACK_COLORS = ('#2b3742', '#c9b385', '#610606', '#1f1501')
+OPT_LINE_STYLES= ('-', ':', '--', '-.')
+
+# SET FONT
+
 OPT_LABEL_WEIGHT = 'bold'
 OPT_LINE_COLORS = COLOR_MAP
-OPT_LINE_WIDTH = 3.0
-OPT_MARKER_SIZE = 6.0
+OPT_LINE_WIDTH = 6.0
+OPT_MARKER_SIZE = 10.0
 
 AXIS_LINEWIDTH = 1.3
 BAR_LINEWIDTH = 1.2
 
-# SET FONT
-
-LABEL_FONT_SIZE = 14
-TICK_FONT_SIZE = 12
-TINY_FONT_SIZE = 8
-LEGEND_FONT_SIZE = 16
+LABEL_FONT_SIZE = 16
+TICK_FONT_SIZE = 14
+TINY_FONT_SIZE = 10
+LEGEND_FONT_SIZE = 18
 
 SMALL_LABEL_FONT_SIZE = 10
 SMALL_LEGEND_FONT_SIZE = 10
-
-AXIS_LINEWIDTH = 1.3
-BAR_LINEWIDTH = 1.2
-
-# SET FONT
-
-LABEL_FONT_SIZE = 14
-TICK_FONT_SIZE = 12
-TINY_FONT_SIZE = 8
-LEGEND_FONT_SIZE = 16
-
-SMALL_LABEL_FONT_SIZE = 10
-SMALL_LEGEND_FONT_SIZE = 10
-
-AXIS_LINEWIDTH = 1.3
-BAR_LINEWIDTH = 1.2
 
 # SET TYPE1 FONTS
 matplotlib.rcParams['ps.useafm'] = True
@@ -149,10 +136,10 @@ WRITE_RATIO_BALANCED    = 0.5
 WRITE_RATIO_WRITE_HEAVY = 0.9
 
 WRITE_RATIO_STRINGS = {
-    0.0 : "read_only",
-    0.1 : "read_heavy",
+    0.0 : "read-only",
+    0.1 : "read-heavy",
     0.5 : "balanced",
-    0.9 : "write_heavy"
+    0.9 : "write-heavy"
 }
 
 DEFAULT_INDEX_USAGE = INDEX_USAGE_INCREMENTAL
@@ -256,8 +243,40 @@ def get_result_file(base_result_dir, result_dir_list, result_file_name):
     # Add local file name
     result_file_name = final_result_dir + result_file_name
         
-    pprint.pprint(result_file_name)
+    #pprint.pprint(result_file_name)
     return result_file_name
+
+###################################################################################
+# LEGEND
+###################################################################################
+
+def create_legend_index_usage():
+    fig = pylab.figure()
+    ax1 = fig.add_subplot(111)
+    
+    LEGEND_VALUES = INDEX_USAGE_STRINGS.values()
+
+    figlegend = pylab.figure(figsize=(9, 0.5))
+    idx = 0
+    lines = [None] * len(LEGEND_VALUES)
+
+    LEGEND_VALUES_UPPER_CASE = [x.upper() for x in LEGEND_VALUES]
+
+    for group in xrange(len(LEGEND_VALUES)):
+        data = [1]
+        x_values = [1]
+        lines[idx], = ax1.plot(x_values, data, color=OPT_LINE_COLORS[idx], linewidth=OPT_LINE_WIDTH,
+                               marker=OPT_MARKERS[idx], markersize=OPT_MARKER_SIZE, label=str(group))
+        idx = idx + 1
+
+    # LEGEND
+    figlegend.legend(lines, LEGEND_VALUES_UPPER_CASE, prop=LEGEND_FP,
+                     loc=1, ncol=4,
+                     mode="expand", shadow=OPT_LEGEND_SHADOW,
+                     frameon=False, borderaxespad=0.0,
+                     handleheight=1, handlelength=4)
+
+    figlegend.savefig('legend_index_usage.pdf')
 
 ###################################################################################
 # PLOT
@@ -265,37 +284,47 @@ def get_result_file(base_result_dir, result_dir_list, result_file_name):
 
 def create_query_line_chart(datasets):
     fig = plot.figure()
-    axe = fig.add_subplot(111)
-
-    # Get X-axis values
-    x_values = list(xrange(1, len(datasets[0])+1))
-
-    for idx, dataset in enumerate(datasets):
-        y_values = [value[1] for value in dataset]
-        axe.plot(x_values, y_values, 
-                 color=OPT_LINE_COLORS[idx],
-                 linewidth= OPT_LINE_WIDTH, 
-                 marker=OPT_MARKERS[idx],
-                 markersize= OPT_MARKER_SIZE)
-
-    axes = axe.get_axes()
-    makeGrid(axes)
-
-    # Y-AXIS
-    axe.yaxis.set_major_locator(LinearLocator(YAXIS_TICKS))
-    axe.minorticks_off()
-    axe.set_ylabel("Execution time (ms)", fontproperties=LABEL_FP)
-    #axe.set_yscale('log', basey=10)
+    ax1 = fig.add_subplot(111)
 
     # X-AXIS
-    axe.set_xlabel("Phase Lengths", fontproperties=LABEL_FP)
+    x_values = [str(i) for i in QUERY_EXP_PHASE_LENGTHS]
+    N = len(x_values)
+    ind = np.arange(N)
 
-    # LABELS
-    axe.legend(["Incremental", "Full", "Never"])
+    idx = 0
+    for group in xrange(len(datasets)):
+        # GROUP
+        y_values = []
+        for line in  xrange(len(datasets[group])):
+            for col in  xrange(len(datasets[group][line])):
+                if col == 1:
+                    y_values.append(datasets[group][line][col])
+        LOG.info("group_data = %s", str(y_values))
+        ax1.plot(ind + 0.5, y_values,
+                 color=OPT_COLORS[idx],
+                 linewidth=OPT_LINE_WIDTH, 
+                 marker=OPT_MARKERS[idx], 
+                 markersize=OPT_MARKER_SIZE,
+                 label=str(group))
+        idx = idx + 1
 
-    for label in axe.get_yticklabels() :
+    # GRID
+    makeGrid(ax1)
+
+    # Y-AXIS
+    ax1.yaxis.set_major_locator(LinearLocator(YAXIS_TICKS))
+    ax1.minorticks_off()
+    ax1.set_ylabel("Execution time (ms)", fontproperties=LABEL_FP)
+    #ax1.set_yscale('log', basey=10)
+
+    # X-AXIS
+    ax1.set_xticks(ind + 0.5)
+    ax1.set_xlabel("Phase Lengths", fontproperties=LABEL_FP)
+    ax1.set_xticklabels(x_values)
+
+    for label in ax1.get_yticklabels() :
         label.set_fontproperties(TICK_FP)
-    for label in axe.get_xticklabels() :
+    for label in ax1.get_xticklabels() :
         label.set_fontproperties(TICK_FP)
 
     return fig
@@ -306,12 +335,12 @@ def create_query_line_chart(datasets):
 
 # QUERY -- PLOT
 def query_plot():
-    
-    for index_usage in QUERY_EXP_INDEX_USAGES:
+
+    for query_complexity in QUERY_EXP_QUERY_COMPLEXITYS:    
         for write_ratio in QUERY_EXP_WRITE_RATIOS:
     
             datasets = []
-            for query_complexity in QUERY_EXP_QUERY_COMPLEXITYS:
+            for index_usage in QUERY_EXP_INDEX_USAGES:
                 # Get result file
                 result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
                                    WRITE_RATIO_STRINGS[write_ratio],
@@ -324,7 +353,7 @@ def query_plot():
             fig = create_query_line_chart(datasets)
 
             file_name = "query" + "-" + \
-                        INDEX_USAGE_STRINGS[query_complexity] + "-" + \
+                        QUERY_COMLEXITY_STRINGS[query_complexity] + "-" + \
                         WRITE_RATIO_STRINGS[write_ratio] + ".pdf"
 
             saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH, height=OPT_GRAPH_HEIGHT)
@@ -405,10 +434,10 @@ def query_eval():
     clean_up_dir(QUERY_DIR)
     
     QUERY_EXP_PHASE_COUNT = 10
-    
-    for index_usage in QUERY_EXP_INDEX_USAGES:
+
+    for query_complexity in QUERY_EXP_QUERY_COMPLEXITYS:
         for write_ratio in QUERY_EXP_WRITE_RATIOS:
-            for query_complexity in QUERY_EXP_QUERY_COMPLEXITYS:
+            for index_usage in QUERY_EXP_INDEX_USAGES:
                 for phase_length in QUERY_EXP_PHASE_LENGTHS:
 
                     # Get result file
@@ -450,6 +479,6 @@ if __name__ == '__main__':
     if args.query_plot:
         query_plot()
 
-    #create_legend()
+    #create_legend_index_usage()
 
 
