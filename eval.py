@@ -144,14 +144,15 @@ WRITE_RATIO_STRINGS = {
 
 DEFAULT_INDEX_USAGE = INDEX_USAGE_INCREMENTAL
 DEFAULT_QUERY_COMLEXITY = QUERY_COMLEXITY_SIMPLE
-DEFAULT_SCALE_FACTOR = 100.0
-DEFAULT_COLUMN_COUNT = 10
+DEFAULT_SCALE_FACTOR = 1000
+DEFAULT_COLUMN_COUNT = 20
 DEFAULT_WRITE_RATIO = WRITE_RATIO_READ_ONLY
 DEFAULT_TUPLES_PER_TG = 1000
-DEFAULT_PHASE_LENGTH = 40
-DEFAULT_PHASE_COUNT = 10
+DEFAULT_PHASE_LENGTH = 100
+DEFAULT_QUERY_COUNT = 600
 DEFAULT_SELECTIVITY = 0.01
 DEFAULT_PROJECTIVITY = 0.1
+DEFAULT_VERBOSITY = 0
 
 SELECTIVITY = (0.2, 0.4, 0.6, 0.8, 1.0)
 PROJECTIVITY = (0.01, 0.1, 0.5)
@@ -166,7 +167,7 @@ QUERY_DIR = BASE_DIR + "/results/query"
 QUERY_EXP_INDEX_USAGES = [INDEX_USAGE_INCREMENTAL, INDEX_USAGE_FULL, INDEX_USAGE_NEVER]
 QUERY_EXP_WRITE_RATIOS = [WRITE_RATIO_READ_ONLY, WRITE_RATIO_READ_HEAVY]
 QUERY_EXP_QUERY_COMPLEXITYS = [QUERY_COMLEXITY_SIMPLE]
-QUERY_EXP_PHASE_LENGTHS = [10, 20]
+QUERY_EXP_PHASE_LENGTHS = [10, 100]
 
 ###################################################################################
 # UTILS
@@ -231,7 +232,7 @@ def get_result_file(base_result_dir, result_dir_list, result_file_name):
 
     # Start with result dir
     final_result_dir = base_result_dir + "/"
-    
+
     # Add each entry in the list as a sub-dir
     for result_dir_entry in result_dir_list:
         final_result_dir += result_dir_entry + "/"
@@ -239,10 +240,10 @@ def get_result_file(base_result_dir, result_dir_list, result_file_name):
     # Create dir if needed
     if not os.path.exists(final_result_dir):
         os.makedirs(final_result_dir)
-        
+
     # Add local file name
     result_file_name = final_result_dir + result_file_name
-        
+
     #pprint.pprint(result_file_name)
     return result_file_name
 
@@ -253,7 +254,7 @@ def get_result_file(base_result_dir, result_dir_list, result_file_name):
 def create_legend_index_usage():
     fig = pylab.figure()
     ax1 = fig.add_subplot(111)
-    
+
     LEGEND_VALUES = INDEX_USAGE_STRINGS.values()
 
     figlegend = pylab.figure(figsize=(9, 0.5))
@@ -302,8 +303,8 @@ def create_query_line_chart(datasets):
         LOG.info("group_data = %s", str(y_values))
         ax1.plot(ind + 0.5, y_values,
                  color=OPT_COLORS[idx],
-                 linewidth=OPT_LINE_WIDTH, 
-                 marker=OPT_MARKERS[idx], 
+                 linewidth=OPT_LINE_WIDTH,
+                 marker=OPT_MARKERS[idx],
                  markersize=OPT_MARKER_SIZE,
                  label=str(group))
         idx = idx + 1
@@ -336,9 +337,9 @@ def create_query_line_chart(datasets):
 # QUERY -- PLOT
 def query_plot():
 
-    for query_complexity in QUERY_EXP_QUERY_COMPLEXITYS:    
+    for query_complexity in QUERY_EXP_QUERY_COMPLEXITYS:
         for write_ratio in QUERY_EXP_WRITE_RATIOS:
-    
+
             datasets = []
             for index_usage in QUERY_EXP_INDEX_USAGES:
                 # Get result file
@@ -346,7 +347,7 @@ def query_plot():
                                    WRITE_RATIO_STRINGS[write_ratio],
                                    QUERY_COMLEXITY_STRINGS[query_complexity]]
                 result_file = get_result_file(QUERY_DIR, result_dir_list, "query.csv")
-        
+
                 dataset = loadDataFile(result_file)
                 datasets.append(dataset)
 
@@ -379,12 +380,14 @@ def run_experiment(
     write_ratio=DEFAULT_WRITE_RATIO,
     tuples_per_tg=DEFAULT_TUPLES_PER_TG,
     phase_length=DEFAULT_PHASE_LENGTH,
-    phase_count=DEFAULT_PHASE_COUNT,
+    query_count=DEFAULT_QUERY_COUNT,
     selectivity=DEFAULT_SELECTIVITY,
-    projectivity=DEFAULT_PROJECTIVITY):
+    projectivity=DEFAULT_PROJECTIVITY,
+    verbosity=DEFAULT_VERBOSITY):
 
     subprocess.call(["rm -f " + OUTPUT_FILE], shell=True)
     subprocess.call([program,
+                     "-v", str(verbosity),
                      "-f", str(index_usage),
                      "-c", str(query_complexity),
                      "-k", str(scale_factor),
@@ -392,7 +395,7 @@ def run_experiment(
                      "-w", str(write_ratio),
                      "-g", str(tuples_per_tg),
                      "-t", str(phase_length),
-                     "-q", str(phase_length * phase_count),
+                     "-q", str(query_count),
                      "-s", str(selectivity),
                      "-p", str(projectivity)])
 
@@ -405,7 +408,7 @@ def run_experiment(
 # Collect result to a given file that already exists
 def collect_aggregate_stat(independent_variable,
                            result_file_name):
-    
+
     # Open result file in append mode
     result_file = open(result_file_name, "a")
 
@@ -415,8 +418,8 @@ def collect_aggregate_stat(independent_variable,
     with open(OUTPUT_FILE) as fp:
         for line in fp:
             line = line.strip()
-            data = line.split(" ")    
-            stat += float(data[-1])        
+            data = line.split(" ")
+            stat += float(data[-1])
             itr += 1
 
     pprint.pprint(stat)
@@ -432,8 +435,6 @@ def query_eval():
 
     # CLEAN UP RESULT DIR
     clean_up_dir(QUERY_DIR)
-    
-    QUERY_EXP_PHASE_COUNT = 10
 
     for query_complexity in QUERY_EXP_QUERY_COMPLEXITYS:
         for write_ratio in QUERY_EXP_WRITE_RATIOS:
@@ -445,14 +446,13 @@ def query_eval():
                                        WRITE_RATIO_STRINGS[write_ratio],
                                        QUERY_COMLEXITY_STRINGS[query_complexity]]
                     result_file = get_result_file(QUERY_DIR, result_dir_list, "query.csv")
-                    
+
                     # Run experiment
-                    run_experiment(phase_count=QUERY_EXP_PHASE_COUNT, 
-                                   phase_length=phase_length,
-                                   index_usage=index_usage, 
+                    run_experiment(phase_length=phase_length,
+                                   index_usage=index_usage,
                                    write_ratio=write_ratio,
                                    query_complexity=query_complexity)
-    
+
                     # Collect stat
                     collect_aggregate_stat(phase_length, result_file)
 
