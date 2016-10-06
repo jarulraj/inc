@@ -119,11 +119,11 @@ INDEX_USAGE_STRINGS = {
 }
 
 ## QUERY COMPLEXITY TYPES
-QUERY_COMLEXITY_SIMPLE   = 1
-QUERY_COMLEXITY_MODERATE = 2
-QUERY_COMLEXITY_COMPLEX  = 3
+QUERY_COMPLEXITY_SIMPLE   = 1
+QUERY_COMPLEXITY_MODERATE = 2
+QUERY_COMPLEXITY_COMPLEX  = 3
 
-QUERY_COMLEXITY_STRINGS = {
+QUERY_COMPLEXITY_STRINGS = {
     1 : "simple",
     2 : "moderate",
     3 : "complex"
@@ -143,7 +143,7 @@ WRITE_RATIO_STRINGS = {
 }
 
 DEFAULT_INDEX_USAGE = INDEX_USAGE_INCREMENTAL
-DEFAULT_QUERY_COMLEXITY = QUERY_COMLEXITY_SIMPLE
+DEFAULT_QUERY_COMLEXITY = QUERY_COMPLEXITY_SIMPLE
 DEFAULT_SCALE_FACTOR = 100
 DEFAULT_COLUMN_COUNT = 20
 DEFAULT_WRITE_RATIO = WRITE_RATIO_READ_ONLY
@@ -166,7 +166,7 @@ QUERY_DIR = BASE_DIR + "/results/query"
 ## QUERY EXPERIMENT
 QUERY_EXP_INDEX_USAGES = [INDEX_USAGE_INCREMENTAL, INDEX_USAGE_NEVER]
 QUERY_EXP_WRITE_RATIOS = [WRITE_RATIO_READ_ONLY, WRITE_RATIO_READ_HEAVY]
-QUERY_EXP_QUERY_COMPLEXITYS = [QUERY_COMLEXITY_SIMPLE, QUERY_COMLEXITY_MODERATE]
+QUERY_EXP_QUERY_COMPLEXITYS = [QUERY_COMPLEXITY_SIMPLE, QUERY_COMPLEXITY_MODERATE]
 QUERY_EXP_PHASE_LENGTHS = [50, 100, 250]
 
 ###################################################################################
@@ -345,7 +345,7 @@ def query_plot():
                 # Get result file
                 result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
                                    WRITE_RATIO_STRINGS[write_ratio],
-                                   QUERY_COMLEXITY_STRINGS[query_complexity]]
+                                   QUERY_COMPLEXITY_STRINGS[query_complexity]]
                 result_file = get_result_file(QUERY_DIR, result_dir_list, "query.csv")
 
                 dataset = loadDataFile(result_file)
@@ -354,7 +354,7 @@ def query_plot():
             fig = create_query_line_chart(datasets)
 
             file_name = "query" + "-" + \
-                        QUERY_COMLEXITY_STRINGS[query_complexity] + "-" + \
+                        QUERY_COMPLEXITY_STRINGS[query_complexity] + "-" + \
                         WRITE_RATIO_STRINGS[write_ratio] + ".pdf"
 
             saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH, height=OPT_GRAPH_HEIGHT)
@@ -444,7 +444,7 @@ def query_eval():
                     # Get result file
                     result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
                                        WRITE_RATIO_STRINGS[write_ratio],
-                                       QUERY_COMLEXITY_STRINGS[query_complexity]]
+                                       QUERY_COMPLEXITY_STRINGS[query_complexity]]
                     result_file = get_result_file(QUERY_DIR, result_dir_list, "query.csv")
 
                     # Run experiment
