@@ -155,6 +155,8 @@ DEFAULT_QUERY_COUNT = 1000
 DEFAULT_SELECTIVITY = 0.001
 DEFAULT_PROJECTIVITY = 0.1
 DEFAULT_VERBOSITY = 0
+DEFAULT_CONVERGENCE_MODE = 0
+DEFAULT_CONVERGENCE_QUERY_THRESHOLD = 200
 
 SELECTIVITY = (0.2, 0.4, 0.6, 0.8, 1.0)
 PROJECTIVITY = (0.01, 0.1, 0.5)
@@ -164,12 +166,23 @@ QUERY_EXPERIMENT = 1
 
 ## DIRS
 QUERY_DIR = BASE_DIR + "/results/query"
+CONVERGENCE_DIR = BASE_DIR + "/results/convergence"
 
 ## QUERY EXPERIMENT
 QUERY_EXP_INDEX_USAGES = [INDEX_USAGE_AGGRESSIVE, INDEX_USAGE_BALANCED, INDEX_USAGE_CONSERVATIVE, INDEX_USAGE_NEVER]
 QUERY_EXP_WRITE_RATIOS = [WRITE_RATIO_READ_ONLY, WRITE_RATIO_READ_HEAVY]
 QUERY_EXP_QUERY_COMPLEXITYS = [QUERY_COMPLEXITY_SIMPLE, QUERY_COMPLEXITY_MODERATE, QUERY_COMPLEXITY_COMPLEX]
 QUERY_EXP_PHASE_LENGTHS = [50, 100, 250, 500]
+QUERY_CSV = "query.csv"
+
+##  CONVERGENCE EXPERIMENT
+CONVERGENCE_EXP_CONVERGENCE_MODE = 1
+CONVERGENCE_EXP_PHASE_LENGTH = DEFAULT_QUERY_COUNT
+CONVERGENCE_EXP_INDEX_USAGES = QUERY_EXP_INDEX_USAGES
+CONVERGENCE_EXP_WRITE_RATIOS = QUERY_EXP_WRITE_RATIOS
+CONVERGENCE_EXP_QUERY_COMPLEXITYS = QUERY_EXP_QUERY_COMPLEXITYS
+CONVERGENCE_EXP_CONVERGENCE_QUERY_THRESHOLDS = [50, 500]
+CONVERGENCE_CSV = "convergence.csv"
 
 ###################################################################################
 # UTILS
@@ -332,6 +345,53 @@ def create_query_line_chart(datasets):
 
     return fig
 
+def create_convergence_line_chart(datasets):
+    fig = plot.figure()
+    ax1 = fig.add_subplot(111)
+
+    # X-AXIS
+    x_values = [str(i) for i in CONVERGENCE_EXP_CONVERGENCE_QUERY_THRESHOLDS]
+    N = len(x_values)
+    ind = np.arange(N)
+
+    idx = 0
+    for group in xrange(len(datasets)):
+        # GROUP
+        y_values = []
+        for line in  xrange(len(datasets[group])):
+            for col in  xrange(len(datasets[group][line])):
+                if col == 1:
+                    y_values.append(datasets[group][line][col])
+        LOG.info("group_data = %s", str(y_values))
+        ax1.plot(ind + 0.5, y_values,
+                 color=OPT_COLORS[idx],
+                 linewidth=OPT_LINE_WIDTH,
+                 marker=OPT_MARKERS[idx],
+                 markersize=OPT_MARKER_SIZE,
+                 label=str(group))
+        idx = idx + 1
+
+    # GRID
+    makeGrid(ax1)
+
+    # Y-AXIS
+    ax1.yaxis.set_major_locator(LinearLocator(YAXIS_TICKS))
+    ax1.minorticks_off()
+    ax1.set_ylabel("Convergence time (ms)", fontproperties=LABEL_FP)
+    #ax1.set_yscale('log', basey=10)
+
+    # X-AXIS
+    ax1.set_xticks(ind + 0.5)
+    ax1.set_xlabel("Convergence query threshold", fontproperties=LABEL_FP)
+    ax1.set_xticklabels(x_values)
+
+    for label in ax1.get_yticklabels() :
+        label.set_fontproperties(TICK_FP)
+    for label in ax1.get_xticklabels() :
+        label.set_fontproperties(TICK_FP)
+
+    return fig
+
 ###################################################################################
 # PLOT HELPERS
 ###################################################################################
@@ -348,7 +408,7 @@ def query_plot():
                 result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
                                    WRITE_RATIO_STRINGS[write_ratio],
                                    QUERY_COMPLEXITY_STRINGS[query_complexity]]
-                result_file = get_result_file(QUERY_DIR, result_dir_list, "query.csv")
+                result_file = get_result_file(QUERY_DIR, result_dir_list, QUERY_CSV)
 
                 dataset = loadDataFile(result_file)
                 datasets.append(dataset)
@@ -356,6 +416,31 @@ def query_plot():
             fig = create_query_line_chart(datasets)
 
             file_name = "query" + "-" + \
+                        QUERY_COMPLEXITY_STRINGS[query_complexity] + "-" + \
+                        WRITE_RATIO_STRINGS[write_ratio] + ".pdf"
+
+            saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH, height=OPT_GRAPH_HEIGHT)
+
+# CONVERGENCE -- PLOT
+def convergence_plot():
+
+    for query_complexity in CONVERGENCE_EXP_QUERY_COMPLEXITYS:
+        for write_ratio in CONVERGENCE_EXP_WRITE_RATIOS:
+
+            datasets = []
+            for index_usage in CONVERGENCE_EXP_INDEX_USAGES:
+                # Get result file
+                result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
+                                   WRITE_RATIO_STRINGS[write_ratio],
+                                   QUERY_COMPLEXITY_STRINGS[query_complexity]]
+                result_file = get_result_file(CONVERGENCE_DIR, result_dir_list, CONVERGENCE_CSV)
+
+                dataset = loadDataFile(result_file)
+                datasets.append(dataset)
+
+            fig = create_convergence_line_chart(datasets)
+
+            file_name = "convergence" + "-" + \
                         QUERY_COMPLEXITY_STRINGS[query_complexity] + "-" + \
                         WRITE_RATIO_STRINGS[write_ratio] + ".pdf"
 
@@ -385,7 +470,9 @@ def run_experiment(
     query_count=DEFAULT_QUERY_COUNT,
     selectivity=DEFAULT_SELECTIVITY,
     projectivity=DEFAULT_PROJECTIVITY,
-    verbosity=DEFAULT_VERBOSITY):
+    verbosity=DEFAULT_VERBOSITY,
+    convergence_mode=DEFAULT_CONVERGENCE_MODE,
+    convergence_query_threshold=DEFAULT_CONVERGENCE_QUERY_THRESHOLD):
 
     subprocess.call(["rm -f " + OUTPUT_FILE], shell=True)
     subprocess.call([program,
@@ -399,7 +486,9 @@ def run_experiment(
                      "-t", str(phase_length),
                      "-q", str(query_count),
                      "-s", str(selectivity),
-                     "-p", str(projectivity)])
+                     "-p", str(projectivity),
+                     "-o", str(convergence_mode),
+                     "-b", str(convergence_query_threshold)])
 
 ###################################################################################
 # UTILITIES
@@ -447,7 +536,7 @@ def query_eval():
                     result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
                                        WRITE_RATIO_STRINGS[write_ratio],
                                        QUERY_COMPLEXITY_STRINGS[query_complexity]]
-                    result_file = get_result_file(QUERY_DIR, result_dir_list, "query.csv")
+                    result_file = get_result_file(QUERY_DIR, result_dir_list, QUERY_CSV)
 
                     # Run experiment
                     run_experiment(phase_length=phase_length,
@@ -457,6 +546,34 @@ def query_eval():
 
                     # Collect stat
                     collect_aggregate_stat(phase_length, result_file)
+                    
+# CONVERGENCE -- EVAL
+def convergence_eval():
+
+    # CLEAN UP RESULT DIR
+    clean_up_dir(CONVERGENCE_DIR)
+
+    for query_complexity in CONVERGENCE_EXP_QUERY_COMPLEXITYS:
+        for write_ratio in CONVERGENCE_EXP_WRITE_RATIOS:
+            for index_usage in CONVERGENCE_EXP_INDEX_USAGES:
+                for convergence_query_threshold in CONVERGENCE_EXP_CONVERGENCE_QUERY_THRESHOLDS :
+
+                    # Get result file
+                    result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
+                                       WRITE_RATIO_STRINGS[write_ratio],
+                                       QUERY_COMPLEXITY_STRINGS[query_complexity]]
+                    result_file = get_result_file(CONVERGENCE_DIR, result_dir_list, CONVERGENCE_CSV)
+
+                    # Run experiment (only one phase)
+                    run_experiment(phase_length=CONVERGENCE_EXP_PHASE_LENGTH,
+                                   index_usage=index_usage,
+                                   write_ratio=write_ratio,
+                                   query_complexity=query_complexity,
+                                   convergence_mode=CONVERGENCE_EXP_CONVERGENCE_MODE,
+                                   convergence_query_threshold=convergence_query_threshold)
+
+                    # Collect stat
+                    collect_aggregate_stat(convergence_query_threshold, result_file)                    
 
 ###################################################################################
 # MAIN
@@ -466,8 +583,10 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Run Incremental Experiments')
 
     parser.add_argument("-a", "--query_eval", help="eval query", action='store_true')
+    parser.add_argument("-b", "--convergence_eval", help="eval convergence", action='store_true')
 
     parser.add_argument("-m", "--query_plot", help="plot query", action='store_true')
+    parser.add_argument("-n", "--convergence_plot", help="plot convergence", action='store_true')
 
     args = parser.parse_args()
 
@@ -476,10 +595,16 @@ if __name__ == '__main__':
     if args.query_eval:
         query_eval()
 
+    if args.convergence_eval:
+        convergence_eval()
+
     ## PLOT
 
     if args.query_plot:
         query_plot()
+
+    if args.convergence_plot:
+        convergence_plot()
 
     #create_legend_index_usage()
 
