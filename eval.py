@@ -157,6 +157,7 @@ DEFAULT_PROJECTIVITY = 0.1
 DEFAULT_VERBOSITY = 0
 DEFAULT_CONVERGENCE_MODE = 0
 DEFAULT_CONVERGENCE_QUERY_THRESHOLD = 200
+DEFAULT_VARIABILITY_THRESHOLD = 25
 
 SELECTIVITY = (0.2, 0.4, 0.6, 0.8, 1.0)
 PROJECTIVITY = (0.01, 0.1, 0.5)
@@ -165,11 +166,13 @@ PROJECTIVITY = (0.01, 0.1, 0.5)
 QUERY_EXPERIMENT = 1
 CONVERGENCE_EXPERIMENT = 2
 TIME_SERIES_EXPERIMENT = 3
+VARIABILITY_EXPERIMENT = 4
 
 ## DIRS
 QUERY_DIR = BASE_DIR + "/results/query"
 CONVERGENCE_DIR = BASE_DIR + "/results/convergence"
 TIME_SERIES_DIR = BASE_DIR + "/results/time_series"
+VARIABILITY_DIR = BASE_DIR + "/results/variability"
 
 ## QUERY EXPERIMENT
 QUERY_EXP_INDEX_USAGES = [INDEX_USAGE_AGGRESSIVE, INDEX_USAGE_BALANCED, INDEX_USAGE_CONSERVATIVE, INDEX_USAGE_NEVER]
@@ -199,6 +202,13 @@ TIME_SERIES_PLOT_MODES = [TIME_SERIES_LATENCY_MODE, TIME_SERIES_INDEX_MODE]
 TIME_SERIES_LATENCY_CSV = "time_series_latency.csv"
 TIME_SERIES_INDEX_CSV = "time_series_index.csv"
 
+##  VARIABILITY EXPERIMENT
+VARIABILITY_EXP_PHASE_LENGTH = 50
+VARIABILITY_EXP_INDEX_USAGES = QUERY_EXP_INDEX_USAGES
+VARIABILITY_EXP_WRITE_RATIO = WRITE_RATIO_READ_ONLY
+VARIABILITY_EXP_QUERY_COMPLEXITYS = QUERY_EXP_QUERY_COMPLEXITYS
+VARIABILITY_EXP_VARIABILITY_THRESHOLDS = [5, 10, 25]
+VARIABILITY_CSV = "variability.csv"
 
 ###################################################################################
 # UTILS
@@ -470,6 +480,53 @@ def create_time_series_line_chart(datasets, plot_mode):
 
     return fig
 
+def create_variability_line_chart(datasets):
+    fig = plot.figure()
+    ax1 = fig.add_subplot(111)
+
+    # X-AXIS
+    x_values = [str(i) for i in VARIABILITY_EXP_VARIABILITY_THRESHOLDS]
+    N = len(x_values)
+    ind = np.arange(N)
+
+    idx = 0
+    for group in xrange(len(datasets)):
+        # GROUP
+        y_values = []
+        for line in  xrange(len(datasets[group])):
+            for col in  xrange(len(datasets[group][line])):
+                if col == 1:
+                    y_values.append(datasets[group][line][col])
+        LOG.info("group_data = %s", str(y_values))
+        ax1.plot(ind + 0.5, y_values,
+                 color=OPT_COLORS[idx],
+                 linewidth=OPT_LINE_WIDTH,
+                 marker=OPT_MARKERS[idx],
+                 markersize=OPT_MARKER_SIZE,
+                 label=str(group))
+        idx = idx + 1
+
+    # GRID
+    makeGrid(ax1)
+
+    # Y-AXIS
+    ax1.yaxis.set_major_locator(LinearLocator(YAXIS_TICKS))
+    ax1.minorticks_off()
+    ax1.set_ylabel("Execution time (ms)", fontproperties=LABEL_FP)
+    #ax1.set_yscale('log', basey=10)
+
+    # X-AXIS
+    ax1.set_xticks(ind + 0.5)
+    ax1.set_xlabel("Variability Threshold", fontproperties=LABEL_FP)
+    ax1.set_xticklabels(x_values)
+
+    for label in ax1.get_yticklabels() :
+        label.set_fontproperties(TICK_FP)
+    for label in ax1.get_xticklabels() :
+        label.set_fontproperties(TICK_FP)
+
+    return fig
+
 ###################################################################################
 # PLOT HELPERS
 ###################################################################################
@@ -572,6 +629,28 @@ def time_series_plot():
     
                 saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH * 2.0, height=OPT_GRAPH_HEIGHT/1.5)
 
+# VARIABILITY -- PLOT
+def variability_plot():
+
+    for query_complexity in VARIABILITY_EXP_QUERY_COMPLEXITYS:
+
+            datasets = []
+            for index_usage in VARIABILITY_EXP_INDEX_USAGES:
+                
+                # Get result file
+                result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
+                                   QUERY_COMPLEXITY_STRINGS[query_complexity]]
+                result_file = get_result_file(VARIABILITY_DIR, result_dir_list, VARIABILITY_CSV)
+
+                dataset = loadDataFile(result_file)
+                datasets.append(dataset)
+
+            fig = create_variability_line_chart(datasets)
+
+            file_name = "variability" + "-" + \
+                        QUERY_COMPLEXITY_STRINGS[query_complexity] + ".pdf"
+
+            saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH, height=OPT_GRAPH_HEIGHT)
     
 ###################################################################################
 # EVAL HELPERS
@@ -599,7 +678,8 @@ def run_experiment(
     projectivity=DEFAULT_PROJECTIVITY,
     verbosity=DEFAULT_VERBOSITY,
     convergence_mode=DEFAULT_CONVERGENCE_MODE,
-    convergence_query_threshold=DEFAULT_CONVERGENCE_QUERY_THRESHOLD):
+    convergence_query_threshold=DEFAULT_CONVERGENCE_QUERY_THRESHOLD,
+    variability_threshold=DEFAULT_VARIABILITY_THRESHOLD):
 
     subprocess.call(["rm -f " + OUTPUT_FILE], shell=True)
     subprocess.call([program,
@@ -615,7 +695,8 @@ def run_experiment(
                      "-s", str(selectivity),
                      "-p", str(projectivity),
                      "-o", str(convergence_mode),
-                     "-b", str(convergence_query_threshold)])
+                     "-b", str(convergence_query_threshold),
+                     "-d", str(variability_threshold)])
 
 ###################################################################################
 # UTILITIES
@@ -765,6 +846,31 @@ def time_series_eval():
                     stat_offset = -2
                     collect_stat(DEFAULT_QUERY_COUNT, index_result_file, stat_offset)
 
+# VARIABILITY -- EVAL
+def variability_eval():
+
+    # CLEAN UP RESULT DIR
+    clean_up_dir(VARIABILITY_DIR)
+
+    for query_complexity in VARIABILITY_EXP_QUERY_COMPLEXITYS:
+            for index_usage in VARIABILITY_EXP_INDEX_USAGES:
+                for variability_threshold in VARIABILITY_EXP_VARIABILITY_THRESHOLDS:
+
+                    # Get result file
+                    result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
+                                       QUERY_COMPLEXITY_STRINGS[query_complexity]]
+                    result_file = get_result_file(VARIABILITY_DIR, result_dir_list, VARIABILITY_CSV)
+
+                    # Run experiment
+                    run_experiment(phase_length=VARIABILITY_EXP_PHASE_LENGTH,
+                                   index_usage=index_usage,
+                                   write_ratio=VARIABILITY_EXP_WRITE_RATIO,
+                                   query_complexity=query_complexity,
+                                   variability_threshold=variability_threshold)
+
+                    # Collect stat
+                    collect_aggregate_stat(variability_threshold, result_file)                  
+
 ###################################################################################
 # MAIN
 ###################################################################################
@@ -775,10 +881,12 @@ if __name__ == '__main__':
     parser.add_argument("-a", "--query_eval", help="eval query", action='store_true')
     parser.add_argument("-b", "--convergence_eval", help="eval convergence", action='store_true')
     parser.add_argument("-c", "--time_series_eval", help="eval time series", action='store_true')
+    parser.add_argument("-d", "--variability_eval", help="eval variability", action='store_true')
 
     parser.add_argument("-m", "--query_plot", help="plot query", action='store_true')
     parser.add_argument("-n", "--convergence_plot", help="plot convergence", action='store_true')
     parser.add_argument("-o", "--time_series_plot", help="plot time series", action='store_true')
+    parser.add_argument("-p", "--variability_plot", help="plot variability", action='store_true')
 
     args = parser.parse_args()
 
@@ -793,6 +901,9 @@ if __name__ == '__main__':
     if args.time_series_eval:
         time_series_eval()
 
+    if args.variability_eval:
+        variability_eval()
+
     ## PLOT
 
     if args.query_plot:
@@ -803,6 +914,9 @@ if __name__ == '__main__':
 
     if args.time_series_plot:
         time_series_plot()
+
+    if args.variability_plot:
+        variability_plot()
 
     #create_legend_index_usage()
 
