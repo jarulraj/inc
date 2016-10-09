@@ -146,13 +146,13 @@ WRITE_RATIO_STRINGS = {
 
 DEFAULT_INDEX_USAGE = INDEX_USAGE_AGGRESSIVE
 DEFAULT_QUERY_COMLEXITY = QUERY_COMPLEXITY_SIMPLE
-DEFAULT_SCALE_FACTOR = 1000
+DEFAULT_SCALE_FACTOR = 100
 DEFAULT_COLUMN_COUNT = 20
 DEFAULT_WRITE_RATIO = WRITE_RATIO_READ_ONLY
 DEFAULT_TUPLES_PER_TG = 1000
 DEFAULT_PHASE_LENGTH = 100
 DEFAULT_QUERY_COUNT = 1000
-DEFAULT_SELECTIVITY = 0.001
+DEFAULT_SELECTIVITY = 0.01
 DEFAULT_PROJECTIVITY = 0.1
 DEFAULT_VERBOSITY = 0
 DEFAULT_CONVERGENCE_MODE = 0
@@ -176,7 +176,7 @@ VARIABILITY_DIR = BASE_DIR + "/results/variability"
 
 ## QUERY EXPERIMENT
 QUERY_EXP_INDEX_USAGES = [INDEX_USAGE_AGGRESSIVE, INDEX_USAGE_BALANCED, INDEX_USAGE_CONSERVATIVE, INDEX_USAGE_NEVER]
-QUERY_EXP_WRITE_RATIOS = [WRITE_RATIO_READ_ONLY, WRITE_RATIO_READ_HEAVY]
+QUERY_EXP_WRITE_RATIOS = [WRITE_RATIO_READ_ONLY, WRITE_RATIO_READ_HEAVY, WRITE_RATIO_BALANCED, WRITE_RATIO_WRITE_HEAVY]
 QUERY_EXP_QUERY_COMPLEXITYS = [QUERY_COMPLEXITY_SIMPLE, QUERY_COMPLEXITY_MODERATE, QUERY_COMPLEXITY_COMPLEX]
 QUERY_EXP_PHASE_LENGTHS = [50, 100, 250, 500]
 QUERY_CSV = "query.csv"
@@ -194,7 +194,7 @@ CONVERGENCE_CSV = "convergence.csv"
 TIME_SERIES_EXP_PHASE_LENGTHS = [50, 100]
 TIME_SERIES_EXP_INDEX_USAGES = [INDEX_USAGE_AGGRESSIVE, INDEX_USAGE_BALANCED, INDEX_USAGE_CONSERVATIVE]
 
-TIME_SERIES_EXP_WRITE_RATIOS = [WRITE_RATIO_READ_ONLY, WRITE_RATIO_READ_HEAVY] 
+TIME_SERIES_EXP_WRITE_RATIOS = [WRITE_RATIO_READ_ONLY, WRITE_RATIO_READ_HEAVY]
 TIME_SERIES_EXP_QUERY_COMPLEXITYS = [QUERY_COMPLEXITY_SIMPLE, QUERY_COMPLEXITY_MODERATE]
 TIME_SERIES_LATENCY_MODE = 1
 TIME_SERIES_INDEX_MODE = 2
@@ -430,7 +430,7 @@ def create_time_series_line_chart(datasets, plot_mode):
 
     TIME_SERIES_OPT_LINE_WIDTH = 3.0
     TIME_SERIES_OPT_MARKER_SIZE = 5.0
-    TIME_SERIES_OPT_MARKER_FREQUENCY = 10
+    TIME_SERIES_OPT_MARKER_FREQUENCY = DEFAULT_QUERY_COUNT/10
 
     idx = 0
     for group in xrange(len(datasets)):
@@ -446,7 +446,7 @@ def create_time_series_line_chart(datasets, plot_mode):
                  linewidth=TIME_SERIES_OPT_LINE_WIDTH,
                  marker=OPT_MARKERS[idx],
                  markersize=TIME_SERIES_OPT_MARKER_SIZE,
-                 markevery=TIME_SERIES_OPT_MARKER_FREQUENCY, 
+                 markevery=TIME_SERIES_OPT_MARKER_FREQUENCY,
                  label=str(group))
         idx = idx + 1
 
@@ -456,14 +456,14 @@ def create_time_series_line_chart(datasets, plot_mode):
     # Y-AXIS
     ax1.yaxis.set_major_locator(LinearLocator(YAXIS_TICKS))
     ax1.minorticks_off()
-    
+
     # LATENCY
     if plot_mode == TIME_SERIES_LATENCY_MODE:
         ax1.set_ylabel("Query latency (ms)", fontproperties=LABEL_FP)
     # INDEX
     elif plot_mode == TIME_SERIES_INDEX_MODE:
         ax1.set_ylabel("Index count", fontproperties=LABEL_FP)
-        
+
     #ax1.set_yscale('log', basey=10)
 
     # X-AXIS
@@ -583,11 +583,11 @@ def convergence_plot():
 
 # TIME SERIES -- PLOT
 def time_series_plot():
-    
+
     num_graphs = len(TIME_SERIES_EXP_QUERY_COMPLEXITYS)
-        
+
     for graph_itr in range(0, num_graphs):
-        
+
         # Pick parameters for time series graph set
         query_complexity = TIME_SERIES_EXP_QUERY_COMPLEXITYS[graph_itr]
         write_ratio = TIME_SERIES_EXP_WRITE_RATIOS[graph_itr]
@@ -595,7 +595,7 @@ def time_series_plot():
         for phase_length in TIME_SERIES_EXP_PHASE_LENGTHS:
 
             for plot_mode in TIME_SERIES_PLOT_MODES:
-                
+
                 # LATENCY
                 if plot_mode == TIME_SERIES_LATENCY_MODE:
                     CSV_FILE = TIME_SERIES_LATENCY_CSV
@@ -604,29 +604,29 @@ def time_series_plot():
                 elif plot_mode == TIME_SERIES_INDEX_MODE:
                     CSV_FILE = TIME_SERIES_INDEX_CSV
                     OUTPUT_STRING = "index"
-                
+
                 datasets = []
                 for index_usage in TIME_SERIES_EXP_INDEX_USAGES:
-    
+
                         # Get result file
                         result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
                                            WRITE_RATIO_STRINGS[write_ratio],
                                            QUERY_COMPLEXITY_STRINGS[query_complexity],
-                                           str(phase_length)]                    
-                        result_file = get_result_file(TIME_SERIES_DIR, 
-                                                      result_dir_list, 
+                                           str(phase_length)]
+                        result_file = get_result_file(TIME_SERIES_DIR,
+                                                      result_dir_list,
                                                       CSV_FILE)
-    
+
                         dataset = loadDataFile(result_file)
                         datasets.append(dataset)
-    
+
                 fig = create_time_series_line_chart(datasets, plot_mode)
-        
+
                 file_name = "time-series" + "-" + OUTPUT_STRING + "-" + \
                             QUERY_COMPLEXITY_STRINGS[query_complexity] + "-" + \
                             WRITE_RATIO_STRINGS[write_ratio] + "-" + \
                             str(phase_length) + ".pdf"
-    
+
                 saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH * 2.0, height=OPT_GRAPH_HEIGHT/1.5)
 
 # VARIABILITY -- PLOT
@@ -636,7 +636,7 @@ def variability_plot():
 
             datasets = []
             for index_usage in VARIABILITY_EXP_INDEX_USAGES:
-                
+
                 # Get result file
                 result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
                                    QUERY_COMPLEXITY_STRINGS[query_complexity]]
@@ -651,7 +651,7 @@ def variability_plot():
                         QUERY_COMPLEXITY_STRINGS[query_complexity] + ".pdf"
 
             saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH, height=OPT_GRAPH_HEIGHT)
-    
+
 ###################################################################################
 # EVAL HELPERS
 ###################################################################################
@@ -775,7 +775,7 @@ def query_eval():
 
                     # Collect stat
                     collect_aggregate_stat(phase_length, result_file)
-                    
+
 # CONVERGENCE -- EVAL
 def convergence_eval():
 
@@ -802,7 +802,7 @@ def convergence_eval():
                                    convergence_query_threshold=convergence_query_threshold)
 
                     # Collect stat
-                    collect_aggregate_stat(convergence_query_threshold, result_file)                    
+                    collect_aggregate_stat(convergence_query_threshold, result_file)
 
 # TIME SERIES -- EVAL
 def time_series_eval():
@@ -811,9 +811,9 @@ def time_series_eval():
     clean_up_dir(TIME_SERIES_DIR)
 
     num_graphs = len(TIME_SERIES_EXP_QUERY_COMPLEXITYS)
-    
+
     for graph_itr in range(0, num_graphs):
-        
+
         # Pick parameters for time series graph set
         query_complexity = TIME_SERIES_EXP_QUERY_COMPLEXITYS[graph_itr]
         write_ratio = TIME_SERIES_EXP_WRITE_RATIOS[graph_itr]
@@ -826,12 +826,12 @@ def time_series_eval():
                                        WRITE_RATIO_STRINGS[write_ratio],
                                        QUERY_COMPLEXITY_STRINGS[query_complexity],
                                        str(phase_length)]
-                    
-                    latency_result_file = get_result_file(TIME_SERIES_DIR, 
-                                                          result_dir_list, 
+
+                    latency_result_file = get_result_file(TIME_SERIES_DIR,
+                                                          result_dir_list,
                                                           TIME_SERIES_LATENCY_CSV)
-                    index_result_file = get_result_file(TIME_SERIES_DIR, 
-                                                        result_dir_list, 
+                    index_result_file = get_result_file(TIME_SERIES_DIR,
+                                                        result_dir_list,
                                                         TIME_SERIES_INDEX_CSV)
 
                     # Run experiment
@@ -840,7 +840,7 @@ def time_series_eval():
                                    write_ratio=write_ratio,
                                    query_complexity=query_complexity)
 
-                    # Collect stat                    
+                    # Collect stat
                     stat_offset = -1
                     collect_stat(DEFAULT_QUERY_COUNT, latency_result_file, stat_offset)
                     stat_offset = -2
@@ -869,7 +869,7 @@ def variability_eval():
                                    variability_threshold=variability_threshold)
 
                     # Collect stat
-                    collect_aggregate_stat(variability_threshold, result_file)                  
+                    collect_aggregate_stat(variability_threshold, result_file)
 
 ###################################################################################
 # MAIN
