@@ -183,11 +183,12 @@ QUERY_CSV = "query.csv"
 
 ##  CONVERGENCE EXPERIMENT
 CONVERGENCE_EXP_CONVERGENCE_MODE = 1
-CONVERGENCE_EXP_PHASE_LENGTH = DEFAULT_QUERY_COUNT
+CONVERGENCE_EXP_VARIABILITY_THRESHOLD = 15
+CONVERGENCE_EXP_PHASE_LENGTH = 5
 CONVERGENCE_EXP_INDEX_USAGES = QUERY_EXP_INDEX_USAGES
 CONVERGENCE_EXP_WRITE_RATIOS = QUERY_EXP_WRITE_RATIOS
 CONVERGENCE_EXP_QUERY_COMPLEXITYS = QUERY_EXP_QUERY_COMPLEXITYS
-CONVERGENCE_EXP_CONVERGENCE_QUERY_THRESHOLDS = [50, 100]
+CONVERGENCE_EXP_CONVERGENCE_QUERY_THRESHOLD = 50
 CONVERGENCE_CSV = "convergence.csv"
 
 ##  TIME SERIES EXPERIMENT
@@ -376,7 +377,7 @@ def create_convergence_line_chart(datasets):
     ax1 = fig.add_subplot(111)
 
     # X-AXIS
-    x_values = [str(i) for i in CONVERGENCE_EXP_CONVERGENCE_QUERY_THRESHOLDS]
+    x_values = CONVERGENCE_EXP_WRITE_RATIOS
     N = len(x_values)
     ind = np.arange(N)
 
@@ -408,7 +409,7 @@ def create_convergence_line_chart(datasets):
 
     # X-AXIS
     ax1.set_xticks(ind + 0.5)
-    ax1.set_xlabel("Convergence query threshold", fontproperties=LABEL_FP)
+    ax1.set_xlabel("Read-write ratio", fontproperties=LABEL_FP)
     ax1.set_xticklabels(x_values)
 
     for label in ax1.get_yticklabels() :
@@ -560,13 +561,11 @@ def query_plot():
 def convergence_plot():
 
     for query_complexity in CONVERGENCE_EXP_QUERY_COMPLEXITYS:
-        for write_ratio in CONVERGENCE_EXP_WRITE_RATIOS:
 
             datasets = []
             for index_usage in CONVERGENCE_EXP_INDEX_USAGES:
                 # Get result file
                 result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
-                                   WRITE_RATIO_STRINGS[write_ratio],
                                    QUERY_COMPLEXITY_STRINGS[query_complexity]]
                 result_file = get_result_file(CONVERGENCE_DIR, result_dir_list, CONVERGENCE_CSV)
 
@@ -576,8 +575,7 @@ def convergence_plot():
             fig = create_convergence_line_chart(datasets)
 
             file_name = "convergence" + "-" + \
-                        QUERY_COMPLEXITY_STRINGS[query_complexity] + "-" + \
-                        WRITE_RATIO_STRINGS[write_ratio] + ".pdf"
+                        QUERY_COMPLEXITY_STRINGS[query_complexity] + ".pdf"
 
             saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH, height=OPT_GRAPH_HEIGHT)
 
@@ -783,13 +781,11 @@ def convergence_eval():
     clean_up_dir(CONVERGENCE_DIR)
 
     for query_complexity in CONVERGENCE_EXP_QUERY_COMPLEXITYS:
-        for write_ratio in CONVERGENCE_EXP_WRITE_RATIOS:
-            for index_usage in CONVERGENCE_EXP_INDEX_USAGES:
-                for convergence_query_threshold in CONVERGENCE_EXP_CONVERGENCE_QUERY_THRESHOLDS :
+        for index_usage in CONVERGENCE_EXP_INDEX_USAGES:
+            for write_ratio in CONVERGENCE_EXP_WRITE_RATIOS:
 
                     # Get result file
                     result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
-                                       WRITE_RATIO_STRINGS[write_ratio],
                                        QUERY_COMPLEXITY_STRINGS[query_complexity]]
                     result_file = get_result_file(CONVERGENCE_DIR, result_dir_list, CONVERGENCE_CSV)
 
@@ -799,10 +795,11 @@ def convergence_eval():
                                    write_ratio=write_ratio,
                                    query_complexity=query_complexity,
                                    convergence_mode=CONVERGENCE_EXP_CONVERGENCE_MODE,
-                                   convergence_query_threshold=convergence_query_threshold)
+                                   convergence_query_threshold=CONVERGENCE_EXP_CONVERGENCE_QUERY_THRESHOLD,
+                                   variability_threshold=CONVERGENCE_EXP_VARIABILITY_THRESHOLD)
 
                     # Collect stat
-                    collect_aggregate_stat(convergence_query_threshold, result_file)
+                    collect_aggregate_stat(write_ratio, result_file)
 
 # TIME SERIES -- EVAL
 def time_series_eval():
