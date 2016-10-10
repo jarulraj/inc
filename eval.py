@@ -158,6 +158,9 @@ DEFAULT_VERBOSITY = 0
 DEFAULT_CONVERGENCE_MODE = 0
 DEFAULT_CONVERGENCE_QUERY_THRESHOLD = 200
 DEFAULT_VARIABILITY_THRESHOLD = 25
+DEFAULT_INDEX_COUNT_THRESHOLD = 10
+DEFAULT_INDEX_UTILITY_THRESHOLD = 0.25
+DEFAULT_WRITE_RATIO_THRESHOLD = 0.75
 
 SELECTIVITY = (0.2, 0.4, 0.6, 0.8, 1.0)
 PROJECTIVITY = (0.01, 0.1, 0.5)
@@ -168,6 +171,9 @@ CONVERGENCE_EXPERIMENT = 2
 TIME_SERIES_EXPERIMENT = 3
 VARIABILITY_EXPERIMENT = 4
 SELECTIVITY_EXPERIMENT = 5
+INDEX_COUNT_EXPERIMENT = 6
+INDEX_UTILITY_EXPERIMENT = 7
+WRITE_RATIO_EXPERIMENT = 8
 
 ## DIRS
 QUERY_DIR = BASE_DIR + "/results/query"
@@ -175,6 +181,9 @@ CONVERGENCE_DIR = BASE_DIR + "/results/convergence"
 TIME_SERIES_DIR = BASE_DIR + "/results/time_series"
 VARIABILITY_DIR = BASE_DIR + "/results/variability"
 SELECTIVITY_DIR = BASE_DIR + "/results/selectivity"
+INDEX_COUNT_DIR = BASE_DIR + "/results/index_count"
+INDEX_UTILITY_DIR = BASE_DIR + "/results/index_utility"
+WRITE_RATIO_DIR = BASE_DIR + "/results/write_ratio"
 
 ## QUERY EXPERIMENT
 QUERY_EXP_INDEX_USAGES = [INDEX_USAGE_AGGRESSIVE, INDEX_USAGE_BALANCED, INDEX_USAGE_CONSERVATIVE, INDEX_USAGE_NEVER]
@@ -221,6 +230,28 @@ SELECTIVITY_EXP_PHASE_LENGTHS = QUERY_EXP_PHASE_LENGTHS
 SELECTIVITY_EXP_SELECTIVITYS = [0.1, 0.01]
 SELECTIVITY_EXP_SCALE_FACTORS = [100, 1000]
 SELECTIVITY_CSV = "selectivity.csv"
+
+## INDEX_COUNT EXPERIMENT
+INDEX_COUNT_EXP_INDEX_USAGES = [INDEX_USAGE_AGGRESSIVE, INDEX_USAGE_BALANCED, INDEX_USAGE_CONSERVATIVE, INDEX_USAGE_NEVER]
+INDEX_COUNT_EXP_WRITE_RATIOS = [WRITE_RATIO_READ_ONLY, WRITE_RATIO_READ_HEAVY, WRITE_RATIO_BALANCED, WRITE_RATIO_WRITE_HEAVY]
+INDEX_COUNT_EXP_QUERY_COMPLEXITY = QUERY_COMPLEXITY_SIMPLE
+INDEX_COUNT_EXP_INDEX_COUNT_THRESHOLDS = [5, 10, 15, 20]
+INDEX_COUNT_CSV = "index_count.csv"
+
+## INDEX_UTILITY EXPERIMENT
+INDEX_UTILITY_EXP_INDEX_USAGES = [INDEX_USAGE_AGGRESSIVE, INDEX_USAGE_BALANCED, INDEX_USAGE_CONSERVATIVE, INDEX_USAGE_NEVER]
+INDEX_UTILITY_EXP_WRITE_RATIO = WRITE_RATIO_BALANCED
+INDEX_UTILITY_EXP_QUERY_COMPLEXITY = QUERY_COMPLEXITY_SIMPLE
+INDEX_UTILITY_EXP_INDEX_UTILITY_THRESHOLDS = [0, 0.25, 0.5, 0.75]
+INDEX_UTILITY_EXP_INDEX_COUNT_THRESHOLDS = [5, 10]
+INDEX_UTILITY_CSV = "index_utility.csv"
+
+## WRITE_RATIO EXPERIMENT
+WRITE_RATIO_EXP_INDEX_USAGES = [INDEX_USAGE_AGGRESSIVE, INDEX_USAGE_BALANCED, INDEX_USAGE_CONSERVATIVE, INDEX_USAGE_NEVER]
+WRITE_RATIO_EXP_WRITE_RATIOS = [WRITE_RATIO_READ_HEAVY, WRITE_RATIO_WRITE_HEAVY]
+WRITE_RATIO_EXP_QUERY_COMPLEXITY = QUERY_COMPLEXITY_SIMPLE
+WRITE_RATIO_EXP_WRITE_RATIO_THRESHOLDS = [0.25, 0.50, 0.75, 1.0]
+WRITE_RATIO_CSV = "write_ratio.csv"
 
 ###################################################################################
 # UTILS
@@ -539,6 +570,147 @@ def create_variability_line_chart(datasets):
 
     return fig
 
+def create_index_count_line_chart(datasets):
+    fig = plot.figure()
+    ax1 = fig.add_subplot(111)
+
+    # X-AXIS
+    x_values = [str(i) for i in INDEX_COUNT_EXP_INDEX_COUNT_THRESHOLDS]
+    N = len(x_values)
+    ind = np.arange(N)
+
+    idx = 0
+    for group in xrange(len(datasets)):
+        # GROUP
+        y_values = []
+        for line in  xrange(len(datasets[group])):
+            for col in  xrange(len(datasets[group][line])):
+                if col == 1:
+                    y_values.append(datasets[group][line][col])
+        LOG.info("group_data = %s", str(y_values))
+        ax1.plot(ind + 0.5, y_values,
+                 color=OPT_COLORS[idx],
+                 linewidth=OPT_LINE_WIDTH,
+                 marker=OPT_MARKERS[idx],
+                 markersize=OPT_MARKER_SIZE,
+                 label=str(group))
+        idx = idx + 1
+
+    # GRID
+    makeGrid(ax1)
+
+    # Y-AXIS
+    ax1.yaxis.set_major_locator(LinearLocator(YAXIS_TICKS))
+    ax1.minorticks_off()
+    ax1.set_ylabel("Execution time (ms)", fontproperties=LABEL_FP)
+    #ax1.set_yscale('log', basey=10)
+
+    # X-AXIS
+    ax1.set_xticks(ind + 0.5)
+    ax1.set_xlabel("Index count threshold", fontproperties=LABEL_FP)
+    ax1.set_xticklabels(x_values)
+
+    for label in ax1.get_yticklabels() :
+        label.set_fontproperties(TICK_FP)
+    for label in ax1.get_xticklabels() :
+        label.set_fontproperties(TICK_FP)
+
+    return fig
+
+def create_index_utility_line_chart(datasets):
+    fig = plot.figure()
+    ax1 = fig.add_subplot(111)
+
+    # X-AXIS
+    x_values = [str(i) for i in INDEX_UTILITY_EXP_INDEX_UTILITY_THRESHOLDS]
+    N = len(x_values)
+    ind = np.arange(N)
+
+    idx = 0
+    for group in xrange(len(datasets)):
+        # GROUP
+        y_values = []
+        for line in  xrange(len(datasets[group])):
+            for col in  xrange(len(datasets[group][line])):
+                if col == 1:
+                    y_values.append(datasets[group][line][col])
+        LOG.info("group_data = %s", str(y_values))
+        ax1.plot(ind + 0.5, y_values,
+                 color=OPT_COLORS[idx],
+                 linewidth=OPT_LINE_WIDTH,
+                 marker=OPT_MARKERS[idx],
+                 markersize=OPT_MARKER_SIZE,
+                 label=str(group))
+        idx = idx + 1
+
+    # GRID
+    makeGrid(ax1)
+
+    # Y-AXIS
+    ax1.yaxis.set_major_locator(LinearLocator(YAXIS_TICKS))
+    ax1.minorticks_off()
+    ax1.set_ylabel("Execution time (ms)", fontproperties=LABEL_FP)
+    #ax1.set_yscale('log', basey=10)
+
+    # X-AXIS
+    ax1.set_xticks(ind + 0.5)
+    ax1.set_xlabel("Index utility threshold", fontproperties=LABEL_FP)
+    ax1.set_xticklabels(x_values)
+
+    for label in ax1.get_yticklabels() :
+        label.set_fontproperties(TICK_FP)
+    for label in ax1.get_xticklabels() :
+        label.set_fontproperties(TICK_FP)
+
+    return fig
+
+def create_write_ratio_line_chart(datasets):
+    fig = plot.figure()
+    ax1 = fig.add_subplot(111)
+
+    # X-AXIS
+    x_values = [str(i) for i in WRITE_RATIO_EXP_WRITE_RATIO_THRESHOLDS]
+    N = len(x_values)
+    ind = np.arange(N)
+
+    idx = 0
+    for group in xrange(len(datasets)):
+        # GROUP
+        y_values = []
+        for line in  xrange(len(datasets[group])):
+            for col in  xrange(len(datasets[group][line])):
+                if col == 1:
+                    y_values.append(datasets[group][line][col])
+        LOG.info("group_data = %s", str(y_values))
+        ax1.plot(ind + 0.5, y_values,
+                 color=OPT_COLORS[idx],
+                 linewidth=OPT_LINE_WIDTH,
+                 marker=OPT_MARKERS[idx],
+                 markersize=OPT_MARKER_SIZE,
+                 label=str(group))
+        idx = idx + 1
+
+    # GRID
+    makeGrid(ax1)
+
+    # Y-AXIS
+    ax1.yaxis.set_major_locator(LinearLocator(YAXIS_TICKS))
+    ax1.minorticks_off()
+    ax1.set_ylabel("Execution time (ms)", fontproperties=LABEL_FP)
+    #ax1.set_yscale('log', basey=10)
+
+    # X-AXIS
+    ax1.set_xticks(ind + 0.5)
+    ax1.set_xlabel("Write ratio threshold", fontproperties=LABEL_FP)
+    ax1.set_xticklabels(x_values)
+
+    for label in ax1.get_yticklabels() :
+        label.set_fontproperties(TICK_FP)
+    for label in ax1.get_xticklabels() :
+        label.set_fontproperties(TICK_FP)
+
+    return fig
+
 ###################################################################################
 # PLOT HELPERS
 ###################################################################################
@@ -668,7 +840,7 @@ def selectivity_plot():
         for scale_factor in SELECTIVITY_EXP_SCALE_FACTORS:
 
             datasets = []
-            for index_usage in QUERY_EXP_INDEX_USAGES:
+            for index_usage in SELECTIVITY_EXP_INDEX_USAGES:
                 # Get result file
                 result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
                                    str(selectivity),
@@ -686,6 +858,72 @@ def selectivity_plot():
 
             saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH, height=OPT_GRAPH_HEIGHT)
 
+# INDEX_COUNT -- PLOT
+def index_count_plot():
+
+    for write_ratio in INDEX_COUNT_EXP_WRITE_RATIOS:
+
+        datasets = []
+        for index_usage in INDEX_COUNT_EXP_INDEX_USAGES:
+            # Get result file
+            result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
+                               WRITE_RATIO_STRINGS[write_ratio]]
+            result_file = get_result_file(INDEX_COUNT_DIR, result_dir_list, INDEX_COUNT_CSV)
+
+            dataset = loadDataFile(result_file)
+            datasets.append(dataset)
+
+        fig = create_index_count_line_chart(datasets)
+
+        file_name = "index-count" + "-" + \
+                    WRITE_RATIO_STRINGS[write_ratio] + ".pdf"
+
+        saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH, height=OPT_GRAPH_HEIGHT)
+
+# INDEX_UTILITY -- PLOT
+def index_utility_plot():
+
+    for index_count_threshold in INDEX_UTILITY_EXP_INDEX_COUNT_THRESHOLDS:
+
+        datasets = []
+        for index_usage in INDEX_UTILITY_EXP_INDEX_USAGES:
+            # Get result file
+            result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
+                               str(index_count_threshold)]
+            result_file = get_result_file(INDEX_UTILITY_DIR, result_dir_list, INDEX_UTILITY_CSV)
+
+            dataset = loadDataFile(result_file)
+            datasets.append(dataset)
+
+        fig = create_index_utility_line_chart(datasets)
+
+        file_name = "index-utility" + "-" + \
+                    str(index_count_threshold) + ".pdf"
+
+        saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH, height=OPT_GRAPH_HEIGHT)
+
+# WRITE_RATIO -- PLOT
+def write_ratio_plot():
+
+    for write_ratio in WRITE_RATIO_EXP_WRITE_RATIOS:
+
+        datasets = []
+        for index_usage in WRITE_RATIO_EXP_INDEX_USAGES:
+            # Get result file
+            result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
+                               str(write_ratio)]
+            result_file = get_result_file(WRITE_RATIO_DIR, result_dir_list, WRITE_RATIO_CSV)
+
+            dataset = loadDataFile(result_file)
+            datasets.append(dataset)
+
+        fig = create_write_ratio_line_chart(datasets)
+
+        file_name = "write-ratio" + "-" + \
+                    str(write_ratio) + ".pdf"
+
+        saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH, height=OPT_GRAPH_HEIGHT)
+
 ###################################################################################
 # EVAL HELPERS
 ###################################################################################
@@ -700,37 +938,44 @@ def clean_up_dir(result_directory):
 # RUN EXPERIMENT
 def run_experiment(
     program=SDBENCH,
-    index_usage=DEFAULT_INDEX_USAGE,
-    query_complexity=DEFAULT_QUERY_COMLEXITY,
-    scale_factor=DEFAULT_SCALE_FACTOR,
     column_count=DEFAULT_COLUMN_COUNT,
-    write_ratio=DEFAULT_WRITE_RATIO,
+    convergence_query_threshold=DEFAULT_CONVERGENCE_QUERY_THRESHOLD,
+    query_complexity=DEFAULT_QUERY_COMLEXITY,
+    variability_threshold=DEFAULT_VARIABILITY_THRESHOLD,
+    index_usage=DEFAULT_INDEX_USAGE,
     tuples_per_tg=DEFAULT_TUPLES_PER_TG,
-    phase_length=DEFAULT_PHASE_LENGTH,
+    scale_factor=DEFAULT_SCALE_FACTOR,
+    convergence_mode=DEFAULT_CONVERGENCE_MODE,
+    projectivity=DEFAULT_PROJECTIVITY,
     query_count=DEFAULT_QUERY_COUNT,
     selectivity=DEFAULT_SELECTIVITY,
-    projectivity=DEFAULT_PROJECTIVITY,
-    verbosity=DEFAULT_VERBOSITY,
-    convergence_mode=DEFAULT_CONVERGENCE_MODE,
-    convergence_query_threshold=DEFAULT_CONVERGENCE_QUERY_THRESHOLD,
-    variability_threshold=DEFAULT_VARIABILITY_THRESHOLD):
+    phase_length=DEFAULT_PHASE_LENGTH,
+    verbosity=DEFAULT_VERBOSITY,    
+    write_ratio=DEFAULT_WRITE_RATIO,
+    index_count_threshold=DEFAULT_INDEX_COUNT_THRESHOLD,
+    index_utility_threshold=DEFAULT_INDEX_UTILITY_THRESHOLD,
+    write_ratio_threshold=DEFAULT_WRITE_RATIO_THRESHOLD):
 
     subprocess.call(["rm -f " + OUTPUT_FILE], shell=True)
     subprocess.call([program,
-                     "-v", str(verbosity),
-                     "-f", str(index_usage),
-                     "-c", str(query_complexity),
-                     "-k", str(scale_factor),
                      "-a", str(column_count),
-                     "-w", str(write_ratio),
+                     "-b", str(convergence_query_threshold),
+                     "-c", str(query_complexity),
+                     "-d", str(variability_threshold),
+                     "-f", str(index_usage),
                      "-g", str(tuples_per_tg),
-                     "-t", str(phase_length),
+                     "-k", str(scale_factor),
+                     "-o", str(convergence_mode),
+                     "-p", str(projectivity),
                      "-q", str(query_count),
                      "-s", str(selectivity),
-                     "-p", str(projectivity),
-                     "-o", str(convergence_mode),
-                     "-b", str(convergence_query_threshold),
-                     "-d", str(variability_threshold)])
+                     "-t", str(phase_length),
+                     "-v", str(verbosity),
+                     "-w", str(write_ratio),
+                     "-x", str(index_count_threshold),
+                     "-y", str(index_utility_threshold),
+                     "-z", str(write_ratio_threshold)
+                     ])
 
 ###################################################################################
 # UTILITIES
@@ -912,8 +1157,8 @@ def selectivity_eval():
 
     for selectivity in SELECTIVITY_EXP_SELECTIVITYS:
         for scale_factor in SELECTIVITY_EXP_SCALE_FACTORS:
-            for index_usage in QUERY_EXP_INDEX_USAGES:
-                for phase_length in QUERY_EXP_PHASE_LENGTHS:
+            for index_usage in SELECTIVITY_EXP_INDEX_USAGES:
+                for phase_length in SELECTIVITY_EXP_PHASE_LENGTHS:
 
                     # Get result file
                     result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
@@ -922,7 +1167,9 @@ def selectivity_eval():
                     result_file = get_result_file(SELECTIVITY_DIR, result_dir_list, SELECTIVITY_CSV)
 
                     # Run experiment
-                    run_experiment(phase_length=phase_length,
+                    run_experiment(write_ratio=SELECTIVITY_EXP_WRITE_RATIO, 
+                                   query_complexity=SELECTIVITY_EXP_QUERY_COMPLEXITY,
+                                   phase_length=phase_length,
                                    index_usage=index_usage,
                                    selectivity=selectivity,
                                    scale_factor=scale_factor)
@@ -930,6 +1177,76 @@ def selectivity_eval():
                     # Collect stat
                     collect_aggregate_stat(phase_length, result_file)
 
+# INDEX_COUNT -- EVAL
+def index_count_eval():
+
+    # CLEAN UP RESULT DIR
+    clean_up_dir(INDEX_COUNT_DIR)
+
+    for write_ratio in INDEX_COUNT_EXP_WRITE_RATIOS:
+        for index_usage in INDEX_COUNT_EXP_INDEX_USAGES:
+            for index_count_threshold in INDEX_COUNT_EXP_INDEX_COUNT_THRESHOLDS:
+
+                # Get result file
+                result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
+                                   WRITE_RATIO_STRINGS[write_ratio]]
+                result_file = get_result_file(INDEX_COUNT_DIR, result_dir_list, INDEX_COUNT_CSV)
+
+                # Run experiment
+                run_experiment(query_complexity=INDEX_COUNT_EXP_QUERY_COMPLEXITY,
+                               index_usage=index_usage,
+                               write_ratio=write_ratio,
+                               index_count_threshold=index_count_threshold)
+
+                # Collect stat
+                collect_aggregate_stat(index_count_threshold, result_file)
+                
+# INDEX_UTILITY -- EVAL
+def index_utility_eval():
+
+    # CLEAN UP RESULT DIR
+    clean_up_dir(INDEX_UTILITY_DIR)
+
+    for index_usage in INDEX_UTILITY_EXP_INDEX_USAGES:
+        for index_count_threshold in INDEX_UTILITY_EXP_INDEX_COUNT_THRESHOLDS:
+            for index_utility_threshold in INDEX_UTILITY_EXP_INDEX_UTILITY_THRESHOLDS:
+
+                # Get result file
+                result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
+                                   str(index_count_threshold)]
+                result_file = get_result_file(INDEX_UTILITY_DIR, result_dir_list, INDEX_UTILITY_CSV)
+
+                # Run experiment
+                run_experiment(query_complexity=INDEX_UTILITY_EXP_QUERY_COMPLEXITY,
+                               write_ratio=INDEX_UTILITY_EXP_WRITE_RATIO,
+                               index_usage=index_usage,
+                               index_count_threshold=index_count_threshold)
+
+                # Collect stat
+                collect_aggregate_stat(index_utility_threshold, result_file)   
+                
+# wRITE_RATIO -- EVAL
+def write_ratio_eval():
+
+    # CLEAN UP RESULT DIR
+    clean_up_dir(WRITE_RATIO_DIR)
+
+    for index_usage in WRITE_RATIO_EXP_INDEX_USAGES:
+        for write_ratio in WRITE_RATIO_EXP_WRITE_RATIOS:
+            for write_ratio_threshold in WRITE_RATIO_EXP_WRITE_RATIO_THRESHOLDS:
+
+                # Get result file
+                result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
+                                   str(write_ratio)]
+                result_file = get_result_file(WRITE_RATIO_DIR, result_dir_list, WRITE_RATIO_CSV)
+
+                # Run experiment
+                run_experiment(query_complexity=WRITE_RATIO_EXP_QUERY_COMPLEXITY,
+                               write_ratio=write_ratio,
+                               index_usage=index_usage)
+
+                # Collect stat
+                collect_aggregate_stat(write_ratio_threshold, result_file)                              
 
 ###################################################################################
 # MAIN
@@ -943,12 +1260,18 @@ if __name__ == '__main__':
     parser.add_argument("-c", "--time_series_eval", help="eval time series", action='store_true')
     parser.add_argument("-d", "--variability_eval", help="eval variability", action='store_true')
     parser.add_argument("-e", "--selectivity_eval", help="eval selectivity", action='store_true')
+    parser.add_argument("-f", "--index_count_eval", help="eval index_count", action='store_true')
+    parser.add_argument("-g", "--index_utility_eval", help="eval index_utility", action='store_true')
+    parser.add_argument("-i", "--write_ratio_eval", help="eval write_ratio", action='store_true')
 
     parser.add_argument("-m", "--query_plot", help="plot query", action='store_true')
     parser.add_argument("-n", "--convergence_plot", help="plot convergence", action='store_true')
     parser.add_argument("-o", "--time_series_plot", help="plot time series", action='store_true')
     parser.add_argument("-p", "--variability_plot", help="plot variability", action='store_true')
     parser.add_argument("-q", "--selectivity_plot", help="plot selectivity", action='store_true')
+    parser.add_argument("-r", "--index_count_plot", help="plot index_count", action='store_true')
+    parser.add_argument("-s", "--index_utility_plot", help="plot index_utility", action='store_true')
+    parser.add_argument("-t", "--write_ratio_plot", help="plot write_ratio", action='store_true')
 
     args = parser.parse_args()
 
@@ -969,6 +1292,15 @@ if __name__ == '__main__':
     if args.selectivity_eval:
         selectivity_eval()
 
+    if args.index_count_eval:
+        index_count_eval()
+
+    if args.index_utility_eval:
+        index_utility_eval()
+
+    if args.write_ratio_eval:
+        write_ratio_eval()
+
     ## PLOT
 
     if args.query_plot:
@@ -985,7 +1317,14 @@ if __name__ == '__main__':
 
     if args.selectivity_plot:
         selectivity_plot()
+        
+    if args.index_count_plot:
+        index_count_plot()
+
+    if args.index_utility_plot:
+        index_utility_plot()
+
+    if args.write_ratio_plot:
+        write_ratio_plot()        
 
     #create_legend_index_usage()
-
-
