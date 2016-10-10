@@ -167,12 +167,14 @@ QUERY_EXPERIMENT = 1
 CONVERGENCE_EXPERIMENT = 2
 TIME_SERIES_EXPERIMENT = 3
 VARIABILITY_EXPERIMENT = 4
+SELECTIVITY_EXPERIMENT = 5
 
 ## DIRS
 QUERY_DIR = BASE_DIR + "/results/query"
 CONVERGENCE_DIR = BASE_DIR + "/results/convergence"
 TIME_SERIES_DIR = BASE_DIR + "/results/time_series"
 VARIABILITY_DIR = BASE_DIR + "/results/variability"
+SELECTIVITY_DIR = BASE_DIR + "/results/selectivity"
 
 ## QUERY EXPERIMENT
 QUERY_EXP_INDEX_USAGES = [INDEX_USAGE_AGGRESSIVE, INDEX_USAGE_BALANCED, INDEX_USAGE_CONSERVATIVE, INDEX_USAGE_NEVER]
@@ -183,11 +185,12 @@ QUERY_CSV = "query.csv"
 
 ##  CONVERGENCE EXPERIMENT
 CONVERGENCE_EXP_CONVERGENCE_MODE = 1
-CONVERGENCE_EXP_PHASE_LENGTH = DEFAULT_QUERY_COUNT
+CONVERGENCE_EXP_VARIABILITY_THRESHOLD = 15
+CONVERGENCE_EXP_PHASE_LENGTH = 5
 CONVERGENCE_EXP_INDEX_USAGES = QUERY_EXP_INDEX_USAGES
 CONVERGENCE_EXP_WRITE_RATIOS = QUERY_EXP_WRITE_RATIOS
 CONVERGENCE_EXP_QUERY_COMPLEXITYS = QUERY_EXP_QUERY_COMPLEXITYS
-CONVERGENCE_EXP_CONVERGENCE_QUERY_THRESHOLDS = [50, 100]
+CONVERGENCE_EXP_CONVERGENCE_QUERY_THRESHOLD = 50
 CONVERGENCE_CSV = "convergence.csv"
 
 ##  TIME SERIES EXPERIMENT
@@ -209,6 +212,15 @@ VARIABILITY_EXP_WRITE_RATIO = WRITE_RATIO_READ_ONLY
 VARIABILITY_EXP_QUERY_COMPLEXITYS = QUERY_EXP_QUERY_COMPLEXITYS
 VARIABILITY_EXP_VARIABILITY_THRESHOLDS = [5, 10, 25]
 VARIABILITY_CSV = "variability.csv"
+
+## SELECTIVITY EXPERIMENT
+SELECTIVITY_EXP_INDEX_USAGES = [INDEX_USAGE_AGGRESSIVE, INDEX_USAGE_BALANCED, INDEX_USAGE_CONSERVATIVE, INDEX_USAGE_NEVER]
+SELECTIVITY_EXP_WRITE_RATIO = WRITE_RATIO_READ_ONLY
+SELECTIVITY_EXP_QUERY_COMPLEXITY = QUERY_COMPLEXITY_SIMPLE
+SELECTIVITY_EXP_PHASE_LENGTHS = QUERY_EXP_PHASE_LENGTHS
+SELECTIVITY_EXP_SELECTIVITYS = [0.1, 0.01]
+SELECTIVITY_EXP_SCALE_FACTORS = [100, 1000]
+SELECTIVITY_CSV = "selectivity.csv"
 
 ###################################################################################
 # UTILS
@@ -376,7 +388,7 @@ def create_convergence_line_chart(datasets):
     ax1 = fig.add_subplot(111)
 
     # X-AXIS
-    x_values = [str(i) for i in CONVERGENCE_EXP_CONVERGENCE_QUERY_THRESHOLDS]
+    x_values = CONVERGENCE_EXP_WRITE_RATIOS
     N = len(x_values)
     ind = np.arange(N)
 
@@ -408,7 +420,7 @@ def create_convergence_line_chart(datasets):
 
     # X-AXIS
     ax1.set_xticks(ind + 0.5)
-    ax1.set_xlabel("Convergence query threshold", fontproperties=LABEL_FP)
+    ax1.set_xlabel("Read-write ratio", fontproperties=LABEL_FP)
     ax1.set_xticklabels(x_values)
 
     for label in ax1.get_yticklabels() :
@@ -560,13 +572,11 @@ def query_plot():
 def convergence_plot():
 
     for query_complexity in CONVERGENCE_EXP_QUERY_COMPLEXITYS:
-        for write_ratio in CONVERGENCE_EXP_WRITE_RATIOS:
 
             datasets = []
             for index_usage in CONVERGENCE_EXP_INDEX_USAGES:
                 # Get result file
                 result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
-                                   WRITE_RATIO_STRINGS[write_ratio],
                                    QUERY_COMPLEXITY_STRINGS[query_complexity]]
                 result_file = get_result_file(CONVERGENCE_DIR, result_dir_list, CONVERGENCE_CSV)
 
@@ -576,8 +586,7 @@ def convergence_plot():
             fig = create_convergence_line_chart(datasets)
 
             file_name = "convergence" + "-" + \
-                        QUERY_COMPLEXITY_STRINGS[query_complexity] + "-" + \
-                        WRITE_RATIO_STRINGS[write_ratio] + ".pdf"
+                        QUERY_COMPLEXITY_STRINGS[query_complexity] + ".pdf"
 
             saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH, height=OPT_GRAPH_HEIGHT)
 
@@ -649,6 +658,31 @@ def variability_plot():
 
             file_name = "variability" + "-" + \
                         QUERY_COMPLEXITY_STRINGS[query_complexity] + ".pdf"
+
+            saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH, height=OPT_GRAPH_HEIGHT)
+
+# SELECTIVITY -- PLOT
+def selectivity_plot():
+
+    for selectivity in SELECTIVITY_EXP_SELECTIVITYS:
+        for scale_factor in SELECTIVITY_EXP_SCALE_FACTORS:
+
+            datasets = []
+            for index_usage in QUERY_EXP_INDEX_USAGES:
+                # Get result file
+                result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
+                                   str(selectivity),
+                                   str(scale_factor)]
+                result_file = get_result_file(SELECTIVITY_DIR, result_dir_list, SELECTIVITY_CSV)
+
+                dataset = loadDataFile(result_file)
+                datasets.append(dataset)
+
+            fig = create_query_line_chart(datasets)
+
+            file_name = "selectivity" + "-" + \
+                        str(selectivity) + "-" + \
+                        str(scale_factor) + ".pdf"
 
             saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH, height=OPT_GRAPH_HEIGHT)
 
@@ -783,13 +817,11 @@ def convergence_eval():
     clean_up_dir(CONVERGENCE_DIR)
 
     for query_complexity in CONVERGENCE_EXP_QUERY_COMPLEXITYS:
-        for write_ratio in CONVERGENCE_EXP_WRITE_RATIOS:
-            for index_usage in CONVERGENCE_EXP_INDEX_USAGES:
-                for convergence_query_threshold in CONVERGENCE_EXP_CONVERGENCE_QUERY_THRESHOLDS :
+        for index_usage in CONVERGENCE_EXP_INDEX_USAGES:
+            for write_ratio in CONVERGENCE_EXP_WRITE_RATIOS:
 
                     # Get result file
                     result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
-                                       WRITE_RATIO_STRINGS[write_ratio],
                                        QUERY_COMPLEXITY_STRINGS[query_complexity]]
                     result_file = get_result_file(CONVERGENCE_DIR, result_dir_list, CONVERGENCE_CSV)
 
@@ -799,10 +831,11 @@ def convergence_eval():
                                    write_ratio=write_ratio,
                                    query_complexity=query_complexity,
                                    convergence_mode=CONVERGENCE_EXP_CONVERGENCE_MODE,
-                                   convergence_query_threshold=convergence_query_threshold)
+                                   convergence_query_threshold=CONVERGENCE_EXP_CONVERGENCE_QUERY_THRESHOLD,
+                                   variability_threshold=CONVERGENCE_EXP_VARIABILITY_THRESHOLD)
 
                     # Collect stat
-                    collect_aggregate_stat(convergence_query_threshold, result_file)
+                    collect_aggregate_stat(write_ratio, result_file)
 
 # TIME SERIES -- EVAL
 def time_series_eval():
@@ -871,6 +904,33 @@ def variability_eval():
                     # Collect stat
                     collect_aggregate_stat(variability_threshold, result_file)
 
+# SELECTIVITY -- EVAL
+def selectivity_eval():
+
+    # CLEAN UP RESULT DIR
+    clean_up_dir(SELECTIVITY_DIR)
+
+    for selectivity in SELECTIVITY_EXP_SELECTIVITYS:
+        for scale_factor in SELECTIVITY_EXP_SCALE_FACTORS:
+            for index_usage in QUERY_EXP_INDEX_USAGES:
+                for phase_length in QUERY_EXP_PHASE_LENGTHS:
+
+                    # Get result file
+                    result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
+                                       str(selectivity),
+                                       str(scale_factor)]
+                    result_file = get_result_file(SELECTIVITY_DIR, result_dir_list, SELECTIVITY_CSV)
+
+                    # Run experiment
+                    run_experiment(phase_length=phase_length,
+                                   index_usage=index_usage,
+                                   selectivity=selectivity,
+                                   scale_factor=scale_factor)
+
+                    # Collect stat
+                    collect_aggregate_stat(phase_length, result_file)
+
+
 ###################################################################################
 # MAIN
 ###################################################################################
@@ -882,11 +942,13 @@ if __name__ == '__main__':
     parser.add_argument("-b", "--convergence_eval", help="eval convergence", action='store_true')
     parser.add_argument("-c", "--time_series_eval", help="eval time series", action='store_true')
     parser.add_argument("-d", "--variability_eval", help="eval variability", action='store_true')
+    parser.add_argument("-e", "--selectivity_eval", help="eval selectivity", action='store_true')
 
     parser.add_argument("-m", "--query_plot", help="plot query", action='store_true')
     parser.add_argument("-n", "--convergence_plot", help="plot convergence", action='store_true')
     parser.add_argument("-o", "--time_series_plot", help="plot time series", action='store_true')
     parser.add_argument("-p", "--variability_plot", help="plot variability", action='store_true')
+    parser.add_argument("-q", "--selectivity_plot", help="plot selectivity", action='store_true')
 
     args = parser.parse_args()
 
@@ -904,6 +966,9 @@ if __name__ == '__main__':
     if args.variability_eval:
         variability_eval()
 
+    if args.selectivity_eval:
+        selectivity_eval()
+
     ## PLOT
 
     if args.query_plot:
@@ -917,6 +982,9 @@ if __name__ == '__main__':
 
     if args.variability_plot:
         variability_plot()
+
+    if args.selectivity_plot:
+        selectivity_plot()
 
     #create_legend_index_usage()
 
