@@ -42,13 +42,13 @@ LOG.setLevel(logging.INFO)
 
 BASE_DIR = os.path.dirname(__file__)
 OPT_FONT_NAME = 'Helvetica'
-OPT_GRAPH_HEIGHT = 300
+OPT_GRAPH_HEIGHT = 150
 OPT_GRAPH_WIDTH = 400
 
 # Make a list by cycling through the colors you care about
 # to match the length of your data.
 NUM_COLORS = 5
-COLOR_MAP = ( '#F58A87', '#80CA86', '#9EC9E9', '#FED113', '#D89761' )
+COLOR_MAP = ( '#418259', '#bd5632', '#e1a94c', '#7d6c5b', '#efefef')
 
 OPT_COLORS = COLOR_MAP
 
@@ -77,6 +77,9 @@ LEGEND_FONT_SIZE = 18
 
 SMALL_LABEL_FONT_SIZE = 10
 SMALL_LEGEND_FONT_SIZE = 10
+
+XAXIS_MIN = 0.25
+XAXIS_MAX = 3.75
 
 # SET TYPE1 FONTS
 matplotlib.rcParams['ps.useafm'] = True
@@ -409,6 +412,7 @@ def create_query_line_chart(datasets):
     ax1.set_xticks(ind + 0.5)
     ax1.set_xlabel("Phase Lengths", fontproperties=LABEL_FP)
     ax1.set_xticklabels(x_values)
+    ax1.set_xlim([XAXIS_MIN, XAXIS_MAX])
 
     for label in ax1.get_yticklabels() :
         label.set_fontproperties(TICK_FP)
@@ -456,6 +460,7 @@ def create_convergence_line_chart(datasets):
     ax1.set_xticks(ind + 0.5)
     ax1.set_xlabel("Read-write ratio", fontproperties=LABEL_FP)
     ax1.set_xticklabels(x_values)
+    ax1.set_xlim([XAXIS_MIN, XAXIS_MAX])
 
     for label in ax1.get_yticklabels() :
         label.set_fontproperties(TICK_FP)
@@ -565,6 +570,7 @@ def create_variability_line_chart(datasets):
     ax1.set_xticks(ind + 0.5)
     ax1.set_xlabel("Variability Threshold", fontproperties=LABEL_FP)
     ax1.set_xticklabels(x_values)
+    ax1.set_xlim([XAXIS_MIN, XAXIS_MAX])
 
     for label in ax1.get_yticklabels() :
         label.set_fontproperties(TICK_FP)
@@ -612,6 +618,7 @@ def create_index_count_line_chart(datasets):
     ax1.set_xticks(ind + 0.5)
     ax1.set_xlabel("Index count threshold", fontproperties=LABEL_FP)
     ax1.set_xticklabels(x_values)
+    ax1.set_xlim([XAXIS_MIN, XAXIS_MAX])
 
     for label in ax1.get_yticklabels() :
         label.set_fontproperties(TICK_FP)
@@ -659,6 +666,7 @@ def create_index_utility_line_chart(datasets):
     ax1.set_xticks(ind + 0.5)
     ax1.set_xlabel("Index utility threshold", fontproperties=LABEL_FP)
     ax1.set_xticklabels(x_values)
+    ax1.set_xlim([XAXIS_MIN, XAXIS_MAX])
 
     for label in ax1.get_yticklabels() :
         label.set_fontproperties(TICK_FP)
@@ -706,6 +714,7 @@ def create_write_ratio_line_chart(datasets):
     ax1.set_xticks(ind + 0.5)
     ax1.set_xlabel("Write ratio threshold", fontproperties=LABEL_FP)
     ax1.set_xticklabels(x_values)
+    ax1.set_xlim([XAXIS_MIN, XAXIS_MAX])
 
     for label in ax1.get_yticklabels() :
         label.set_fontproperties(TICK_FP)
@@ -811,7 +820,7 @@ def time_series_plot():
                             WRITE_RATIO_STRINGS[write_ratio] + "-" + \
                             str(phase_length) + ".pdf"
 
-                saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH * 2.0, height=OPT_GRAPH_HEIGHT/1.5)
+                saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH * 2.0, height=OPT_GRAPH_HEIGHT)
 
 # VARIABILITY -- PLOT
 def variability_plot():
