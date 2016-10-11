@@ -236,6 +236,7 @@ INDEX_COUNT_EXP_INDEX_USAGES = [INDEX_USAGE_AGGRESSIVE, INDEX_USAGE_BALANCED, IN
 INDEX_COUNT_EXP_WRITE_RATIOS = [WRITE_RATIO_READ_ONLY, WRITE_RATIO_READ_HEAVY, WRITE_RATIO_BALANCED, WRITE_RATIO_WRITE_HEAVY]
 INDEX_COUNT_EXP_QUERY_COMPLEXITY = QUERY_COMPLEXITY_SIMPLE
 INDEX_COUNT_EXP_INDEX_COUNT_THRESHOLDS = [5, 10, 15, 20]
+INDEX_COUNT_EXP_PHASE_LENGTH = 50
 INDEX_COUNT_CSV = "index_count.csv"
 
 ## INDEX_UTILITY EXPERIMENT
@@ -244,6 +245,7 @@ INDEX_UTILITY_EXP_WRITE_RATIO = WRITE_RATIO_BALANCED
 INDEX_UTILITY_EXP_QUERY_COMPLEXITY = QUERY_COMPLEXITY_SIMPLE
 INDEX_UTILITY_EXP_INDEX_UTILITY_THRESHOLDS = [0, 0.25, 0.5, 0.75]
 INDEX_UTILITY_EXP_INDEX_COUNT_THRESHOLDS = [5, 10]
+INDEX_UTILITY_EXP_PHASE_LENGTH = INDEX_COUNT_EXP_PHASE_LENGTH
 INDEX_UTILITY_CSV = "index_utility.csv"
 
 ## WRITE_RATIO EXPERIMENT
@@ -251,6 +253,7 @@ WRITE_RATIO_EXP_INDEX_USAGES = [INDEX_USAGE_AGGRESSIVE, INDEX_USAGE_BALANCED, IN
 WRITE_RATIO_EXP_WRITE_RATIOS = [WRITE_RATIO_READ_HEAVY, WRITE_RATIO_WRITE_HEAVY]
 WRITE_RATIO_EXP_QUERY_COMPLEXITY = QUERY_COMPLEXITY_SIMPLE
 WRITE_RATIO_EXP_WRITE_RATIO_THRESHOLDS = [0.25, 0.50, 0.75, 1.0]
+WRITE_RATIO_EXP_PHASE_LENGTH = INDEX_COUNT_EXP_PHASE_LENGTH
 WRITE_RATIO_CSV = "write_ratio.csv"
 
 ###################################################################################
@@ -1194,6 +1197,7 @@ def index_count_eval():
 
                 # Run experiment
                 run_experiment(query_complexity=INDEX_COUNT_EXP_QUERY_COMPLEXITY,
+                               phase_length=INDEX_COUNT_EXP_PHASE_LENGTH,
                                index_usage=index_usage,
                                write_ratio=write_ratio,
                                index_count_threshold=index_count_threshold)
@@ -1218,6 +1222,7 @@ def index_utility_eval():
 
                 # Run experiment
                 run_experiment(query_complexity=INDEX_UTILITY_EXP_QUERY_COMPLEXITY,
+                               phase_length=INDEX_UTILITY_EXP_PHASE_LENGTH,
                                write_ratio=INDEX_UTILITY_EXP_WRITE_RATIO,
                                index_usage=index_usage,
                                index_count_threshold=index_count_threshold)
@@ -1242,6 +1247,7 @@ def write_ratio_eval():
 
                 # Run experiment
                 run_experiment(query_complexity=WRITE_RATIO_EXP_QUERY_COMPLEXITY,
+                               phase_length=WRITE_RATIO_EXP_PHASE_LENGTH,
                                write_ratio=write_ratio,
                                index_usage=index_usage)
 
