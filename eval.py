@@ -347,7 +347,7 @@ def create_legend_index_usage():
 
     LEGEND_VALUES = INDEX_USAGE_STRINGS.values()
 
-    figlegend = pylab.figure(figsize=(9, 0.5))
+    figlegend = pylab.figure(figsize=(12, 0.5))
     idx = 0
     lines = [None] * len(LEGEND_VALUES)
 
