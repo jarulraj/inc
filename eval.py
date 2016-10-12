@@ -974,7 +974,7 @@ def run_experiment(
     subprocess.call(["rm -f " + OUTPUT_FILE], shell=True)
     PROGRAM_OUTPUT_FILE_NAME = "program.txt"
     PROGRAM_OUTPUT_FILE = open(PROGRAM_OUTPUT_FILE_NAME, "w")
-    subprocess.call([program,
+    arg_list = [program,
                      "-a", str(column_count),
                      "-b", str(convergence_query_threshold),
                      "-c", str(query_complexity),
@@ -992,8 +992,11 @@ def run_experiment(
                      "-x", str(index_count_threshold),
                      "-y", str(index_utility_threshold),
                      "-z", str(write_ratio_threshold)
-                     ],
-                     stdout = PROGRAM_OUTPUT_FILE)
+                     ]
+    arg_string = ' '.join(arg_list[1:]) 
+    pprint.pprint(arg_string)
+    subprocess.call(arg_list,
+                    stdout = PROGRAM_OUTPUT_FILE)
     subprocess.call(["rm -f " + PROGRAM_OUTPUT_FILE_NAME], shell=True)
 
 
