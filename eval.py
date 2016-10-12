@@ -36,6 +36,9 @@ LOG_handler.setFormatter(LOG_formatter)
 LOG.addHandler(LOG_handler)
 LOG.setLevel(logging.INFO)
 
+MAJOR_STRING = "\"++++++++++++++++++++++++++++\n\n\""
+MINOR_STRING = "\"----------------\n\""
+
 ###################################################################################
 # OUTPUT CONFIGURATION
 ###################################################################################
@@ -969,6 +972,8 @@ def run_experiment(
     write_ratio_threshold=DEFAULT_WRITE_RATIO_THRESHOLD):
 
     subprocess.call(["rm -f " + OUTPUT_FILE], shell=True)
+    PROGRAM_OUTPUT_FILE_NAME = "program.txt"
+    PROGRAM_OUTPUT_FILE = open(PROGRAM_OUTPUT_FILE_NAME, "w")
     subprocess.call([program,
                      "-a", str(column_count),
                      "-b", str(convergence_query_threshold),
@@ -987,7 +992,10 @@ def run_experiment(
                      "-x", str(index_count_threshold),
                      "-y", str(index_utility_threshold),
                      "-z", str(write_ratio_threshold)
-                     ])
+                     ],
+                     stdout = PROGRAM_OUTPUT_FILE)
+    subprocess.call(["rm -f " + PROGRAM_OUTPUT_FILE_NAME], shell=True)
+
 
 ###################################################################################
 # UTILITIES
@@ -1048,9 +1056,17 @@ def query_eval():
     clean_up_dir(QUERY_DIR)
 
     for query_complexity in QUERY_EXP_QUERY_COMPLEXITYS:
+        print(MAJOR_STRING)
+
         for write_ratio in QUERY_EXP_WRITE_RATIOS:
+            print(MINOR_STRING)            
+            
             for index_usage in QUERY_EXP_INDEX_USAGES:
                 for phase_length in QUERY_EXP_PHASE_LENGTHS:
+                    print("> query_complexity: " + str(query_complexity) + 
+                            " write_ratio: " + str(write_ratio) +
+                            " index_usage: " + str(index_usage) +
+                            " phase_length: " + str(phase_length) )
 
                     # Get result file
                     result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
@@ -1074,8 +1090,15 @@ def convergence_eval():
     clean_up_dir(CONVERGENCE_DIR)
 
     for query_complexity in CONVERGENCE_EXP_QUERY_COMPLEXITYS:
+        print(MAJOR_STRING)
+
         for index_usage in CONVERGENCE_EXP_INDEX_USAGES:
+            print(MINOR_STRING)            
+
             for write_ratio in CONVERGENCE_EXP_WRITE_RATIOS:
+                    print("> query_complexity: " + str(query_complexity) + 
+                            " index_usage: " + str(index_usage) +
+                            " write_ratio: " + str(write_ratio) )
 
                     # Get result file
                     result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
@@ -1103,13 +1126,20 @@ def time_series_eval():
     num_graphs = len(TIME_SERIES_EXP_QUERY_COMPLEXITYS)
 
     for graph_itr in range(0, num_graphs):
+        print(MAJOR_STRING)
 
         # Pick parameters for time series graph set
         query_complexity = TIME_SERIES_EXP_QUERY_COMPLEXITYS[graph_itr]
         write_ratio = TIME_SERIES_EXP_WRITE_RATIOS[graph_itr]
 
         for phase_length in TIME_SERIES_EXP_PHASE_LENGTHS:
+            print(MINOR_STRING)            
+
             for index_usage in TIME_SERIES_EXP_INDEX_USAGES:
+                    print("> query_complexity: " + str(query_complexity) + 
+                            " write_ratio: " + str(write_ratio) +
+                            " phase_length: " + str(phase_length) +
+                            " index_usage: " + str(index_usage) )
 
                     # Get result file
                     result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
@@ -1143,23 +1173,31 @@ def variability_eval():
     clean_up_dir(VARIABILITY_DIR)
 
     for query_complexity in VARIABILITY_EXP_QUERY_COMPLEXITYS:
-            for index_usage in VARIABILITY_EXP_INDEX_USAGES:
-                for variability_threshold in VARIABILITY_EXP_VARIABILITY_THRESHOLDS:
+        print(MAJOR_STRING)
 
-                    # Get result file
-                    result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
-                                       QUERY_COMPLEXITY_STRINGS[query_complexity]]
-                    result_file = get_result_file(VARIABILITY_DIR, result_dir_list, VARIABILITY_CSV)
+        for index_usage in VARIABILITY_EXP_INDEX_USAGES:
+            print(MINOR_STRING)                        
+            
+            for variability_threshold in VARIABILITY_EXP_VARIABILITY_THRESHOLDS:
+                print("> query_complexity: " + str(query_complexity) + 
+                        " index_usage: " + str(index_usage) +
+                        " variability_threshold: " + str(variability_threshold) )
 
-                    # Run experiment
-                    run_experiment(phase_length=VARIABILITY_EXP_PHASE_LENGTH,
-                                   index_usage=index_usage,
-                                   write_ratio=VARIABILITY_EXP_WRITE_RATIO,
-                                   query_complexity=query_complexity,
-                                   variability_threshold=variability_threshold)
 
-                    # Collect stat
-                    collect_aggregate_stat(variability_threshold, result_file)
+                # Get result file
+                result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
+                                   QUERY_COMPLEXITY_STRINGS[query_complexity]]
+                result_file = get_result_file(VARIABILITY_DIR, result_dir_list, VARIABILITY_CSV)
+
+                # Run experiment
+                run_experiment(phase_length=VARIABILITY_EXP_PHASE_LENGTH,
+                               index_usage=index_usage,
+                               write_ratio=VARIABILITY_EXP_WRITE_RATIO,
+                               query_complexity=query_complexity,
+                               variability_threshold=variability_threshold)
+
+                # Collect stat
+                collect_aggregate_stat(variability_threshold, result_file)
 
 # SELECTIVITY -- EVAL
 def selectivity_eval():
@@ -1168,9 +1206,17 @@ def selectivity_eval():
     clean_up_dir(SELECTIVITY_DIR)
 
     for selectivity in SELECTIVITY_EXP_SELECTIVITYS:
+        print(MAJOR_STRING)
+
         for scale_factor in SELECTIVITY_EXP_SCALE_FACTORS:
+            print(MINOR_STRING)            
+
             for index_usage in SELECTIVITY_EXP_INDEX_USAGES:
                 for phase_length in SELECTIVITY_EXP_PHASE_LENGTHS:
+                    print("> selectivity: " + str(selectivity) + 
+                            " scale_factor: " + str(scale_factor) +
+                            " index_usage: " + str(index_usage) +
+                            " phase_length: " + str(phase_length) )
 
                     # Get result file
                     result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
@@ -1196,8 +1242,15 @@ def index_count_eval():
     clean_up_dir(INDEX_COUNT_DIR)
 
     for write_ratio in INDEX_COUNT_EXP_WRITE_RATIOS:
+        print(MAJOR_STRING)
+
         for index_usage in INDEX_COUNT_EXP_INDEX_USAGES:
+            print(MINOR_STRING)            
+
             for index_count_threshold in INDEX_COUNT_EXP_INDEX_COUNT_THRESHOLDS:
+                print("> write_ratio: " + str(write_ratio) + 
+                        " index_usage: " + str(index_usage) +
+                        " index_count_threshold: " + str(index_count_threshold) )
 
                 # Get result file
                 result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
@@ -1221,8 +1274,16 @@ def index_utility_eval():
     clean_up_dir(INDEX_UTILITY_DIR)
 
     for index_usage in INDEX_UTILITY_EXP_INDEX_USAGES:
+        print(MAJOR_STRING)
+
         for index_count_threshold in INDEX_UTILITY_EXP_INDEX_COUNT_THRESHOLDS:
+            print(MINOR_STRING)            
+            
             for index_utility_threshold in INDEX_UTILITY_EXP_INDEX_UTILITY_THRESHOLDS:
+                print("> index_usage: " + str(index_usage) +
+                        " index_count_threshold: " + str(index_count_threshold) +
+                        " index_utility_threshold: " + str(index_utility_threshold) )
+
 
                 # Get result file
                 result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
@@ -1246,8 +1307,15 @@ def write_ratio_eval():
     clean_up_dir(WRITE_RATIO_DIR)
 
     for index_usage in WRITE_RATIO_EXP_INDEX_USAGES:
+        print(MAJOR_STRING)
+
         for write_ratio in WRITE_RATIO_EXP_WRITE_RATIOS:
+            print(MINOR_STRING)            
+
             for write_ratio_threshold in WRITE_RATIO_EXP_WRITE_RATIO_THRESHOLDS:
+                print("> index_usage: " + str(index_usage) + 
+                              " write_ratio: " + str(write_ratio) +
+                              " write_ratio_threshold: " + str(write_ratio_threshold) )
 
                 # Get result file
                 result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
