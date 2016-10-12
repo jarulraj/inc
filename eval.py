@@ -137,6 +137,15 @@ QUERY_COMPLEXITY_STRINGS = {
     3 : "complex"
 }
 
+## WRITE COMPLEXITY TYPES
+WRITE_COMPLEXITY_SIMPLE   = 1
+WRITE_COMPLEXITY_COMPLEX  = 2
+
+WRITE_COMPLEXITY_STRINGS = {
+    1 : "simple",
+    2 : "complex"
+}
+
 ## WRITE RATIO TYPES
 WRITE_RATIO_READ_ONLY   = 0.0
 WRITE_RATIO_READ_HEAVY  = 0.1
@@ -151,7 +160,8 @@ WRITE_RATIO_STRINGS = {
 }
 
 DEFAULT_INDEX_USAGE = INDEX_USAGE_AGGRESSIVE
-DEFAULT_QUERY_COMLEXITY = QUERY_COMPLEXITY_SIMPLE
+DEFAULT_QUERY_COMPLEXITY = QUERY_COMPLEXITY_SIMPLE
+DEFAULT_WRITE_COMPLEXITY = WRITE_COMPLEXITY_COMPLEX 
 DEFAULT_SCALE_FACTOR = 100
 DEFAULT_COLUMN_COUNT = 20
 DEFAULT_WRITE_RATIO = WRITE_RATIO_READ_ONLY
@@ -955,7 +965,7 @@ def run_experiment(
     program=SDBENCH,
     column_count=DEFAULT_COLUMN_COUNT,
     convergence_query_threshold=DEFAULT_CONVERGENCE_QUERY_THRESHOLD,
-    query_complexity=DEFAULT_QUERY_COMLEXITY,
+    query_complexity=DEFAULT_QUERY_COMPLEXITY,
     variability_threshold=DEFAULT_VARIABILITY_THRESHOLD,
     index_usage=DEFAULT_INDEX_USAGE,
     tuples_per_tg=DEFAULT_TUPLES_PER_TG,
@@ -966,6 +976,7 @@ def run_experiment(
     selectivity=DEFAULT_SELECTIVITY,
     phase_length=DEFAULT_PHASE_LENGTH,
     verbosity=DEFAULT_VERBOSITY,    
+    write_complexity=DEFAULT_WRITE_COMPLEXITY,
     write_ratio=DEFAULT_WRITE_RATIO,
     index_count_threshold=DEFAULT_INDEX_COUNT_THRESHOLD,
     index_utility_threshold=DEFAULT_INDEX_UTILITY_THRESHOLD,
@@ -988,6 +999,7 @@ def run_experiment(
                      "-s", str(selectivity),
                      "-t", str(phase_length),
                      "-v", str(verbosity),
+                     "-u", str(write_complexity),
                      "-w", str(write_ratio),
                      "-x", str(index_count_threshold),
                      "-y", str(index_utility_threshold),
