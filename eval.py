@@ -225,7 +225,8 @@ CONVERGENCE_CSV = "convergence.csv"
 ##  TIME SERIES EXPERIMENT
 TIME_SERIES_EXP_PHASE_LENGTHS = [50, 100]
 TIME_SERIES_EXP_INDEX_USAGES = INDEX_USAGES_SUBSET
-
+TIME_SERIES_EXP_INDEX_COUNT = 5
+TIME_SERIES_EXP_QUERY_COUNT = 2000
 TIME_SERIES_EXP_WRITE_RATIOS = [WRITE_RATIO_READ_ONLY, WRITE_RATIO_READ_HEAVY]
 TIME_SERIES_EXP_QUERY_COMPLEXITYS = [QUERY_COMPLEXITY_SIMPLE, QUERY_COMPLEXITY_MODERATE]
 TIME_SERIES_LATENCY_MODE = 1
@@ -1177,6 +1178,8 @@ def time_series_eval():
                     run_experiment(phase_length=phase_length,
                                    index_usage=index_usage,
                                    write_ratio=write_ratio,
+                                   index_count=TIME_SERIES_EXP_INDEX_COUNT,
+                                   query_count=TIME_SERIES_EXP_QUERY_COUNT,
                                    query_complexity=query_complexity)
 
                     # Collect stat
