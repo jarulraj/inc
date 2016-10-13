@@ -161,7 +161,7 @@ WRITE_RATIO_STRINGS = {
 
 DEFAULT_INDEX_USAGE = INDEX_USAGE_AGGRESSIVE
 DEFAULT_QUERY_COMPLEXITY = QUERY_COMPLEXITY_SIMPLE
-DEFAULT_WRITE_COMPLEXITY = WRITE_COMPLEXITY_COMPLEX 
+DEFAULT_WRITE_COMPLEXITY = WRITE_COMPLEXITY_COMPLEX
 DEFAULT_SCALE_FACTOR = 100
 DEFAULT_COLUMN_COUNT = 20
 DEFAULT_WRITE_RATIO = WRITE_RATIO_READ_ONLY
@@ -493,13 +493,13 @@ def create_time_series_line_chart(datasets, plot_mode):
     ax1 = fig.add_subplot(111)
 
     # X-AXIS
-    x_values = [str(i) for i in range(1, DEFAULT_QUERY_COUNT + 1)]
+    x_values = [str(i) for i in range(1, TIME_SERIES_EXP_QUERY_COUNT + 1)]
     N = len(x_values)
     ind = np.arange(N)
 
     TIME_SERIES_OPT_LINE_WIDTH = 3.0
     TIME_SERIES_OPT_MARKER_SIZE = 5.0
-    TIME_SERIES_OPT_MARKER_FREQUENCY = DEFAULT_QUERY_COUNT/10
+    TIME_SERIES_OPT_MARKER_FREQUENCY = TIME_SERIES_EXP_QUERY_COUNT/10
 
     idx = 0
     for group in xrange(len(datasets)):
@@ -980,7 +980,7 @@ def run_experiment(
     query_count=DEFAULT_QUERY_COUNT,
     selectivity=DEFAULT_SELECTIVITY,
     phase_length=DEFAULT_PHASE_LENGTH,
-    verbosity=DEFAULT_VERBOSITY,    
+    verbosity=DEFAULT_VERBOSITY,
     write_complexity=DEFAULT_WRITE_COMPLEXITY,
     write_ratio=DEFAULT_WRITE_RATIO,
     index_count_threshold=DEFAULT_INDEX_COUNT_THRESHOLD,
@@ -1010,7 +1010,7 @@ def run_experiment(
                      "-y", str(index_utility_threshold),
                      "-z", str(write_ratio_threshold)
                      ]
-    arg_string = ' '.join(arg_list[1:]) 
+    arg_string = ' '.join(arg_list[1:])
     pprint.pprint(arg_string)
     subprocess.call(arg_list,
                     stdout = PROGRAM_OUTPUT_FILE)
@@ -1079,11 +1079,11 @@ def query_eval():
         print(MAJOR_STRING)
 
         for write_ratio in QUERY_EXP_WRITE_RATIOS:
-            print(MINOR_STRING)            
-            
+            print(MINOR_STRING)
+
             for index_usage in QUERY_EXP_INDEX_USAGES:
                 for phase_length in QUERY_EXP_PHASE_LENGTHS:
-                    print("> query_complexity: " + str(query_complexity) + 
+                    print("> query_complexity: " + str(query_complexity) +
                             " write_ratio: " + str(write_ratio) +
                             " index_usage: " + str(index_usage) +
                             " phase_length: " + str(phase_length) )
@@ -1113,10 +1113,10 @@ def convergence_eval():
         print(MAJOR_STRING)
 
         for index_usage in CONVERGENCE_EXP_INDEX_USAGES:
-            print(MINOR_STRING)            
+            print(MINOR_STRING)
 
             for write_ratio in CONVERGENCE_EXP_WRITE_RATIOS:
-                    print("> query_complexity: " + str(query_complexity) + 
+                    print("> query_complexity: " + str(query_complexity) +
                             " index_usage: " + str(index_usage) +
                             " write_ratio: " + str(write_ratio) )
 
@@ -1153,10 +1153,10 @@ def time_series_eval():
         write_ratio = TIME_SERIES_EXP_WRITE_RATIOS[graph_itr]
 
         for phase_length in TIME_SERIES_EXP_PHASE_LENGTHS:
-            print(MINOR_STRING)            
+            print(MINOR_STRING)
 
             for index_usage in TIME_SERIES_EXP_INDEX_USAGES:
-                    print("> query_complexity: " + str(query_complexity) + 
+                    print("> query_complexity: " + str(query_complexity) +
                             " write_ratio: " + str(write_ratio) +
                             " phase_length: " + str(phase_length) +
                             " index_usage: " + str(index_usage) )
@@ -1198,10 +1198,10 @@ def variability_eval():
         print(MAJOR_STRING)
 
         for index_usage in VARIABILITY_EXP_INDEX_USAGES:
-            print(MINOR_STRING)                        
-            
+            print(MINOR_STRING)
+
             for variability_threshold in VARIABILITY_EXP_VARIABILITY_THRESHOLDS:
-                print("> query_complexity: " + str(query_complexity) + 
+                print("> query_complexity: " + str(query_complexity) +
                         " index_usage: " + str(index_usage) +
                         " variability_threshold: " + str(variability_threshold) )
 
@@ -1231,11 +1231,11 @@ def selectivity_eval():
         print(MAJOR_STRING)
 
         for scale_factor in SELECTIVITY_EXP_SCALE_FACTORS:
-            print(MINOR_STRING)            
+            print(MINOR_STRING)
 
             for index_usage in SELECTIVITY_EXP_INDEX_USAGES:
                 for phase_length in SELECTIVITY_EXP_PHASE_LENGTHS:
-                    print("> selectivity: " + str(selectivity) + 
+                    print("> selectivity: " + str(selectivity) +
                             " scale_factor: " + str(scale_factor) +
                             " index_usage: " + str(index_usage) +
                             " phase_length: " + str(phase_length) )
@@ -1247,7 +1247,7 @@ def selectivity_eval():
                     result_file = get_result_file(SELECTIVITY_DIR, result_dir_list, SELECTIVITY_CSV)
 
                     # Run experiment
-                    run_experiment(write_ratio=SELECTIVITY_EXP_WRITE_RATIO, 
+                    run_experiment(write_ratio=SELECTIVITY_EXP_WRITE_RATIO,
                                    query_complexity=SELECTIVITY_EXP_QUERY_COMPLEXITY,
                                    phase_length=phase_length,
                                    index_usage=index_usage,
@@ -1267,10 +1267,10 @@ def index_count_eval():
         print(MAJOR_STRING)
 
         for index_usage in INDEX_COUNT_EXP_INDEX_USAGES:
-            print(MINOR_STRING)            
+            print(MINOR_STRING)
 
             for index_count_threshold in INDEX_COUNT_EXP_INDEX_COUNT_THRESHOLDS:
-                print("> write_ratio: " + str(write_ratio) + 
+                print("> write_ratio: " + str(write_ratio) +
                         " index_usage: " + str(index_usage) +
                         " index_count_threshold: " + str(index_count_threshold) )
 
@@ -1288,7 +1288,7 @@ def index_count_eval():
 
                 # Collect stat
                 collect_aggregate_stat(index_count_threshold, result_file)
-                
+
 # INDEX_UTILITY -- EVAL
 def index_utility_eval():
 
@@ -1299,8 +1299,8 @@ def index_utility_eval():
         print(MAJOR_STRING)
 
         for index_count_threshold in INDEX_UTILITY_EXP_INDEX_COUNT_THRESHOLDS:
-            print(MINOR_STRING)            
-            
+            print(MINOR_STRING)
+
             for index_utility_threshold in INDEX_UTILITY_EXP_INDEX_UTILITY_THRESHOLDS:
                 print("> index_usage: " + str(index_usage) +
                         " index_count_threshold: " + str(index_count_threshold) +
@@ -1320,8 +1320,8 @@ def index_utility_eval():
                                index_count_threshold=index_count_threshold)
 
                 # Collect stat
-                collect_aggregate_stat(index_utility_threshold, result_file)   
-                
+                collect_aggregate_stat(index_utility_threshold, result_file)
+
 # wRITE_RATIO -- EVAL
 def write_ratio_eval():
 
@@ -1332,10 +1332,10 @@ def write_ratio_eval():
         print(MAJOR_STRING)
 
         for write_ratio in WRITE_RATIO_EXP_WRITE_RATIOS:
-            print(MINOR_STRING)            
+            print(MINOR_STRING)
 
             for write_ratio_threshold in WRITE_RATIO_EXP_WRITE_RATIO_THRESHOLDS:
-                print("> index_usage: " + str(index_usage) + 
+                print("> index_usage: " + str(index_usage) +
                               " write_ratio: " + str(write_ratio) +
                               " write_ratio_threshold: " + str(write_ratio_threshold) )
 
@@ -1351,7 +1351,7 @@ def write_ratio_eval():
                                index_usage=index_usage)
 
                 # Collect stat
-                collect_aggregate_stat(write_ratio_threshold, result_file)                              
+                collect_aggregate_stat(write_ratio_threshold, result_file)
 
 ###################################################################################
 # MAIN
@@ -1422,7 +1422,7 @@ if __name__ == '__main__':
 
     if args.selectivity_plot:
         selectivity_plot()
-        
+
     if args.index_count_plot:
         index_count_plot()
 
@@ -1430,6 +1430,6 @@ if __name__ == '__main__':
         index_utility_plot()
 
     if args.write_ratio_plot:
-        write_ratio_plot()        
+        write_ratio_plot()
 
     #create_legend_index_usage()
