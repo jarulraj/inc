@@ -58,7 +58,7 @@ OPT_COLORS = COLOR_MAP
 OPT_GRID_COLOR = 'gray'
 OPT_LEGEND_SHADOW = False
 OPT_MARKERS = (['o', 's', 'v', "^", "h", "v", ">", "x", "d", "<", "|", "", "|", "_"])
-OPT_PATTERNS = ([ "////", "////", "o", "o", "\\\\" , "\\\\" , "//////", "//////", ".", "." , "\\\\\\" , "\\\\\\" ])
+OPT_PATTERNS = ([ "////", "o", "\\\\" , ".", "\\\\\\"])
 
 OPT_STACK_COLORS = ('#2b3742', '#c9b385', '#610606', '#1f1501')
 OPT_LINE_STYLES= ('-', ':', '--', '-.')
@@ -364,27 +364,77 @@ def create_legend_index_usage():
 
     LEGEND_VALUES = INDEX_USAGE_STRINGS.values()
 
-    figlegend = pylab.figure(figsize=(12, 0.5))
+    figlegend = pylab.figure(figsize=(15, 0.5))
     idx = 0
-    lines = [None] * len(LEGEND_VALUES)
+    lines = [None] * (len(LEGEND_VALUES) + 1)
+    data = [1]
+    x_values = [1]
 
-    LEGEND_VALUES_UPPER_CASE = [x.upper() for x in LEGEND_VALUES]
+    TITLE = "ADAPTATION MODES:"
+    LABELS = [TITLE, "AGGRESSIVE", "BALANCED", "CONSERVATIVE", "DISABLED"]
+
+    lines[idx], = ax1.plot(x_values, data, linewidth = 0)
+    idx = 1
 
     for group in xrange(len(LEGEND_VALUES)):
-        data = [1]
-        x_values = [1]
-        lines[idx], = ax1.plot(x_values, data, color=OPT_LINE_COLORS[idx], linewidth=OPT_LINE_WIDTH,
-                               marker=OPT_MARKERS[idx], markersize=OPT_MARKER_SIZE, label=str(group))
+        pprint.pprint(group)
+        lines[idx], = ax1.plot(x_values, data, color=OPT_LINE_COLORS[idx - 1], linewidth=OPT_LINE_WIDTH,
+                               marker=OPT_MARKERS[idx - 1], markersize=OPT_MARKER_SIZE)
         idx = idx + 1
 
     # LEGEND
-    figlegend.legend(lines, LEGEND_VALUES_UPPER_CASE, prop=LEGEND_FP,
+    figlegend.legend(lines, LABELS, prop=LEGEND_FP,
+                     loc=1, ncol=5,
+                     mode="expand", shadow=OPT_LEGEND_SHADOW,
+                     frameon=False, borderaxespad=0.0,
+                     handleheight=1, handlelength=3)
+
+    figlegend.savefig('legend_index_usage.pdf')
+    
+def create_bar_legend_index_usage():
+    fig = pylab.figure()
+    ax1 = fig.add_subplot(111)
+
+    figlegend = pylab.figure(figsize=(13, 0.5))
+
+    LEGEND_VALUES = INDEX_USAGE_STRINGS.values()
+    LEGEND_VALUES = LEGEND_VALUES[:-1]
+
+    num_items = len(LEGEND_VALUES) + 1
+    ind = np.arange(1)
+    margin = 0.10
+    width = ((1.0 - 2 * margin) / num_items)
+    data = [1]
+
+    bars = [None] * num_items
+
+    # TITLE
+    idx = 0
+    bars[idx] = ax1.bar(ind + margin + (idx * width), data, width,
+                        color = 'w',
+                        linewidth=0)
+
+    idx = 1
+    for group in xrange(len(LEGEND_VALUES)):
+        bars[idx] = ax1.bar(ind + margin + (idx * width), data, width,
+                              color=OPT_COLORS[idx - 1],
+                              hatch=OPT_PATTERNS[idx - 1],
+                              linewidth=BAR_LINEWIDTH)
+        idx = idx + 1
+
+    TITLE = "ADAPTATION MODES:"
+    LABELS = [TITLE, "AGGRESSIVE", "BALANCED", "CONSERVATIVE"]
+
+    # LEGEND
+    figlegend.legend(bars, LABELS, prop=LEGEND_FP,
                      loc=1, ncol=4,
                      mode="expand", shadow=OPT_LEGEND_SHADOW,
                      frameon=False, borderaxespad=0.0,
                      handleheight=1, handlelength=4)
 
-    figlegend.savefig('legend_index_usage.pdf')
+    figlegend.savefig('legend_bar_index_usage.pdf')
+    fig = pylab.figure()
+    ax1 = fig.add_subplot(111)
 
 ###################################################################################
 # PLOT
@@ -420,9 +470,12 @@ def create_query_line_chart(datasets):
     makeGrid(ax1)
 
     # Y-AXIS
+    YAXIS_MIN = 0
+    YAXIS_MAX = 100000
     ax1.yaxis.set_major_locator(LinearLocator(YAXIS_TICKS))
     ax1.minorticks_off()
     ax1.set_ylabel("Execution time (ms)", fontproperties=LABEL_FP)
+    #ax1.set_ylim([YAXIS_MIN, YAXIS_MAX])
     #ax1.set_yscale('log', basey=10)
 
     # X-AXIS
@@ -445,9 +498,12 @@ def create_convergence_line_chart(datasets):
     # X-AXIS
     x_values = CONVERGENCE_EXP_WRITE_RATIOS
     N = len(x_values)
+    M = len(INDEX_USAGES_SUBSET)
     ind = np.arange(N)
+    margin = 0.1
+    width = (1.-2.*margin)/M
+    bars = [None] * N
 
-    idx = 0
     for group in xrange(len(datasets)):
         # GROUP
         y_values = []
@@ -456,13 +512,11 @@ def create_convergence_line_chart(datasets):
                 if col == 1:
                     y_values.append(datasets[group][line][col])
         LOG.info("group_data = %s", str(y_values))
-        ax1.plot(ind + 0.5, y_values,
-                 color=OPT_COLORS[idx],
-                 linewidth=OPT_LINE_WIDTH,
-                 marker=OPT_MARKERS[idx],
-                 markersize=OPT_MARKER_SIZE,
-                 label=str(group))
-        idx = idx + 1
+        bars[group] =  ax1.bar(ind + margin + (group * width), 
+                               y_values, width,
+                               color=OPT_COLORS[group],
+                               hatch=OPT_PATTERNS[group],
+                               linewidth=BAR_LINEWIDTH)
 
     # GRID
     makeGrid(ax1)
@@ -477,7 +531,7 @@ def create_convergence_line_chart(datasets):
     ax1.set_xticks(ind + 0.5)
     ax1.set_xlabel("Read-write ratio", fontproperties=LABEL_FP)
     ax1.set_xticklabels(x_values)
-    ax1.set_xlim([XAXIS_MIN, XAXIS_MAX])
+    #ax1.set_xlim([XAXIS_MIN, XAXIS_MAX])
 
     for label in ax1.get_yticklabels() :
         label.set_fontproperties(TICK_FP)
@@ -1429,5 +1483,6 @@ if __name__ == '__main__':
 
     if args.write_ratio_plot:
         write_ratio_plot()
-
-    #create_legend_index_usage()
+        
+    create_legend_index_usage()
+    create_bar_legend_index_usage()
