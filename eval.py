@@ -402,7 +402,7 @@ def create_bar_legend_index_usage():
     num_items = len(LEGEND_VALUES) + 1
     ind = np.arange(1)
     margin = 0.10
-    width = ((1.0 - 2 * margin) / num_items)
+    width = (1.-2.*margin)/num_items
     data = [1]
 
     bars = [None] * num_items
@@ -470,10 +470,10 @@ def create_query_line_chart(datasets):
 
     # Y-AXIS
     YAXIS_MIN = 0
-    YAXIS_MAX = 100000
     ax1.yaxis.set_major_locator(LinearLocator(YAXIS_TICKS))
     ax1.minorticks_off()
     ax1.set_ylabel("Execution time (ms)", fontproperties=LABEL_FP)
+    ax1.set_ylim(bottom=YAXIS_MIN)
     #ax1.set_ylim([YAXIS_MIN, YAXIS_MAX])
     #ax1.set_yscale('log', basey=10)
 
@@ -490,7 +490,7 @@ def create_query_line_chart(datasets):
 
     return fig
 
-def create_convergence_line_chart(datasets):
+def create_convergence_bar_chart(datasets):
     fig = plot.figure()
     ax1 = fig.add_subplot(111)
 
@@ -649,7 +649,7 @@ def create_variability_line_chart(datasets):
 
     return fig
 
-def create_index_count_line_chart(datasets):
+def create_index_count_bar_chart(datasets):
     fig = plot.figure()
     ax1 = fig.add_subplot(111)
 
@@ -657,6 +657,10 @@ def create_index_count_line_chart(datasets):
     x_values = [str(i) for i in INDEX_COUNT_EXP_INDEX_COUNT_THRESHOLDS]
     N = len(x_values)
     ind = np.arange(N)
+    M = len(INDEX_USAGES_ALL)
+    margin = 0.1
+    width = (1.-2.*margin)/M
+    bars = [None] * N
 
     idx = 0
     for group in xrange(len(datasets)):
@@ -667,28 +671,29 @@ def create_index_count_line_chart(datasets):
                 if col == 1:
                     y_values.append(datasets[group][line][col])
         LOG.info("group_data = %s", str(y_values))
-        ax1.plot(ind + 0.5, y_values,
-                 color=OPT_COLORS[idx],
-                 linewidth=OPT_LINE_WIDTH,
-                 marker=OPT_MARKERS[idx],
-                 markersize=OPT_MARKER_SIZE,
-                 label=str(group))
+        bars[group] =  ax1.bar(ind + margin + (group * width), 
+                       y_values, width,
+                       color=OPT_COLORS[group],
+                       hatch=OPT_PATTERNS[group],
+                       linewidth=BAR_LINEWIDTH)
         idx = idx + 1
 
     # GRID
     makeGrid(ax1)
 
     # Y-AXIS
+    YAXIS_MIN = 0
     ax1.yaxis.set_major_locator(LinearLocator(YAXIS_TICKS))
     ax1.minorticks_off()
     ax1.set_ylabel("Execution time (ms)", fontproperties=LABEL_FP)
+    ax1.set_ylim(bottom=YAXIS_MIN)
     #ax1.set_yscale('log', basey=10)
 
     # X-AXIS
     ax1.set_xticks(ind + 0.5)
     ax1.set_xlabel("Index count threshold", fontproperties=LABEL_FP)
     ax1.set_xticklabels(x_values)
-    ax1.set_xlim([XAXIS_MIN, XAXIS_MAX])
+    #ax1.set_xlim([XAXIS_MIN, XAXIS_MAX])
 
     for label in ax1.get_yticklabels() :
         label.set_fontproperties(TICK_FP)
@@ -837,7 +842,7 @@ def convergence_plot():
                 dataset = loadDataFile(result_file)
                 datasets.append(dataset)
 
-            fig = create_convergence_line_chart(datasets)
+            fig = create_convergence_bar_chart(datasets)
 
             file_name = "convergence" + "-" + \
                         QUERY_COMPLEXITY_STRINGS[query_complexity] + ".pdf"
@@ -955,7 +960,7 @@ def index_count_plot():
             dataset = loadDataFile(result_file)
             datasets.append(dataset)
 
-        fig = create_index_count_line_chart(datasets)
+        fig = create_index_count_bar_chart(datasets)
 
         file_name = "index-count" + "-" + \
                     WRITE_RATIO_STRINGS[write_ratio] + ".pdf"
