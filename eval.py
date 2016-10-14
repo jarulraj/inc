@@ -223,11 +223,11 @@ CONVERGENCE_CSV = "convergence.csv"
 
 ##  TIME SERIES EXPERIMENT
 TIME_SERIES_EXP_PHASE_LENGTHS = [50, 100]
-TIME_SERIES_EXP_INDEX_USAGES = INDEX_USAGES_SUBSET
+TIME_SERIES_EXP_INDEX_USAGES = INDEX_USAGES_ALL
 TIME_SERIES_EXP_INDEX_COUNT_THRESHOLD = 10
-TIME_SERIES_EXP_QUERY_COUNT = 2000
-TIME_SERIES_EXP_WRITE_RATIOS = [WRITE_RATIO_READ_ONLY, WRITE_RATIO_READ_HEAVY]
-TIME_SERIES_EXP_QUERY_COMPLEXITYS = [QUERY_COMPLEXITY_SIMPLE, QUERY_COMPLEXITY_MODERATE]
+TIME_SERIES_EXP_QUERY_COUNT = 3000
+TIME_SERIES_EXP_WRITE_RATIOS = [WRITE_RATIO_READ_HEAVY, WRITE_RATIO_WRITE_HEAVY]
+TIME_SERIES_EXP_QUERY_COMPLEXITYS = [QUERY_COMPLEXITY_MODERATE, QUERY_COMPLEXITY_COMPLEX]
 TIME_SERIES_LATENCY_MODE = 1
 TIME_SERIES_INDEX_MODE = 2
 TIME_SERIES_PLOT_MODES = [TIME_SERIES_LATENCY_MODE, TIME_SERIES_INDEX_MODE]
@@ -377,7 +377,6 @@ def create_legend_index_usage():
     idx = 1
 
     for group in xrange(len(LEGEND_VALUES)):
-        pprint.pprint(group)
         lines[idx], = ax1.plot(x_values, data, color=OPT_LINE_COLORS[idx - 1], linewidth=OPT_LINE_WIDTH,
                                marker=OPT_MARKERS[idx - 1], markersize=OPT_MARKER_SIZE)
         idx = idx + 1
@@ -1064,7 +1063,6 @@ def run_experiment(
                      "-z", str(write_ratio_threshold)
                      ]
     arg_string = ' '.join(arg_list[1:])
-    pprint.pprint(arg_string)
     subprocess.call(arg_list,
                     stdout = PROGRAM_OUTPUT_FILE)
     subprocess.call(["rm -f " + PROGRAM_OUTPUT_FILE_NAME], shell=True)
@@ -1484,5 +1482,5 @@ if __name__ == '__main__':
     if args.write_ratio_plot:
         write_ratio_plot()
         
-    create_legend_index_usage()
-    create_bar_legend_index_usage()
+    #create_legend_index_usage()
+    #create_bar_legend_index_usage()
