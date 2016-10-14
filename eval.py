@@ -227,7 +227,7 @@ TIME_SERIES_EXP_INDEX_USAGES = INDEX_USAGES_ALL
 TIME_SERIES_EXP_INDEX_COUNT_THRESHOLD = 10
 TIME_SERIES_EXP_QUERY_COUNT = 3000
 TIME_SERIES_EXP_WRITE_RATIOS = [WRITE_RATIO_READ_HEAVY, WRITE_RATIO_WRITE_HEAVY]
-TIME_SERIES_EXP_QUERY_COMPLEXITYS = [QUERY_COMPLEXITY_MODERATE, QUERY_COMPLEXITY_COMPLEX]
+TIME_SERIES_EXP_QUERY_COMPLEXITY = QUERY_COMPLEXITY_COMPLEX
 TIME_SERIES_LATENCY_MODE = 1
 TIME_SERIES_INDEX_MODE = 2
 TIME_SERIES_PLOT_MODES = [TIME_SERIES_LATENCY_MODE, TIME_SERIES_INDEX_MODE]
@@ -847,12 +847,12 @@ def convergence_plot():
 # TIME SERIES -- PLOT
 def time_series_plot():
 
-    num_graphs = len(TIME_SERIES_EXP_QUERY_COMPLEXITYS)
+    num_graphs = len(TIME_SERIES_EXP_WRITE_RATIOS)
 
     for graph_itr in range(0, num_graphs):
 
         # Pick parameters for time series graph set
-        query_complexity = TIME_SERIES_EXP_QUERY_COMPLEXITYS[graph_itr]
+        query_complexity = TIME_SERIES_EXP_QUERY_COMPLEXITY
         write_ratio = TIME_SERIES_EXP_WRITE_RATIOS[graph_itr]
 
         for phase_length in TIME_SERIES_EXP_PHASE_LENGTHS:
@@ -890,7 +890,7 @@ def time_series_plot():
                             WRITE_RATIO_STRINGS[write_ratio] + "-" + \
                             str(phase_length) + ".pdf"
 
-                saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH * 2.0, height=OPT_GRAPH_HEIGHT)
+                saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH * 3.0, height=OPT_GRAPH_HEIGHT / 2.0)
 
 # VARIABILITY -- PLOT
 def variability_plot():
@@ -1193,13 +1193,13 @@ def time_series_eval():
     # CLEAN UP RESULT DIR
     clean_up_dir(TIME_SERIES_DIR)
 
-    num_graphs = len(TIME_SERIES_EXP_QUERY_COMPLEXITYS)
+    num_graphs = len(TIME_SERIES_EXP_WRITE_RATIOS)
 
     for graph_itr in range(0, num_graphs):
         print(MAJOR_STRING)
 
         # Pick parameters for time series graph set
-        query_complexity = TIME_SERIES_EXP_QUERY_COMPLEXITYS[graph_itr]
+        query_complexity = TIME_SERIES_EXP_QUERY_COMPLEXITY
         write_ratio = TIME_SERIES_EXP_WRITE_RATIOS[graph_itr]
 
         for phase_length in TIME_SERIES_EXP_PHASE_LENGTHS:
