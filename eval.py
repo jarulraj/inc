@@ -172,7 +172,7 @@ DEFAULT_SELECTIVITY = 0.001
 DEFAULT_PROJECTIVITY = 0.1
 DEFAULT_VERBOSITY = 0
 DEFAULT_CONVERGENCE_MODE = 0
-DEFAULT_CONVERGENCE_QUERY_THRESHOLD = 300
+DEFAULT_CONVERGENCE_QUERY_THRESHOLD = 500
 DEFAULT_VARIABILITY_THRESHOLD = 25
 DEFAULT_INDEX_COUNT_THRESHOLD = 10
 DEFAULT_INDEX_UTILITY_THRESHOLD = 0.25
@@ -216,11 +216,9 @@ QUERY_CSV = "query.csv"
 CONVERGENCE_EXP_CONVERGENCE_MODE = 1
 CONVERGENCE_EXP_VARIABILITY_THRESHOLD = 15
 CONVERGENCE_EXP_PHASE_LENGTH = 5
-CONVERGENCE_EXP_INDEX_COUNT_THRESHOLD = 5
 CONVERGENCE_EXP_INDEX_USAGES = INDEX_USAGES_SUBSET
 CONVERGENCE_EXP_WRITE_RATIOS = QUERY_EXP_WRITE_RATIOS
 CONVERGENCE_EXP_QUERY_COMPLEXITYS = QUERY_EXP_QUERY_COMPLEXITYS
-CONVERGENCE_EXP_CONVERGENCE_QUERY_THRESHOLD = 300
 CONVERGENCE_CSV = "convergence.csv"
 
 ##  TIME SERIES EXPERIMENT
@@ -1132,9 +1130,7 @@ def convergence_eval():
                                    write_ratio=write_ratio,
                                    query_complexity=query_complexity,
                                    convergence_mode=CONVERGENCE_EXP_CONVERGENCE_MODE,
-                                   convergence_query_threshold=CONVERGENCE_EXP_CONVERGENCE_QUERY_THRESHOLD,
-                                   variability_threshold=CONVERGENCE_EXP_VARIABILITY_THRESHOLD,
-                                   index_count_threshold=CONVERGENCE_EXP_INDEX_COUNT_THRESHOLD)
+                                   variability_threshold=CONVERGENCE_EXP_VARIABILITY_THRESHOLD)
 
                     # Collect stat
                     collect_aggregate_stat(write_ratio, result_file)
