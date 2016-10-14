@@ -589,7 +589,8 @@ def create_time_series_line_chart(datasets, plot_mode):
 
     # X-AXIS
     #ax1.set_xticks(ind + 0.5)
-    major_ticks = np.arange(0, DEFAULT_QUERY_COUNT + 1, TIME_SERIES_OPT_MARKER_FREQUENCY)
+    major_ticks = np.arange(0, TIME_SERIES_EXP_QUERY_COUNT + 1, 
+                            TIME_SERIES_OPT_MARKER_FREQUENCY)
     ax1.set_xticks(major_ticks)
     ax1.set_xlabel("Query Sequence", fontproperties=LABEL_FP)
     #ax1.set_xticklabels(x_values)
@@ -895,7 +896,7 @@ def time_series_plot():
                             WRITE_RATIO_STRINGS[write_ratio] + "-" + \
                             str(phase_length) + ".pdf"
 
-                saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH * 3.0, height=OPT_GRAPH_HEIGHT / 2.0)
+                saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH * 3.0, height=OPT_GRAPH_HEIGHT)
 
 # VARIABILITY -- PLOT
 def variability_plot():
