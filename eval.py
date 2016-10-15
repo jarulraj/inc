@@ -6,6 +6,7 @@
 
 from __future__ import print_function
 
+import time
 import argparse
 import csv
 import logging
@@ -126,6 +127,18 @@ INDEX_USAGE_STRINGS = {
     4 : "never"
 }
 
+
+## LAYOUT TYPES
+LAYOUT_MODE_ROW = 1
+LAYOUT_MODE_COLUMN = 2
+LAYOUT_MODE_HYBRID = 3
+
+LAYOUT_MODE_STRINGS = {
+    1 : 'row',
+    2 : 'column',
+    3 : 'hybrid'
+}
+
 ## QUERY COMPLEXITY TYPES
 QUERY_COMPLEXITY_SIMPLE   = 1
 QUERY_COMPLEXITY_MODERATE = 2
@@ -177,6 +190,7 @@ DEFAULT_VARIABILITY_THRESHOLD = 25
 DEFAULT_INDEX_COUNT_THRESHOLD = 20
 DEFAULT_INDEX_UTILITY_THRESHOLD = 0.25
 DEFAULT_WRITE_RATIO_THRESHOLD = 1.0
+DEFAULT_LAYOUT_MODE = LAYOUT_MODE_ROW
 
 SELECTIVITY = (0.2, 0.4, 0.6, 0.8, 1.0)
 PROJECTIVITY = (0.01, 0.1, 0.5)
@@ -200,6 +214,7 @@ SELECTIVITY_DIR = BASE_DIR + "/results/selectivity"
 INDEX_COUNT_DIR = BASE_DIR + "/results/index_count"
 INDEX_UTILITY_DIR = BASE_DIR + "/results/index_utility"
 WRITE_RATIO_DIR = BASE_DIR + "/results/write_ratio"
+LAYOUT_DIR = BASE_DIR + "results/layout/"
 
 ## INDEX USAGES
 INDEX_USAGES_ALL = [INDEX_USAGE_AGGRESSIVE, INDEX_USAGE_BALANCED, INDEX_USAGE_CONSERVATIVE, INDEX_USAGE_NEVER]
@@ -275,6 +290,17 @@ WRITE_RATIO_EXP_QUERY_COMPLEXITY = QUERY_COMPLEXITY_SIMPLE
 WRITE_RATIO_EXP_WRITE_RATIO_THRESHOLDS = [0.75, 0.9]
 WRITE_RATIO_EXP_PHASE_LENGTH = INDEX_COUNT_EXP_PHASE_LENGTH
 WRITE_RATIO_CSV = "write_ratio.csv"
+
+## LAYOUT EXPERIMENT
+LAYOUT_EXP_LAYOUT_MODES = [LAYOUT_MODE_ROW, LAYOUT_MODE_COLUMN, LAYOUT_MODE_HYBRID]
+LAYOUT_EXP_WRITE_RATIOS = [WRITE_RATIO_READ_ONLY, WRITE_RATIO_READ_HEAVY, WRITE_RATIO_BALANCED, WRITE_RATIO_WRITE_HEAVY]
+LAYOUT_EXP_QUERY_COMPLEXITYS = [QUERY_COMPLEXITY_SIMPLE, QUERY_COMPLEXITY_MODERATE, QUERY_COMPLEXITY_COMPLEX]
+LAYOUT_EXP_SELECTIVITYS = [0.01, 0.1, 0.5, 0.9]
+LAYOUT_EXP_PROJECTIVITYS = [0.01, 0.1, 0.5, 0.9]
+LAYOUT_EXP_COLUMN_COUNT = 100 # COLUMN_COUNT * PROJECTIVITY should > 0
+LAYOUT_EXP_INDEX_USAGE = INDEX_USAGE_AGGRESSIVE
+LAYOUT_EXP_PHASE_LENGTH = 100
+LAYOUT_CSV = "layout.csv"
 
 ###################################################################################
 # UTILS
@@ -1043,7 +1069,8 @@ def run_experiment(
     write_ratio=DEFAULT_WRITE_RATIO,
     index_count_threshold=DEFAULT_INDEX_COUNT_THRESHOLD,
     index_utility_threshold=DEFAULT_INDEX_UTILITY_THRESHOLD,
-    write_ratio_threshold=DEFAULT_WRITE_RATIO_THRESHOLD):
+    write_ratio_threshold=DEFAULT_WRITE_RATIO_THRESHOLD,
+    layout_mode=DEFAULT_LAYOUT_MODE):
 
     subprocess.call(["rm -f " + OUTPUT_FILE], shell=True)
     PROGRAM_OUTPUT_FILE_NAME = "program.txt"
@@ -1066,7 +1093,8 @@ def run_experiment(
                      "-w", str(write_ratio),
                      "-x", str(index_count_threshold),
                      "-y", str(index_utility_threshold),
-                     "-z", str(write_ratio_threshold)
+                     "-z", str(write_ratio_threshold),
+                     "-l", str(layout_mode)
                      ]
     arg_string = ' '.join(arg_list[1:])
     subprocess.call(arg_list,
@@ -1409,6 +1437,59 @@ def write_ratio_eval():
                 # Collect stat
                 collect_aggregate_stat(write_ratio_threshold, result_file)
 
+def layout_eval():
+    # CLEAN UP RESULT DIR
+    clean_up_dir(LAYOUT_DIR)
+
+    index_usage = LAYOUT_EXP_INDEX_USAGE
+    phase_length = LAYOUT_EXP_PHASE_LENGTH
+    column_count = LAYOUT_EXP_COLUMN_COUNT
+
+    for layout_mode in LAYOUT_EXP_LAYOUT_MODES:
+        print(MAJOR_STRING)
+
+        for query_complexity in LAYOUT_EXP_QUERY_COMPLEXITYS:
+            print(MINOR_STRING)
+
+            for write_ratio in LAYOUT_EXP_WRITE_RATIOS:
+                print(MINOR_STRING)
+
+                for selectivity in LAYOUT_EXP_SELECTIVITYS:
+                    print(MINOR_STRING)
+
+                    for projectivity in LAYOUT_EXP_PROJECTIVITYS:
+                        print(MINOR_STRING)
+
+                        print("> layout_mode: " + str(layout_mode) +
+                                " query_complexity: " + str(query_complexity) +
+                                " write_ratio: " + str(write_ratio) +
+                                " selectivity: " + str(selectivity) +
+                                " projectivity: " + str(projectivity))
+
+                        # Get result file
+                        result_dir_list = [LAYOUT_MODE_STRINGS[layout_mode],
+                                           QUERY_COMPLEXITY_STRINGS[query_complexity],
+                                           WRITE_RATIO_STRINGS[write_ratio],
+                                           str(selectivity),
+                                           str(projectivity)]
+
+                        result_file = get_result_file(LAYOUT_DIR, result_dir_list, LAYOUT_CSV)
+
+                        # Run experiment
+                        start_time = time.time()
+                        run_experiment(phase_length=phase_length,
+                                       index_usage=index_usage,
+                                       write_ratio=write_ratio,
+                                       query_complexity=query_complexity,
+                                       layout_mode=layout_mode,
+                                       selectivity=selectivity,
+                                       projectivity=projectivity,
+                                       column_count=column_count)
+                        print("Executed in", time.time() - start_time, "s")
+
+                        # Collect stat
+                        collect_aggregate_stat(phase_length, result_file)
+
 ###################################################################################
 # MAIN
 ###################################################################################
@@ -1424,6 +1505,7 @@ if __name__ == '__main__':
     parser.add_argument("-f", "--index_count_eval", help="eval index_count", action='store_true')
     parser.add_argument("-g", "--index_utility_eval", help="eval index_utility", action='store_true')
     parser.add_argument("-i", "--write_ratio_eval", help="eval write_ratio", action='store_true')
+    parser.add_argument("-j", "--layout_eval", help="eval index tuning with query experiment", action="store_true")
 
     parser.add_argument("-m", "--query_plot", help="plot query", action='store_true')
     parser.add_argument("-n", "--convergence_plot", help="plot convergence", action='store_true')
@@ -1461,6 +1543,9 @@ if __name__ == '__main__':
 
     if args.write_ratio_eval:
         write_ratio_eval()
+
+    if args.layout_eval:
+        layout_eval()
 
     ## PLOT
 
