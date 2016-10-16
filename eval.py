@@ -190,6 +190,7 @@ SELECTIVITY_EXPERIMENT = 5
 INDEX_COUNT_EXPERIMENT = 6
 INDEX_UTILITY_EXPERIMENT = 7
 WRITE_RATIO_EXPERIMENT = 8
+TREND_EXPERIMENT = 9
 
 ## DIRS
 QUERY_DIR = BASE_DIR + "/results/query"
@@ -200,6 +201,7 @@ SELECTIVITY_DIR = BASE_DIR + "/results/selectivity"
 INDEX_COUNT_DIR = BASE_DIR + "/results/index_count"
 INDEX_UTILITY_DIR = BASE_DIR + "/results/index_utility"
 WRITE_RATIO_DIR = BASE_DIR + "/results/write_ratio"
+TREND_DIR = BASE_DIR + "/results/trend"
 
 ## INDEX USAGES
 INDEX_USAGES_ALL = [INDEX_USAGE_AGGRESSIVE, INDEX_USAGE_BALANCED, INDEX_USAGE_CONSERVATIVE, INDEX_USAGE_NEVER]
@@ -275,6 +277,12 @@ WRITE_RATIO_EXP_QUERY_COMPLEXITY = QUERY_COMPLEXITY_SIMPLE
 WRITE_RATIO_EXP_WRITE_RATIO_THRESHOLDS = [0.75, 0.9]
 WRITE_RATIO_EXP_PHASE_LENGTH = INDEX_COUNT_EXP_PHASE_LENGTH
 WRITE_RATIO_CSV = "write_ratio.csv"
+
+## TREND EXPERIMENT
+TREND_EXP_TUNING_COUNT = 300
+TREND_EXP_METHODS = ["Data", "Holt-Winters Forecast"]
+TREND_CSV = "trend.csv"
+TREND_LINE_COLORS = ( '#594F4F', '#45ADA8')
 
 ###################################################################################
 # UTILS
@@ -435,6 +443,39 @@ def create_bar_legend_index_usage():
     fig = pylab.figure()
     ax1 = fig.add_subplot(111)
 
+def create_legend_trend():
+    fig = pylab.figure()
+    ax1 = fig.add_subplot(111)
+
+    figlegend = pylab.figure(figsize=(9, 0.5))
+    idx = 0
+    lines = [None] * (len(TREND_EXP_METHODS) + 1)
+    data = [1]
+    x_values = [1]
+
+    TITLE = "TREND:"
+    LABELS = [TITLE, "DATA", "HOLT-WINTERS FORECAST"]
+
+    lines[idx], = ax1.plot(x_values, data, linewidth = 0)
+    idx = 1
+
+    for group in xrange(len(TREND_EXP_METHODS)):
+        lines[idx], = ax1.plot(x_values, data, 
+                               color=TREND_LINE_COLORS[idx - 1], 
+                               linewidth=OPT_LINE_WIDTH,
+                               marker=OPT_MARKERS[idx - 1], 
+                               markersize=OPT_MARKER_SIZE)
+        idx = idx + 1
+
+    # LEGEND
+    figlegend.legend(lines, LABELS, prop=LEGEND_FP,
+                     loc=1, ncol=5,
+                     mode="expand", shadow=OPT_LEGEND_SHADOW,
+                     frameon=False, borderaxespad=0.0,
+                     handleheight=1, handlelength=3)
+
+    figlegend.savefig('legend_trend.pdf')
+    
 ###################################################################################
 # PLOT
 ###################################################################################
@@ -799,6 +840,62 @@ def create_write_ratio_line_chart(datasets):
 
     return fig
 
+def create_trend_line_chart(datasets):
+    fig = plot.figure()
+    ax1 = fig.add_subplot(111)
+
+    # X-AXIS
+    x_values = [str(i) for i in range(1, TREND_EXP_TUNING_COUNT + 1)]
+    N = len(x_values)
+    ind = np.arange(N)
+
+    TREND_OPT_LINE_WIDTH = 3.0
+    TREND_OPT_MARKER_SIZE = 5.0
+    TREND_OPT_MARKER_FREQUENCY = TREND_EXP_TUNING_COUNT/10
+
+    idx = 0
+    for group in xrange(len(datasets)):
+        # GROUP
+        y_values = []
+        for line in  xrange(len(datasets[group])):
+            for col in  xrange(len(datasets[group][line])):
+                if col == 1:
+                    y_values.append(datasets[group][line][col])
+        LOG.info("group_data = %s", str(y_values))
+        ax1.plot(ind + 0.5, y_values,
+                 color=TREND_LINE_COLORS[idx],
+                 linewidth=TREND_OPT_LINE_WIDTH,
+                 marker=OPT_MARKERS[idx],
+                 markersize=TREND_OPT_MARKER_SIZE,
+                 markevery=TREND_OPT_MARKER_FREQUENCY,
+                 label=str(group))
+        idx = idx + 1
+
+    # GRID
+    makeGrid(ax1)
+
+    # Y-AXIS
+    ax1.yaxis.set_major_locator(LinearLocator(YAXIS_TICKS))
+    ax1.minorticks_off()
+    ax1.set_ylabel("Index Utility Forecast", fontproperties=LABEL_FP)
+    YAXIS_MIN = 0
+    ax1.set_ylim(bottom=YAXIS_MIN)
+    #ax1.set_yscale('log', basey=10)
+
+    # X-AXIS
+    major_ticks = np.arange(0, TREND_EXP_TUNING_COUNT + 1, 
+                            TREND_OPT_MARKER_FREQUENCY)
+    ax1.set_xticks(major_ticks)
+    ax1.set_xlabel("Tuning Period", fontproperties=LABEL_FP)
+    #ax1.set_xlim([XAXIS_MIN, XAXIS_MAX])
+
+    for label in ax1.get_yticklabels() :
+        label.set_fontproperties(TICK_FP)
+    for label in ax1.get_xticklabels() :
+        label.set_fontproperties(TICK_FP)
+
+    return fig
+
 ###################################################################################
 # PLOT HELPERS
 ###################################################################################
@@ -1011,6 +1108,27 @@ def write_ratio_plot():
                     str(write_ratio) + ".pdf"
 
         saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH, height=OPT_GRAPH_HEIGHT)
+        
+# TREND -- PLOT
+def trend_plot():
+
+    num_lines = len(TREND_EXP_METHODS)
+
+    datasets = []
+    for line_itr in range(0, num_lines):
+        
+        # Get result file
+        result_dir_list = [str(line_itr)]
+        result_file = get_result_file(TREND_DIR, result_dir_list, TREND_CSV)
+
+        dataset = loadDataFile(result_file)
+        datasets.append(dataset)
+
+    fig = create_trend_line_chart(datasets)
+
+    file_name = "trend" + ".pdf"
+
+    saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH * 2.0, height=OPT_GRAPH_HEIGHT)        
 
 ###################################################################################
 # EVAL HELPERS
@@ -1131,6 +1249,7 @@ def query_eval():
 
     # CLEAN UP RESULT DIR
     clean_up_dir(QUERY_DIR)
+    print("QUERY EVAL")
 
     for query_complexity in QUERY_EXP_QUERY_COMPLEXITYS:
         print(MAJOR_STRING)
@@ -1165,6 +1284,7 @@ def convergence_eval():
 
     # CLEAN UP RESULT DIR
     clean_up_dir(CONVERGENCE_DIR)
+    print("CONVERGENCE EVAL")
 
     for query_complexity in CONVERGENCE_EXP_QUERY_COMPLEXITYS:
         print(MAJOR_STRING)
@@ -1198,6 +1318,7 @@ def time_series_eval():
 
     # CLEAN UP RESULT DIR
     clean_up_dir(TIME_SERIES_DIR)
+    print("TIME SERIES EVAL")
 
     num_graphs = len(TIME_SERIES_EXP_WRITE_RATIOS)
 
@@ -1249,6 +1370,7 @@ def variability_eval():
 
     # CLEAN UP RESULT DIR
     clean_up_dir(VARIABILITY_DIR)
+    print("VARIABILITY EVAL")
 
     for query_complexity in VARIABILITY_EXP_QUERY_COMPLEXITYS:
         print(MAJOR_STRING)
@@ -1282,6 +1404,7 @@ def selectivity_eval():
 
     # CLEAN UP RESULT DIR
     clean_up_dir(SELECTIVITY_DIR)
+    print("SELECTIVITY EVAL")
 
     for selectivity in SELECTIVITY_EXP_SELECTIVITYS:
         print(MAJOR_STRING)
@@ -1318,6 +1441,7 @@ def index_count_eval():
 
     # CLEAN UP RESULT DIR
     clean_up_dir(INDEX_COUNT_DIR)
+    print("INDEX COUNT EVAL")
 
     for write_ratio in INDEX_COUNT_EXP_WRITE_RATIOS:
         print(MAJOR_STRING)
@@ -1350,6 +1474,7 @@ def index_utility_eval():
 
     # CLEAN UP RESULT DIR
     clean_up_dir(INDEX_UTILITY_DIR)
+    print("INDEX UTILITY EVAL")
 
     for index_usage in INDEX_UTILITY_EXP_INDEX_USAGES:
         print(MAJOR_STRING)
@@ -1383,6 +1508,7 @@ def write_ratio_eval():
 
     # CLEAN UP RESULT DIR
     clean_up_dir(WRITE_RATIO_DIR)
+    print("WRITE RATIO EVAL")
 
     for index_usage in WRITE_RATIO_EXP_INDEX_USAGES:
         print(MAJOR_STRING)
@@ -1433,6 +1559,8 @@ if __name__ == '__main__':
     parser.add_argument("-r", "--index_count_plot", help="plot index_count", action='store_true')
     parser.add_argument("-s", "--index_utility_plot", help="plot index_utility", action='store_true')
     parser.add_argument("-t", "--write_ratio_plot", help="plot write_ratio", action='store_true')
+
+    parser.add_argument("-z", "--trend_plot", help="plot trend", action='store_true')
 
     args = parser.parse_args()
 
@@ -1487,6 +1615,10 @@ if __name__ == '__main__':
 
     if args.write_ratio_plot:
         write_ratio_plot()
+                
+    if args.trend_plot:
+        trend_plot()
         
     #create_legend_index_usage()
     #create_bar_legend_index_usage()
+    create_legend_trend()
