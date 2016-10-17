@@ -214,7 +214,7 @@ SELECTIVITY_DIR = BASE_DIR + "/results/selectivity"
 INDEX_COUNT_DIR = BASE_DIR + "/results/index_count"
 INDEX_UTILITY_DIR = BASE_DIR + "/results/index_utility"
 WRITE_RATIO_DIR = BASE_DIR + "/results/write_ratio"
-LAYOUT_DIR = BASE_DIR + "results/layout/"
+LAYOUT_DIR = BASE_DIR + "/results/layout/"
 
 ## INDEX USAGES
 INDEX_USAGES_ALL = [INDEX_USAGE_AGGRESSIVE, INDEX_USAGE_BALANCED, INDEX_USAGE_CONSERVATIVE, INDEX_USAGE_NEVER]
@@ -293,13 +293,13 @@ WRITE_RATIO_CSV = "write_ratio.csv"
 
 ## LAYOUT EXPERIMENT
 LAYOUT_EXP_LAYOUT_MODES = [LAYOUT_MODE_ROW, LAYOUT_MODE_COLUMN, LAYOUT_MODE_HYBRID]
-LAYOUT_EXP_WRITE_RATIOS = [WRITE_RATIO_READ_ONLY, WRITE_RATIO_READ_HEAVY, WRITE_RATIO_BALANCED, WRITE_RATIO_WRITE_HEAVY]
-LAYOUT_EXP_QUERY_COMPLEXITYS = [QUERY_COMPLEXITY_SIMPLE, QUERY_COMPLEXITY_MODERATE, QUERY_COMPLEXITY_COMPLEX]
-LAYOUT_EXP_SELECTIVITYS = [0.01, 0.1, 0.5, 0.9]
-LAYOUT_EXP_PROJECTIVITYS = [0.01, 0.1, 0.5, 0.9]
+LAYOUT_EXP_WRITE_RATIO = WRITE_RATIO_READ_HEAVY
+LAYOUT_EXP_QUERY_COMPLEXITY = QUERY_COMPLEXITY_MODERATE
+LAYOUT_EXP_SELECTIVITYS = [0.01, 0.9]
+LAYOUT_EXP_PROJECTIVITYS = [0.01, 0.9]
 LAYOUT_EXP_COLUMN_COUNT = 100 # COLUMN_COUNT * PROJECTIVITY should > 0
-LAYOUT_EXP_INDEX_USAGE = INDEX_USAGE_AGGRESSIVE
-LAYOUT_EXP_PHASE_LENGTH = 100
+LAYOUT_EXP_INDEX_USAGES = [INDEX_USAGE_AGGRESSIVE, INDEX_USAGE_NEVER]
+LAYOUT_EXP_PHASE_LENGTH=250
 LAYOUT_CSV = "layout.csv"
 
 ###################################################################################
@@ -825,6 +825,55 @@ def create_write_ratio_line_chart(datasets):
 
     return fig
 
+def create_layout_bar_chart(datasets, desc=""):
+    fig = plot.figure()
+    ax1 = fig.add_subplot(111)
+
+    # X-AXIS
+    x_values = [LAYOUT_MODE_STRINGS[layout_mode] for layout_mode in LAYOUT_EXP_LAYOUT_MODES]
+    N = len(x_values)
+    ind = np.arange(N)
+    M = 2
+    margin = 0.1
+    width = (1.-2.*margin)/M
+    bars = [None] * N
+
+    for group in xrange(len(datasets)):
+        # GROUP
+        y_values = []
+        for line in  xrange(len(datasets[group])):
+            for col in  xrange(len(datasets[group][line])):
+                if col == 1:
+                    y_values.append(datasets[group][line][col])
+        LOG.info("group_data = %s", str(y_values))
+        bars[group] =  ax1.bar(ind + margin + (group * width),
+                               y_values, width,
+                               color=OPT_COLORS[group],
+                               hatch=OPT_PATTERNS[group],
+                               linewidth=BAR_LINEWIDTH)
+
+    # GRID
+    makeGrid(ax1)
+
+    # Y-AXIS
+    ax1.yaxis.set_major_locator(LinearLocator(YAXIS_TICKS))
+    ax1.minorticks_off()
+    ax1.set_ylabel("Execution time (ms)", fontproperties=LABEL_FP)
+    #ax1.set_yscale('log', basey=10)
+
+    # X-AXIS
+    ax1.set_xticks(np.arange(3) + 0.5)
+    ax1.set_xlabel("Storage Layout" if desc == "" else "Storage Layout(" + desc + ")", fontproperties=LABEL_FP)
+    ax1.set_xticklabels(x_values)
+    #ax1.set_xlim([XAXIS_MIN, XAXIS_MAX])
+
+    for label in ax1.get_yticklabels() :
+        label.set_fontproperties(TICK_FP)
+    for label in ax1.get_xticklabels() :
+        label.set_fontproperties(TICK_FP)
+
+    return fig
+
 ###################################################################################
 # PLOT HELPERS
 ###################################################################################
@@ -1038,6 +1087,27 @@ def write_ratio_plot():
 
         saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH, height=OPT_GRAPH_HEIGHT)
 
+def layout_plot():
+    print('plotting layout')
+    for selectivity in LAYOUT_EXP_SELECTIVITYS:
+        for projectivity in LAYOUT_EXP_PROJECTIVITYS:
+            datasets = []
+            for index_usage in LAYOUT_EXP_INDEX_USAGES:
+                result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
+                                   str(selectivity), str(projectivity)]
+
+                result_file = get_result_file(LAYOUT_DIR, result_dir_list, LAYOUT_CSV)
+
+                dataset = loadDataFile(result_file)
+                datasets.append(dataset)
+
+            fig = create_layout_bar_chart(datasets, "sel=" + str(selectivity) + " proj=" + str(projectivity))
+
+            file_name = "layout" + '-' \
+                        "sel=" + str(selectivity) + "-" + "proj=" + \
+                        str(projectivity) + ".pdf"
+            saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH, height=OPT_GRAPH_HEIGHT)
+
 ###################################################################################
 # EVAL HELPERS
 ###################################################################################
@@ -1149,6 +1219,7 @@ def collect_stat(independent_variable,
             itr += 1
 
     result_file.close()
+
 
 ###################################################################################
 # EVAL
@@ -1441,54 +1512,46 @@ def layout_eval():
     # CLEAN UP RESULT DIR
     clean_up_dir(LAYOUT_DIR)
 
-    index_usage = LAYOUT_EXP_INDEX_USAGE
     phase_length = LAYOUT_EXP_PHASE_LENGTH
-    column_count = LAYOUT_EXP_COLUMN_COUNT
 
-    for layout_mode in LAYOUT_EXP_LAYOUT_MODES:
+    for layout_mode in LAYOUT_EXP_LAYOUT_MODES: # Different lines
         print(MAJOR_STRING)
 
-        for query_complexity in LAYOUT_EXP_QUERY_COMPLEXITYS:
+        for index_usage in LAYOUT_EXP_INDEX_USAGES:
             print(MINOR_STRING)
 
-            for write_ratio in LAYOUT_EXP_WRITE_RATIOS:
+            for projectivity in LAYOUT_EXP_PROJECTIVITYS:
                 print(MINOR_STRING)
 
                 for selectivity in LAYOUT_EXP_SELECTIVITYS:
                     print(MINOR_STRING)
 
-                    for projectivity in LAYOUT_EXP_PROJECTIVITYS:
-                        print(MINOR_STRING)
+                    print("> layout_mode: " + str(layout_mode) +
+                            " index_usage: " + str(index_usage) +
+                            " selectivity: " + str(selectivity) +
+                            " projectivity: " + str(projectivity))
 
-                        print("> layout_mode: " + str(layout_mode) +
-                                " query_complexity: " + str(query_complexity) +
-                                " write_ratio: " + str(write_ratio) +
-                                " selectivity: " + str(selectivity) +
-                                " projectivity: " + str(projectivity))
+                    # Get result file
+                    result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
+                                       str(selectivity),
+                                       str(projectivity)]
 
-                        # Get result file
-                        result_dir_list = [LAYOUT_MODE_STRINGS[layout_mode],
-                                           QUERY_COMPLEXITY_STRINGS[query_complexity],
-                                           WRITE_RATIO_STRINGS[write_ratio],
-                                           str(selectivity),
-                                           str(projectivity)]
+                    result_file = get_result_file(LAYOUT_DIR, result_dir_list, LAYOUT_CSV)
 
-                        result_file = get_result_file(LAYOUT_DIR, result_dir_list, LAYOUT_CSV)
+                    # Run experiment
+                    start_time = time.time()
+                    run_experiment(
+                                   layout_mode=layout_mode,
+                                   index_usage=index_usage,
+                                   write_ratio=LAYOUT_EXP_WRITE_RATIO,
+                                   query_complexity=LAYOUT_EXP_QUERY_COMPLEXITY,
+                                   selectivity=selectivity,
+                                   projectivity=projectivity,
+                                   column_count=LAYOUT_EXP_COLUMN_COUNT)
+                    print("Executed in", time.time() - start_time, "s")
 
-                        # Run experiment
-                        start_time = time.time()
-                        run_experiment(phase_length=phase_length,
-                                       index_usage=index_usage,
-                                       write_ratio=write_ratio,
-                                       query_complexity=query_complexity,
-                                       layout_mode=layout_mode,
-                                       selectivity=selectivity,
-                                       projectivity=projectivity,
-                                       column_count=column_count)
-                        print("Executed in", time.time() - start_time, "s")
-
-                        # Collect stat
-                        collect_aggregate_stat(phase_length, result_file)
+                    # Collect stat
+                    collect_aggregate_stat(phase_length, result_file)
 
 ###################################################################################
 # MAIN
@@ -1515,6 +1578,7 @@ if __name__ == '__main__':
     parser.add_argument("-r", "--index_count_plot", help="plot index_count", action='store_true')
     parser.add_argument("-s", "--index_utility_plot", help="plot index_utility", action='store_true')
     parser.add_argument("-t", "--write_ratio_plot", help="plot write_ratio", action='store_true')
+    parser.add_argument("-u", "--layout_plot", help="plot layout", action='store_true')
 
     args = parser.parse_args()
 
@@ -1572,6 +1636,9 @@ if __name__ == '__main__':
 
     if args.write_ratio_plot:
         write_ratio_plot()
+
+    if args.layout_plot:
+        layout_plot()
         
     #create_legend_index_usage()
     #create_bar_legend_index_usage()
