@@ -877,7 +877,7 @@ def create_trend_line_chart(datasets):
     # Y-AXIS
     ax1.yaxis.set_major_locator(LinearLocator(YAXIS_TICKS))
     ax1.minorticks_off()
-    ax1.set_ylabel("Index Utility Forecast", fontproperties=LABEL_FP)
+    ax1.set_ylabel("Index Utility", fontproperties=LABEL_FP)
     YAXIS_MIN = 0
     ax1.set_ylim(bottom=YAXIS_MIN)
     #ax1.set_yscale('log', basey=10)
