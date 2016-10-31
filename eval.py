@@ -6,6 +6,7 @@
 
 from __future__ import print_function
 
+import time
 import argparse
 import csv
 import logging
@@ -126,6 +127,18 @@ INDEX_USAGE_STRINGS = {
     4 : "never"
 }
 
+
+## LAYOUT TYPES
+LAYOUT_MODE_ROW = 1
+LAYOUT_MODE_COLUMN = 2
+LAYOUT_MODE_HYBRID = 3
+
+LAYOUT_MODE_STRINGS = {
+    1 : 'row',
+    2 : 'column',
+    3 : 'hybrid'
+}
+
 ## QUERY COMPLEXITY TYPES
 QUERY_COMPLEXITY_SIMPLE   = 1
 QUERY_COMPLEXITY_MODERATE = 2
@@ -177,6 +190,7 @@ DEFAULT_VARIABILITY_THRESHOLD = 25
 DEFAULT_INDEX_COUNT_THRESHOLD = 20
 DEFAULT_INDEX_UTILITY_THRESHOLD = 0.25
 DEFAULT_WRITE_RATIO_THRESHOLD = 1.0
+DEFAULT_LAYOUT_MODE = LAYOUT_MODE_ROW
 
 SELECTIVITY = (0.2, 0.4, 0.6, 0.8, 1.0)
 PROJECTIVITY = (0.01, 0.1, 0.5)
@@ -201,6 +215,7 @@ SELECTIVITY_DIR = BASE_DIR + "/results/selectivity"
 INDEX_COUNT_DIR = BASE_DIR + "/results/index_count"
 INDEX_UTILITY_DIR = BASE_DIR + "/results/index_utility"
 WRITE_RATIO_DIR = BASE_DIR + "/results/write_ratio"
+LAYOUT_DIR = BASE_DIR + "/results/layout"
 TREND_DIR = BASE_DIR + "/results/trend"
 
 ## INDEX USAGES
@@ -278,11 +293,23 @@ WRITE_RATIO_EXP_WRITE_RATIO_THRESHOLDS = [0.75, 0.9]
 WRITE_RATIO_EXP_PHASE_LENGTH = INDEX_COUNT_EXP_PHASE_LENGTH
 WRITE_RATIO_CSV = "write_ratio.csv"
 
+## LAYOUT EXPERIMENT
+LAYOUT_EXP_LAYOUT_MODES = [LAYOUT_MODE_ROW, LAYOUT_MODE_COLUMN, LAYOUT_MODE_HYBRID]
+LAYOUT_EXP_WRITE_RATIO = WRITE_RATIO_READ_HEAVY
+LAYOUT_EXP_QUERY_COMPLEXITY = QUERY_COMPLEXITY_MODERATE
+LAYOUT_EXP_SELECTIVITYS = [0.01, 0.9]
+LAYOUT_EXP_PROJECTIVITYS = [0.01, 0.9]
+LAYOUT_EXP_COLUMN_COUNT = 100 # COLUMN_COUNT * PROJECTIVITY should > 0
+LAYOUT_EXP_INDEX_USAGES = [INDEX_USAGE_AGGRESSIVE, INDEX_USAGE_NEVER]
+LAYOUT_EXP_PHASE_LENGTH=250
+LAYOUT_CSV = "layout.csv"
+
 ## TREND EXPERIMENT
 TREND_EXP_TUNING_COUNT = 300
 TREND_EXP_METHODS = ["Data", "Holt-Winters Forecast"]
 TREND_CSV = "trend.csv"
 TREND_LINE_COLORS = ( '#594F4F', '#45ADA8')
+
 
 ###################################################################################
 # UTILS
@@ -840,6 +867,55 @@ def create_write_ratio_line_chart(datasets):
 
     return fig
 
+def create_layout_bar_chart(datasets, desc=""):
+    fig = plot.figure()
+    ax1 = fig.add_subplot(111)
+
+    # X-AXIS
+    x_values = [LAYOUT_MODE_STRINGS[layout_mode] for layout_mode in LAYOUT_EXP_LAYOUT_MODES]
+    N = len(x_values)
+    ind = np.arange(N)
+    M = 2
+    margin = 0.1
+    width = (1.-2.*margin)/M
+    bars = [None] * N
+
+    for group in xrange(len(datasets)):
+        # GROUP
+        y_values = []
+        for line in  xrange(len(datasets[group])):
+            for col in  xrange(len(datasets[group][line])):
+                if col == 1:
+                    y_values.append(datasets[group][line][col])
+        LOG.info("group_data = %s", str(y_values))
+        bars[group] =  ax1.bar(ind + margin + (group * width),
+                               y_values, width,
+                               color=OPT_COLORS[group],
+                               hatch=OPT_PATTERNS[group],
+                               linewidth=BAR_LINEWIDTH)
+
+    # GRID
+    makeGrid(ax1)
+
+    # Y-AXIS
+    ax1.yaxis.set_major_locator(LinearLocator(YAXIS_TICKS))
+    ax1.minorticks_off()
+    ax1.set_ylabel("Execution time (ms)", fontproperties=LABEL_FP)
+    #ax1.set_yscale('log', basey=10)
+
+    # X-AXIS
+    ax1.set_xticks(np.arange(3) + 0.5)
+    ax1.set_xlabel("Storage Layout" if desc == "" else "Storage Layout(" + desc + ")", fontproperties=LABEL_FP)
+    ax1.set_xticklabels(x_values)
+    #ax1.set_xlim([XAXIS_MIN, XAXIS_MAX])
+
+    for label in ax1.get_yticklabels() :
+        label.set_fontproperties(TICK_FP)
+    for label in ax1.get_xticklabels() :
+        label.set_fontproperties(TICK_FP)
+
+    return fig
+
 def create_trend_line_chart(datasets):
     fig = plot.figure()
     ax1 = fig.add_subplot(111)
@@ -1130,6 +1206,27 @@ def trend_plot():
 
     saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH * 2.0, height=OPT_GRAPH_HEIGHT)        
 
+def layout_plot():
+    print('plotting layout')
+    for selectivity in LAYOUT_EXP_SELECTIVITYS:
+        for projectivity in LAYOUT_EXP_PROJECTIVITYS:
+            datasets = []
+            for index_usage in LAYOUT_EXP_INDEX_USAGES:
+                result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
+                                   str(selectivity), str(projectivity)]
+
+                result_file = get_result_file(LAYOUT_DIR, result_dir_list, LAYOUT_CSV)
+
+                dataset = loadDataFile(result_file)
+                datasets.append(dataset)
+
+            fig = create_layout_bar_chart(datasets, "sel=" + str(selectivity) + " proj=" + str(projectivity))
+
+            file_name = "layout" + '-' \
+                        "sel=" + str(selectivity) + "-" + "proj=" + \
+                        str(projectivity) + ".pdf"
+            saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH, height=OPT_GRAPH_HEIGHT)
+
 ###################################################################################
 # EVAL HELPERS
 ###################################################################################
@@ -1161,7 +1258,8 @@ def run_experiment(
     write_ratio=DEFAULT_WRITE_RATIO,
     index_count_threshold=DEFAULT_INDEX_COUNT_THRESHOLD,
     index_utility_threshold=DEFAULT_INDEX_UTILITY_THRESHOLD,
-    write_ratio_threshold=DEFAULT_WRITE_RATIO_THRESHOLD):
+    write_ratio_threshold=DEFAULT_WRITE_RATIO_THRESHOLD,
+    layout_mode=DEFAULT_LAYOUT_MODE):
 
     subprocess.call(["rm -f " + OUTPUT_FILE], shell=True)
     PROGRAM_OUTPUT_FILE_NAME = "program.txt"
@@ -1184,7 +1282,8 @@ def run_experiment(
                      "-w", str(write_ratio),
                      "-x", str(index_count_threshold),
                      "-y", str(index_utility_threshold),
-                     "-z", str(write_ratio_threshold)
+                     "-z", str(write_ratio_threshold),
+                     "-l", str(layout_mode)
                      ]
     arg_string = ' '.join(arg_list[1:])
     subprocess.call(arg_list,
@@ -1239,6 +1338,7 @@ def collect_stat(independent_variable,
             itr += 1
 
     result_file.close()
+
 
 ###################################################################################
 # EVAL
@@ -1535,6 +1635,51 @@ def write_ratio_eval():
                 # Collect stat
                 collect_aggregate_stat(write_ratio_threshold, result_file)
 
+def layout_eval():
+    # CLEAN UP RESULT DIR
+    clean_up_dir(LAYOUT_DIR)
+
+    phase_length = LAYOUT_EXP_PHASE_LENGTH
+
+    for layout_mode in LAYOUT_EXP_LAYOUT_MODES: # Different lines
+        print(MAJOR_STRING)
+
+        for index_usage in LAYOUT_EXP_INDEX_USAGES:
+            print(MINOR_STRING)
+
+            for projectivity in LAYOUT_EXP_PROJECTIVITYS:
+                print(MINOR_STRING)
+
+                for selectivity in LAYOUT_EXP_SELECTIVITYS:
+                    print(MINOR_STRING)
+
+                    print("> layout_mode: " + str(layout_mode) +
+                            " index_usage: " + str(index_usage) +
+                            " selectivity: " + str(selectivity) +
+                            " projectivity: " + str(projectivity))
+
+                    # Get result file
+                    result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
+                                       str(selectivity),
+                                       str(projectivity)]
+
+                    result_file = get_result_file(LAYOUT_DIR, result_dir_list, LAYOUT_CSV)
+
+                    # Run experiment
+                    start_time = time.time()
+                    run_experiment(
+                                   layout_mode=layout_mode,
+                                   index_usage=index_usage,
+                                   write_ratio=LAYOUT_EXP_WRITE_RATIO,
+                                   query_complexity=LAYOUT_EXP_QUERY_COMPLEXITY,
+                                   selectivity=selectivity,
+                                   projectivity=projectivity,
+                                   column_count=LAYOUT_EXP_COLUMN_COUNT)
+                    print("Executed in", time.time() - start_time, "s")
+
+                    # Collect stat
+                    collect_aggregate_stat(phase_length, result_file)
+
 ###################################################################################
 # MAIN
 ###################################################################################
@@ -1550,6 +1695,7 @@ if __name__ == '__main__':
     parser.add_argument("-f", "--index_count_eval", help="eval index_count", action='store_true')
     parser.add_argument("-g", "--index_utility_eval", help="eval index_utility", action='store_true')
     parser.add_argument("-i", "--write_ratio_eval", help="eval write_ratio", action='store_true')
+    parser.add_argument("-j", "--layout_eval", help="eval index tuning with query experiment", action="store_true")
 
     parser.add_argument("-m", "--query_plot", help="plot query", action='store_true')
     parser.add_argument("-n", "--convergence_plot", help="plot convergence", action='store_true')
@@ -1559,6 +1705,7 @@ if __name__ == '__main__':
     parser.add_argument("-r", "--index_count_plot", help="plot index_count", action='store_true')
     parser.add_argument("-s", "--index_utility_plot", help="plot index_utility", action='store_true')
     parser.add_argument("-t", "--write_ratio_plot", help="plot write_ratio", action='store_true')
+    parser.add_argument("-u", "--layout_plot", help="plot layout", action='store_true')
 
     parser.add_argument("-z", "--trend_plot", help="plot trend", action='store_true')
 
@@ -1590,6 +1737,9 @@ if __name__ == '__main__':
     if args.write_ratio_eval:
         write_ratio_eval()
 
+    if args.layout_eval:
+        layout_eval()
+
     ## PLOT
 
     if args.query_plot:
@@ -1615,10 +1765,13 @@ if __name__ == '__main__':
 
     if args.write_ratio_plot:
         write_ratio_plot()
-                
+
+    if args.layout_plot:
+        layout_plot()
+
     if args.trend_plot:
         trend_plot()
-        
+
     #create_legend_index_usage()
     #create_bar_legend_index_usage()
     create_legend_trend()
