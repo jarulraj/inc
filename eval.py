@@ -114,17 +114,21 @@ SDBENCH = PELOTON_BUILD_DIR + "/bin/sdbench"
 
 OUTPUT_FILE = "outputfile.summary"
 
-## INDEX USAGE TYPES
-INDEX_USAGE_AGGRESSIVE  = 1
-INDEX_USAGE_BALANCED = 2
-INDEX_USAGE_CONSERVATIVE = 3
-INDEX_USAGE_NEVER = 4
+## TUNER MODE TYPES
+TUNER_MODE_TYPE_AGG_FAST  = 1
+TUNER_MODE_TYPE_AGG_SLOW = 2
+TUNER_MODE_TYPE_CON_FAST = 3
+TUNER_MODE_TYPE_CON_SLOW = 4
+TUNER_MODE_TYPE_FULL = 5
+TUNER_MODE_TYPE_NEVER = 6
 
-INDEX_USAGE_STRINGS = {
-    1 : "aggressive",
-    2 : "balanced",
-    3 : "conservative",
-    4 : "never"
+TUNER_MODE_STRINGS = {
+    1 : "agg-fast",
+    2 : "agg-slow",
+    3 : "con-fast",
+    4 : "con-slow",
+    5 : "full",
+    6 : "never"
 }
 
 
@@ -172,7 +176,7 @@ WRITE_RATIO_STRINGS = {
     0.9 : "write-heavy"
 }
 
-DEFAULT_INDEX_USAGE = INDEX_USAGE_AGGRESSIVE
+DEFAULT_TUNER_MODE = TUNER_MODE_TYPE_AGG_FAST
 DEFAULT_QUERY_COMPLEXITY = QUERY_COMPLEXITY_SIMPLE
 DEFAULT_WRITE_COMPLEXITY = WRITE_COMPLEXITY_COMPLEX
 DEFAULT_SCALE_FACTOR = 100
@@ -218,12 +222,14 @@ WRITE_RATIO_DIR = BASE_DIR + "/results/write_ratio"
 LAYOUT_DIR = BASE_DIR + "/results/layout"
 TREND_DIR = BASE_DIR + "/results/trend"
 
-## INDEX USAGES
-INDEX_USAGES_ALL = [INDEX_USAGE_AGGRESSIVE, INDEX_USAGE_BALANCED, INDEX_USAGE_CONSERVATIVE, INDEX_USAGE_NEVER]
-INDEX_USAGES_SUBSET = INDEX_USAGES_ALL[:-1]
+## TUNER MODES
+TUNER_MODES_ALL = [TUNER_MODE_TYPE_AGG_FAST, TUNER_MODE_TYPE_AGG_SLOW, 
+                   TUNER_MODE_TYPE_CON_FAST, TUNER_MODE_TYPE_CON_SLOW,
+                   TUNER_MODE_TYPE_FULL, TUNER_MODE_TYPE_NEVER]
+TUNER_MODES_SUBSET = TUNER_MODES_ALL[:-1]
 
 ## QUERY EXPERIMENT
-QUERY_EXP_INDEX_USAGES = INDEX_USAGES_ALL
+QUERY_EXP_TUNER_MODES = TUNER_MODES_ALL
 QUERY_EXP_WRITE_RATIOS = [WRITE_RATIO_READ_ONLY, WRITE_RATIO_READ_HEAVY, WRITE_RATIO_BALANCED, WRITE_RATIO_WRITE_HEAVY]
 QUERY_EXP_QUERY_COMPLEXITYS = [QUERY_COMPLEXITY_SIMPLE, QUERY_COMPLEXITY_MODERATE, QUERY_COMPLEXITY_COMPLEX]
 QUERY_EXP_PHASE_LENGTHS = [50, 100, 250, 500]
@@ -233,14 +239,14 @@ QUERY_CSV = "query.csv"
 CONVERGENCE_EXP_CONVERGENCE_MODE = 1
 CONVERGENCE_EXP_VARIABILITY_THRESHOLD = 15
 CONVERGENCE_EXP_PHASE_LENGTH = 5
-CONVERGENCE_EXP_INDEX_USAGES = INDEX_USAGES_SUBSET
+CONVERGENCE_EXP_TUNER_MODES = TUNER_MODES_SUBSET
 CONVERGENCE_EXP_WRITE_RATIOS = QUERY_EXP_WRITE_RATIOS
 CONVERGENCE_EXP_QUERY_COMPLEXITYS = QUERY_EXP_QUERY_COMPLEXITYS
 CONVERGENCE_CSV = "convergence.csv"
 
 ##  TIME SERIES EXPERIMENT
 TIME_SERIES_EXP_PHASE_LENGTHS = [50]
-TIME_SERIES_EXP_INDEX_USAGES = INDEX_USAGES_ALL
+TIME_SERIES_EXP_TUNER_MODES = TUNER_MODES_ALL
 TIME_SERIES_EXP_INDEX_COUNT_THRESHOLD = 5
 TIME_SERIES_EXP_QUERY_COUNT = 3000
 TIME_SERIES_EXP_WRITE_RATIOS = [WRITE_RATIO_READ_HEAVY, WRITE_RATIO_WRITE_HEAVY]
@@ -253,14 +259,14 @@ TIME_SERIES_INDEX_CSV = "time_series_index.csv"
 
 ##  VARIABILITY EXPERIMENT
 VARIABILITY_EXP_PHASE_LENGTH = 50
-VARIABILITY_EXP_INDEX_USAGES = QUERY_EXP_INDEX_USAGES
+VARIABILITY_EXP_TUNER_MODES = QUERY_EXP_TUNER_MODES
 VARIABILITY_EXP_WRITE_RATIO = WRITE_RATIO_READ_ONLY
 VARIABILITY_EXP_QUERY_COMPLEXITYS = QUERY_EXP_QUERY_COMPLEXITYS
 VARIABILITY_EXP_VARIABILITY_THRESHOLDS = [5, 10, 15, 25]
 VARIABILITY_CSV = "variability.csv"
 
 ## SELECTIVITY EXPERIMENT
-SELECTIVITY_EXP_INDEX_USAGES = INDEX_USAGES_ALL
+SELECTIVITY_EXP_TUNER_MODES = TUNER_MODES_ALL
 SELECTIVITY_EXP_WRITE_RATIO = WRITE_RATIO_READ_ONLY
 SELECTIVITY_EXP_QUERY_COMPLEXITY = QUERY_COMPLEXITY_SIMPLE
 SELECTIVITY_EXP_PHASE_LENGTHS = QUERY_EXP_PHASE_LENGTHS
@@ -269,7 +275,7 @@ SELECTIVITY_EXP_SCALE_FACTORS = [100, 1000]
 SELECTIVITY_CSV = "selectivity.csv"
 
 ## INDEX_COUNT EXPERIMENT
-INDEX_COUNT_EXP_INDEX_USAGES = INDEX_USAGES_ALL
+INDEX_COUNT_EXP_TUNER_MODES = TUNER_MODES_ALL
 INDEX_COUNT_EXP_WRITE_RATIOS = [WRITE_RATIO_READ_ONLY, WRITE_RATIO_READ_HEAVY, WRITE_RATIO_BALANCED, WRITE_RATIO_WRITE_HEAVY]
 INDEX_COUNT_EXP_QUERY_COMPLEXITY = QUERY_COMPLEXITY_SIMPLE
 INDEX_COUNT_EXP_INDEX_COUNT_THRESHOLDS = [5, 10, 15, 20]
@@ -277,7 +283,7 @@ INDEX_COUNT_EXP_PHASE_LENGTH = 50
 INDEX_COUNT_CSV = "index_count.csv"
 
 ## INDEX_UTILITY EXPERIMENT
-INDEX_UTILITY_EXP_INDEX_USAGES = INDEX_USAGES_ALL
+INDEX_UTILITY_EXP_TUNER_MODES = TUNER_MODES_ALL
 INDEX_UTILITY_EXP_WRITE_RATIO = WRITE_RATIO_BALANCED
 INDEX_UTILITY_EXP_QUERY_COMPLEXITY = QUERY_COMPLEXITY_SIMPLE
 INDEX_UTILITY_EXP_INDEX_UTILITY_THRESHOLDS = [0, 0.25, 0.5, 0.75]
@@ -286,7 +292,7 @@ INDEX_UTILITY_EXP_PHASE_LENGTH = INDEX_COUNT_EXP_PHASE_LENGTH
 INDEX_UTILITY_CSV = "index_utility.csv"
 
 ## WRITE_RATIO EXPERIMENT
-WRITE_RATIO_EXP_INDEX_USAGES = INDEX_USAGES_ALL
+WRITE_RATIO_EXP_TUNER_MODES = TUNER_MODES_ALL
 WRITE_RATIO_EXP_WRITE_RATIOS = [WRITE_RATIO_READ_HEAVY, WRITE_RATIO_WRITE_HEAVY]
 WRITE_RATIO_EXP_QUERY_COMPLEXITY = QUERY_COMPLEXITY_SIMPLE
 WRITE_RATIO_EXP_WRITE_RATIO_THRESHOLDS = [0.75, 0.9]
@@ -300,7 +306,7 @@ LAYOUT_EXP_QUERY_COMPLEXITY = QUERY_COMPLEXITY_MODERATE
 LAYOUT_EXP_SELECTIVITYS = [0.01, 0.9]
 LAYOUT_EXP_PROJECTIVITYS = [0.01, 0.9]
 LAYOUT_EXP_COLUMN_COUNT = 100 # COLUMN_COUNT * PROJECTIVITY should > 0
-LAYOUT_EXP_INDEX_USAGES = [INDEX_USAGE_AGGRESSIVE, INDEX_USAGE_NEVER]
+LAYOUT_EXP_TUNER_MODES = [TUNER_MODE_TYPE_AGG_FAST, TUNER_MODE_TYPE_NEVER]
 LAYOUT_EXP_PHASE_LENGTH=250
 LAYOUT_CSV = "layout.csv"
 
@@ -393,11 +399,11 @@ def get_result_file(base_result_dir, result_dir_list, result_file_name):
 # LEGEND
 ###################################################################################
 
-def create_legend_index_usage():
+def create_legend_tuner_mode():
     fig = pylab.figure()
     ax1 = fig.add_subplot(111)
 
-    LEGEND_VALUES = INDEX_USAGE_STRINGS.values()
+    LEGEND_VALUES = TUNER_MODE_STRINGS.values()
 
     figlegend = pylab.figure(figsize=(15, 0.5))
     idx = 0
@@ -423,15 +429,15 @@ def create_legend_index_usage():
                      frameon=False, borderaxespad=0.0,
                      handleheight=1, handlelength=3)
 
-    figlegend.savefig('legend_index_usage.pdf')
+    figlegend.savefig('legend_tuner_mode.pdf')
     
-def create_bar_legend_index_usage():
+def create_bar_legend_tuner_mode():
     fig = pylab.figure()
     ax1 = fig.add_subplot(111)
 
     figlegend = pylab.figure(figsize=(13, 0.5))
 
-    LEGEND_VALUES = INDEX_USAGE_STRINGS.values()
+    LEGEND_VALUES = TUNER_MODE_STRINGS.values()
     LEGEND_VALUES = LEGEND_VALUES[:-1]
 
     num_items = len(LEGEND_VALUES) + 1
@@ -466,7 +472,7 @@ def create_bar_legend_index_usage():
                      frameon=False, borderaxespad=0.0,
                      handleheight=1, handlelength=4)
 
-    figlegend.savefig('legend_bar_index_usage.pdf')
+    figlegend.savefig('legend_bar_tuner_mode.pdf')
     fig = pylab.figure()
     ax1 = fig.add_subplot(111)
 
@@ -565,7 +571,7 @@ def create_convergence_bar_chart(datasets):
     # X-AXIS
     x_values = CONVERGENCE_EXP_WRITE_RATIOS
     N = len(x_values)
-    M = len(INDEX_USAGES_SUBSET)
+    M = len(TUNER_MODES_SUBSET)
     ind = np.arange(N)
     margin = 0.1
     width = (1.-2.*margin)/M
@@ -726,7 +732,7 @@ def create_index_count_bar_chart(datasets):
     x_values = [str(i) for i in INDEX_COUNT_EXP_INDEX_COUNT_THRESHOLDS]
     N = len(x_values)
     ind = np.arange(N)
-    M = len(INDEX_USAGES_ALL)
+    M = len(TUNER_MODES_ALL)
     margin = 0.1
     width = (1.-2.*margin)/M
     bars = [None] * N
@@ -977,15 +983,15 @@ def create_trend_line_chart(datasets):
 ###################################################################################
 
 # QUERY -- PLOT
-def query_plot():
+def reflex_plot():
 
     for query_complexity in QUERY_EXP_QUERY_COMPLEXITYS:
         for write_ratio in QUERY_EXP_WRITE_RATIOS:
 
             datasets = []
-            for index_usage in QUERY_EXP_INDEX_USAGES:
+            for tuner_mode in QUERY_EXP_TUNER_MODES:
                 # Get result file
-                result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
+                result_dir_list = [TUNER_MODE_STRINGS[tuner_mode],
                                    WRITE_RATIO_STRINGS[write_ratio],
                                    QUERY_COMPLEXITY_STRINGS[query_complexity]]
                 result_file = get_result_file(QUERY_DIR, result_dir_list, QUERY_CSV)
@@ -1007,9 +1013,9 @@ def convergence_plot():
     for query_complexity in CONVERGENCE_EXP_QUERY_COMPLEXITYS:
 
             datasets = []
-            for index_usage in CONVERGENCE_EXP_INDEX_USAGES:
+            for tuner_mode in CONVERGENCE_EXP_TUNER_MODES:
                 # Get result file
-                result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
+                result_dir_list = [TUNER_MODE_STRINGS[tuner_mode],
                                    QUERY_COMPLEXITY_STRINGS[query_complexity]]
                 result_file = get_result_file(CONVERGENCE_DIR, result_dir_list, CONVERGENCE_CSV)
 
@@ -1048,10 +1054,10 @@ def time_series_plot():
                     OUTPUT_STRING = "index"
 
                 datasets = []
-                for index_usage in TIME_SERIES_EXP_INDEX_USAGES:
+                for tuner_mode in TIME_SERIES_EXP_TUNER_MODES:
 
                         # Get result file
-                        result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
+                        result_dir_list = [TUNER_MODE_STRINGS[tuner_mode],
                                            WRITE_RATIO_STRINGS[write_ratio],
                                            QUERY_COMPLEXITY_STRINGS[query_complexity],
                                            str(phase_length)]
@@ -1077,10 +1083,10 @@ def variability_plot():
     for query_complexity in VARIABILITY_EXP_QUERY_COMPLEXITYS:
 
             datasets = []
-            for index_usage in VARIABILITY_EXP_INDEX_USAGES:
+            for tuner_mode in VARIABILITY_EXP_TUNER_MODES:
 
                 # Get result file
-                result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
+                result_dir_list = [TUNER_MODE_STRINGS[tuner_mode],
                                    QUERY_COMPLEXITY_STRINGS[query_complexity]]
                 result_file = get_result_file(VARIABILITY_DIR, result_dir_list, VARIABILITY_CSV)
 
@@ -1101,9 +1107,9 @@ def selectivity_plot():
         for scale_factor in SELECTIVITY_EXP_SCALE_FACTORS:
 
             datasets = []
-            for index_usage in SELECTIVITY_EXP_INDEX_USAGES:
+            for tuner_mode in SELECTIVITY_EXP_TUNER_MODES:
                 # Get result file
-                result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
+                result_dir_list = [TUNER_MODE_STRINGS[tuner_mode],
                                    str(selectivity),
                                    str(scale_factor)]
                 result_file = get_result_file(SELECTIVITY_DIR, result_dir_list, SELECTIVITY_CSV)
@@ -1125,9 +1131,9 @@ def index_count_plot():
     for write_ratio in INDEX_COUNT_EXP_WRITE_RATIOS:
 
         datasets = []
-        for index_usage in INDEX_COUNT_EXP_INDEX_USAGES:
+        for tuner_mode in INDEX_COUNT_EXP_TUNER_MODES:
             # Get result file
-            result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
+            result_dir_list = [TUNER_MODE_STRINGS[tuner_mode],
                                WRITE_RATIO_STRINGS[write_ratio]]
             result_file = get_result_file(INDEX_COUNT_DIR, result_dir_list, INDEX_COUNT_CSV)
 
@@ -1147,9 +1153,9 @@ def index_utility_plot():
     for index_count_threshold in INDEX_UTILITY_EXP_INDEX_COUNT_THRESHOLDS:
 
         datasets = []
-        for index_usage in INDEX_UTILITY_EXP_INDEX_USAGES:
+        for tuner_mode in INDEX_UTILITY_EXP_TUNER_MODES:
             # Get result file
-            result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
+            result_dir_list = [TUNER_MODE_STRINGS[tuner_mode],
                                str(index_count_threshold)]
             result_file = get_result_file(INDEX_UTILITY_DIR, result_dir_list, INDEX_UTILITY_CSV)
 
@@ -1169,9 +1175,9 @@ def write_ratio_plot():
     for write_ratio in WRITE_RATIO_EXP_WRITE_RATIOS:
 
         datasets = []
-        for index_usage in WRITE_RATIO_EXP_INDEX_USAGES:
+        for tuner_mode in WRITE_RATIO_EXP_TUNER_MODES:
             # Get result file
-            result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
+            result_dir_list = [TUNER_MODE_STRINGS[tuner_mode],
                                str(write_ratio)]
             result_file = get_result_file(WRITE_RATIO_DIR, result_dir_list, WRITE_RATIO_CSV)
 
@@ -1211,8 +1217,8 @@ def layout_plot():
     for selectivity in LAYOUT_EXP_SELECTIVITYS:
         for projectivity in LAYOUT_EXP_PROJECTIVITYS:
             datasets = []
-            for index_usage in LAYOUT_EXP_INDEX_USAGES:
-                result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
+            for tuner_mode in LAYOUT_EXP_TUNER_MODES:
+                result_dir_list = [TUNER_MODE_STRINGS[tuner_mode],
                                    str(selectivity), str(projectivity)]
 
                 result_file = get_result_file(LAYOUT_DIR, result_dir_list, LAYOUT_CSV)
@@ -1245,7 +1251,7 @@ def run_experiment(
     convergence_query_threshold=DEFAULT_CONVERGENCE_QUERY_THRESHOLD,
     query_complexity=DEFAULT_QUERY_COMPLEXITY,
     variability_threshold=DEFAULT_VARIABILITY_THRESHOLD,
-    index_usage=DEFAULT_INDEX_USAGE,
+    tuner_mode=DEFAULT_TUNER_MODE,
     tuples_per_tg=DEFAULT_TUPLES_PER_TG,
     scale_factor=DEFAULT_SCALE_FACTOR,
     convergence_mode=DEFAULT_CONVERGENCE_MODE,
@@ -1269,7 +1275,7 @@ def run_experiment(
                      "-b", str(convergence_query_threshold),
                      "-c", str(query_complexity),
                      "-d", str(variability_threshold),
-                     "-f", str(index_usage),
+                     "-e", str(tuner_mode),
                      "-g", str(tuples_per_tg),
                      "-k", str(scale_factor),
                      "-o", str(convergence_mode),
@@ -1345,7 +1351,7 @@ def collect_stat(independent_variable,
 ###################################################################################
 
 # QUERY -- EVAL
-def query_eval():
+def reflex_eval():
 
     # CLEAN UP RESULT DIR
     clean_up_dir(QUERY_DIR)
@@ -1357,22 +1363,22 @@ def query_eval():
         for write_ratio in QUERY_EXP_WRITE_RATIOS:
             print(MINOR_STRING)
 
-            for index_usage in QUERY_EXP_INDEX_USAGES:
+            for tuner_mode in QUERY_EXP_TUNER_MODES:
                 for phase_length in QUERY_EXP_PHASE_LENGTHS:
                     print("> query_complexity: " + str(query_complexity) +
                             " write_ratio: " + str(write_ratio) +
-                            " index_usage: " + str(index_usage) +
+                            " tuner_mode: " + str(tuner_mode) +
                             " phase_length: " + str(phase_length) )
 
                     # Get result file
-                    result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
+                    result_dir_list = [TUNER_MODE_STRINGS[tuner_mode],
                                        WRITE_RATIO_STRINGS[write_ratio],
                                        QUERY_COMPLEXITY_STRINGS[query_complexity]]
                     result_file = get_result_file(QUERY_DIR, result_dir_list, QUERY_CSV)
 
                     # Run experiment
                     run_experiment(phase_length=phase_length,
-                                   index_usage=index_usage,
+                                   tuner_mode=tuner_mode,
                                    write_ratio=write_ratio,
                                    query_complexity=query_complexity)
 
@@ -1389,22 +1395,22 @@ def convergence_eval():
     for query_complexity in CONVERGENCE_EXP_QUERY_COMPLEXITYS:
         print(MAJOR_STRING)
 
-        for index_usage in CONVERGENCE_EXP_INDEX_USAGES:
+        for tuner_mode in CONVERGENCE_EXP_TUNER_MODES:
             print(MINOR_STRING)
 
             for write_ratio in CONVERGENCE_EXP_WRITE_RATIOS:
                     print("> query_complexity: " + str(query_complexity) +
-                            " index_usage: " + str(index_usage) +
+                            " tuner_mode: " + str(tuner_mode) +
                             " write_ratio: " + str(write_ratio) )
 
                     # Get result file
-                    result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
+                    result_dir_list = [TUNER_MODE_STRINGS[tuner_mode],
                                        QUERY_COMPLEXITY_STRINGS[query_complexity]]
                     result_file = get_result_file(CONVERGENCE_DIR, result_dir_list, CONVERGENCE_CSV)
 
                     # Run experiment (only one phase)
                     run_experiment(phase_length=CONVERGENCE_EXP_PHASE_LENGTH,
-                                   index_usage=index_usage,
+                                   tuner_mode=tuner_mode,
                                    write_ratio=write_ratio,
                                    query_complexity=query_complexity,
                                    convergence_mode=CONVERGENCE_EXP_CONVERGENCE_MODE,
@@ -1432,14 +1438,14 @@ def time_series_eval():
         for phase_length in TIME_SERIES_EXP_PHASE_LENGTHS:
             print(MINOR_STRING)
 
-            for index_usage in TIME_SERIES_EXP_INDEX_USAGES:
+            for tuner_mode in TIME_SERIES_EXP_TUNER_MODES:
                     print("> query_complexity: " + str(query_complexity) +
                             " write_ratio: " + str(write_ratio) +
                             " phase_length: " + str(phase_length) +
-                            " index_usage: " + str(index_usage) )
+                            " tuner_mode: " + str(tuner_mode) )
 
                     # Get result file
-                    result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
+                    result_dir_list = [TUNER_MODE_STRINGS[tuner_mode],
                                        WRITE_RATIO_STRINGS[write_ratio],
                                        QUERY_COMPLEXITY_STRINGS[query_complexity],
                                        str(phase_length)]
@@ -1453,7 +1459,7 @@ def time_series_eval():
 
                     # Run experiment
                     run_experiment(phase_length=phase_length,
-                                   index_usage=index_usage,
+                                   tuner_mode=tuner_mode,
                                    write_ratio=write_ratio,
                                    index_count_threshold=TIME_SERIES_EXP_INDEX_COUNT_THRESHOLD,
                                    query_count=TIME_SERIES_EXP_QUERY_COUNT,
@@ -1475,23 +1481,23 @@ def variability_eval():
     for query_complexity in VARIABILITY_EXP_QUERY_COMPLEXITYS:
         print(MAJOR_STRING)
 
-        for index_usage in VARIABILITY_EXP_INDEX_USAGES:
+        for tuner_mode in VARIABILITY_EXP_TUNER_MODES:
             print(MINOR_STRING)
 
             for variability_threshold in VARIABILITY_EXP_VARIABILITY_THRESHOLDS:
                 print("> query_complexity: " + str(query_complexity) +
-                        " index_usage: " + str(index_usage) +
+                        " tuner_mode: " + str(tuner_mode) +
                         " variability_threshold: " + str(variability_threshold) )
 
 
                 # Get result file
-                result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
+                result_dir_list = [TUNER_MODE_STRINGS[tuner_mode],
                                    QUERY_COMPLEXITY_STRINGS[query_complexity]]
                 result_file = get_result_file(VARIABILITY_DIR, result_dir_list, VARIABILITY_CSV)
 
                 # Run experiment
                 run_experiment(phase_length=VARIABILITY_EXP_PHASE_LENGTH,
-                               index_usage=index_usage,
+                               tuner_mode=tuner_mode,
                                write_ratio=VARIABILITY_EXP_WRITE_RATIO,
                                query_complexity=query_complexity,
                                variability_threshold=variability_threshold)
@@ -1512,15 +1518,15 @@ def selectivity_eval():
         for scale_factor in SELECTIVITY_EXP_SCALE_FACTORS:
             print(MINOR_STRING)
 
-            for index_usage in SELECTIVITY_EXP_INDEX_USAGES:
+            for tuner_mode in SELECTIVITY_EXP_TUNER_MODES:
                 for phase_length in SELECTIVITY_EXP_PHASE_LENGTHS:
                     print("> selectivity: " + str(selectivity) +
                             " scale_factor: " + str(scale_factor) +
-                            " index_usage: " + str(index_usage) +
+                            " tuner_mode: " + str(tuner_mode) +
                             " phase_length: " + str(phase_length) )
 
                     # Get result file
-                    result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
+                    result_dir_list = [TUNER_MODE_STRINGS[tuner_mode],
                                        str(selectivity),
                                        str(scale_factor)]
                     result_file = get_result_file(SELECTIVITY_DIR, result_dir_list, SELECTIVITY_CSV)
@@ -1529,7 +1535,7 @@ def selectivity_eval():
                     run_experiment(write_ratio=SELECTIVITY_EXP_WRITE_RATIO,
                                    query_complexity=SELECTIVITY_EXP_QUERY_COMPLEXITY,
                                    phase_length=phase_length,
-                                   index_usage=index_usage,
+                                   tuner_mode=tuner_mode,
                                    selectivity=selectivity,
                                    scale_factor=scale_factor)
 
@@ -1546,23 +1552,23 @@ def index_count_eval():
     for write_ratio in INDEX_COUNT_EXP_WRITE_RATIOS:
         print(MAJOR_STRING)
 
-        for index_usage in INDEX_COUNT_EXP_INDEX_USAGES:
+        for tuner_mode in INDEX_COUNT_EXP_TUNER_MODES:
             print(MINOR_STRING)
 
             for index_count_threshold in INDEX_COUNT_EXP_INDEX_COUNT_THRESHOLDS:
                 print("> write_ratio: " + str(write_ratio) +
-                        " index_usage: " + str(index_usage) +
+                        " tuner_mode: " + str(tuner_mode) +
                         " index_count_threshold: " + str(index_count_threshold) )
 
                 # Get result file
-                result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
+                result_dir_list = [TUNER_MODE_STRINGS[tuner_mode],
                                    WRITE_RATIO_STRINGS[write_ratio]]
                 result_file = get_result_file(INDEX_COUNT_DIR, result_dir_list, INDEX_COUNT_CSV)
 
                 # Run experiment
                 run_experiment(query_complexity=INDEX_COUNT_EXP_QUERY_COMPLEXITY,
                                phase_length=INDEX_COUNT_EXP_PHASE_LENGTH,
-                               index_usage=index_usage,
+                               tuner_mode=tuner_mode,
                                write_ratio=write_ratio,
                                index_count_threshold=index_count_threshold)
 
@@ -1576,20 +1582,20 @@ def index_utility_eval():
     clean_up_dir(INDEX_UTILITY_DIR)
     print("INDEX UTILITY EVAL")
 
-    for index_usage in INDEX_UTILITY_EXP_INDEX_USAGES:
+    for tuner_mode in INDEX_UTILITY_EXP_TUNER_MODES:
         print(MAJOR_STRING)
 
         for index_count_threshold in INDEX_UTILITY_EXP_INDEX_COUNT_THRESHOLDS:
             print(MINOR_STRING)
 
             for index_utility_threshold in INDEX_UTILITY_EXP_INDEX_UTILITY_THRESHOLDS:
-                print("> index_usage: " + str(index_usage) +
+                print("> tuner_mode: " + str(tuner_mode) +
                         " index_count_threshold: " + str(index_count_threshold) +
                         " index_utility_threshold: " + str(index_utility_threshold) )
 
 
                 # Get result file
-                result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
+                result_dir_list = [TUNER_MODE_STRINGS[tuner_mode],
                                    str(index_count_threshold)]
                 result_file = get_result_file(INDEX_UTILITY_DIR, result_dir_list, INDEX_UTILITY_CSV)
 
@@ -1597,7 +1603,7 @@ def index_utility_eval():
                 run_experiment(query_complexity=INDEX_UTILITY_EXP_QUERY_COMPLEXITY,
                                phase_length=INDEX_UTILITY_EXP_PHASE_LENGTH,
                                write_ratio=INDEX_UTILITY_EXP_WRITE_RATIO,
-                               index_usage=index_usage,
+                               tuner_mode=tuner_mode,
                                index_count_threshold=index_count_threshold)
 
                 # Collect stat
@@ -1610,19 +1616,19 @@ def write_ratio_eval():
     clean_up_dir(WRITE_RATIO_DIR)
     print("WRITE RATIO EVAL")
 
-    for index_usage in WRITE_RATIO_EXP_INDEX_USAGES:
+    for tuner_mode in WRITE_RATIO_EXP_TUNER_MODES:
         print(MAJOR_STRING)
 
         for write_ratio in WRITE_RATIO_EXP_WRITE_RATIOS:
             print(MINOR_STRING)
 
             for write_ratio_threshold in WRITE_RATIO_EXP_WRITE_RATIO_THRESHOLDS:
-                print("> index_usage: " + str(index_usage) +
+                print("> tuner_mode: " + str(tuner_mode) +
                               " write_ratio: " + str(write_ratio) +
                               " write_ratio_threshold: " + str(write_ratio_threshold) )
 
                 # Get result file
-                result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
+                result_dir_list = [TUNER_MODE_STRINGS[tuner_mode],
                                    str(write_ratio)]
                 result_file = get_result_file(WRITE_RATIO_DIR, result_dir_list, WRITE_RATIO_CSV)
 
@@ -1630,7 +1636,7 @@ def write_ratio_eval():
                 run_experiment(query_complexity=WRITE_RATIO_EXP_QUERY_COMPLEXITY,
                                phase_length=WRITE_RATIO_EXP_PHASE_LENGTH,
                                write_ratio=write_ratio,
-                               index_usage=index_usage)
+                               tuner_mode=tuner_mode)
 
                 # Collect stat
                 collect_aggregate_stat(write_ratio_threshold, result_file)
@@ -1644,7 +1650,7 @@ def layout_eval():
     for layout_mode in LAYOUT_EXP_LAYOUT_MODES: # Different lines
         print(MAJOR_STRING)
 
-        for index_usage in LAYOUT_EXP_INDEX_USAGES:
+        for tuner_mode in LAYOUT_EXP_TUNER_MODES:
             print(MINOR_STRING)
 
             for projectivity in LAYOUT_EXP_PROJECTIVITYS:
@@ -1654,12 +1660,12 @@ def layout_eval():
                     print(MINOR_STRING)
 
                     print("> layout_mode: " + str(layout_mode) +
-                            " index_usage: " + str(index_usage) +
+                            " tuner_mode: " + str(tuner_mode) +
                             " selectivity: " + str(selectivity) +
                             " projectivity: " + str(projectivity))
 
                     # Get result file
-                    result_dir_list = [INDEX_USAGE_STRINGS[index_usage],
+                    result_dir_list = [TUNER_MODE_STRINGS[tuner_mode],
                                        str(selectivity),
                                        str(projectivity)]
 
@@ -1669,7 +1675,7 @@ def layout_eval():
                     start_time = time.time()
                     run_experiment(
                                    layout_mode=layout_mode,
-                                   index_usage=index_usage,
+                                   tuner_mode=tuner_mode,
                                    write_ratio=LAYOUT_EXP_WRITE_RATIO,
                                    query_complexity=LAYOUT_EXP_QUERY_COMPLEXITY,
                                    selectivity=selectivity,
@@ -1687,7 +1693,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Run Incremental Experiments')
 
-    parser.add_argument("-a", "--query_eval", help="eval query", action='store_true')
+    parser.add_argument("-a", "--reflex_eval", help="eval reflex", action='store_true')
     parser.add_argument("-b", "--convergence_eval", help="eval convergence", action='store_true')
     parser.add_argument("-c", "--time_series_eval", help="eval time series", action='store_true')
     parser.add_argument("-d", "--variability_eval", help="eval variability", action='store_true')
@@ -1697,7 +1703,7 @@ if __name__ == '__main__':
     parser.add_argument("-i", "--write_ratio_eval", help="eval write_ratio", action='store_true')
     parser.add_argument("-j", "--layout_eval", help="eval index tuning with query experiment", action="store_true")
 
-    parser.add_argument("-m", "--query_plot", help="plot query", action='store_true')
+    parser.add_argument("-m", "--reflex_plot", help="plot query", action='store_true')
     parser.add_argument("-n", "--convergence_plot", help="plot convergence", action='store_true')
     parser.add_argument("-o", "--time_series_plot", help="plot time series", action='store_true')
     parser.add_argument("-p", "--variability_plot", help="plot variability", action='store_true')
@@ -1713,8 +1719,8 @@ if __name__ == '__main__':
 
     ## EVAL
 
-    if args.query_eval:
-        query_eval()
+    if args.reflex_eval:
+        reflex_eval()
 
     if args.convergence_eval:
         convergence_eval()
@@ -1742,8 +1748,8 @@ if __name__ == '__main__':
 
     ## PLOT
 
-    if args.query_plot:
-        query_plot()
+    if args.reflex_plot:
+        reflex_plot()
 
     if args.convergence_plot:
         convergence_plot()
@@ -1772,6 +1778,6 @@ if __name__ == '__main__':
     if args.trend_plot:
         trend_plot()
 
-    #create_legend_index_usage()
-    #create_bar_legend_index_usage()
+    #create_legend_tuner_mode()
+    #create_bar_legend_tuner_mode()
     create_legend_trend()
