@@ -209,6 +209,7 @@ INDEX_COUNT_EXPERIMENT = 6
 INDEX_UTILITY_EXPERIMENT = 7
 WRITE_RATIO_EXPERIMENT = 8
 TREND_EXPERIMENT = 9
+MOTIVATION_EXPERIMENT = 10
 
 ## DIRS
 QUERY_DIR = BASE_DIR + "/results/query"
@@ -221,12 +222,15 @@ INDEX_UTILITY_DIR = BASE_DIR + "/results/index_utility"
 WRITE_RATIO_DIR = BASE_DIR + "/results/write_ratio"
 LAYOUT_DIR = BASE_DIR + "/results/layout"
 TREND_DIR = BASE_DIR + "/results/trend"
+MOTIVATION_DIR = BASE_DIR + "/results/motivation"
 
 ## TUNER MODES
 TUNER_MODES_ALL = [TUNER_MODE_TYPE_AGG_FAST, TUNER_MODE_TYPE_AGG_SLOW, 
                    TUNER_MODE_TYPE_CON_FAST, TUNER_MODE_TYPE_CON_SLOW,
                    TUNER_MODE_TYPE_FULL, TUNER_MODE_TYPE_NEVER]
 TUNER_MODES_SUBSET = TUNER_MODES_ALL[:-1]
+TUNER_MODES_MOTIVATION = [TUNER_MODE_TYPE_AGG_SLOW, TUNER_MODE_TYPE_FULL, 
+                          TUNER_MODE_TYPE_NEVER]
 
 ## QUERY EXPERIMENT
 QUERY_EXP_TUNER_MODES = TUNER_MODES_ALL
@@ -316,6 +320,18 @@ TREND_EXP_METHODS = ["Data", "Holt-Winters Forecast"]
 TREND_CSV = "trend.csv"
 TREND_LINE_COLORS = ( '#594F4F', '#45ADA8')
 
+## MOTIVATION EXPERIMENT
+MOTIVATION_EXP_PHASE_LENGTHS = [3000]
+MOTIVATION_EXP_TUNER_MODES = TUNER_MODES_MOTIVATION
+MOTIVATION_EXP_INDEX_COUNT_THRESHOLD = 5
+MOTIVATION_EXP_QUERY_COUNT = 3000
+MOTIVATION_EXP_WRITE_RATIOS = [WRITE_RATIO_READ_ONLY]
+MOTIVATION_EXP_QUERY_COMPLEXITY = QUERY_COMPLEXITY_SIMPLE
+MOTIVATION_LATENCY_MODE = 1
+MOTIVATION_INDEX_MODE = 2
+MOTIVATION_PLOT_MODES = [MOTIVATION_LATENCY_MODE, MOTIVATION_INDEX_MODE]
+MOTIVATION_LATENCY_CSV = "motivation_latency.csv"
+MOTIVATION_INDEX_CSV = "motivation_index.csv"
 
 ###################################################################################
 # UTILS
@@ -411,8 +427,8 @@ def create_legend_tuner_mode():
     data = [1]
     x_values = [1]
 
-    TITLE = "ADAPTATION MODES:"
-    LABELS = [TITLE, "AGGRESSIVE", "BALANCED", "CONSERVATIVE", "DISABLED"]
+    TITLE = "TUNER MODES:"
+    LABELS = [TITLE, "AGG-FAST", "AGG-SLOW", "CON-FAST", "CON-SLOW", "FULL", "NEVER"]
 
     lines[idx], = ax1.plot(x_values, data, linewidth = 0)
     idx = 1
@@ -424,7 +440,7 @@ def create_legend_tuner_mode():
 
     # LEGEND
     figlegend.legend(lines, LABELS, prop=LEGEND_FP,
-                     loc=1, ncol=5,
+                     loc=1, ncol=7,
                      mode="expand", shadow=OPT_LEGEND_SHADOW,
                      frameon=False, borderaxespad=0.0,
                      handleheight=1, handlelength=3)
@@ -978,6 +994,69 @@ def create_trend_line_chart(datasets):
 
     return fig
 
+def create_motivation_line_chart(datasets, plot_mode):
+    fig = plot.figure()
+    ax1 = fig.add_subplot(111)
+
+    # X-AXIS
+    x_values = [str(i) for i in range(1, MOTIVATION_EXP_QUERY_COUNT + 1)]
+    N = len(x_values)
+    ind = np.arange(N)
+    
+    MOTIVATION_OPT_LINE_WIDTH = 3.0
+    MOTIVATION_OPT_MARKER_SIZE = 5.0
+    MOTIVATION_OPT_MARKER_FREQUENCY = MOTIVATION_EXP_QUERY_COUNT/10
+
+    idx = 0
+    for group in xrange(len(datasets)):
+        # GROUP
+        y_values = []
+        for line in  xrange(len(datasets[group])):
+            for col in  xrange(len(datasets[group][line])):
+                if col == 1:
+                    y_values.append(datasets[group][line][col])
+        LOG.info("group_data = %s", str(y_values))
+        ax1.plot(ind + 0.5, y_values,
+                 color=OPT_COLORS[idx],
+                 linewidth=MOTIVATION_OPT_LINE_WIDTH,
+                 marker=OPT_MARKERS[idx],
+                 markersize=MOTIVATION_OPT_MARKER_SIZE,
+                 markevery=MOTIVATION_OPT_MARKER_FREQUENCY,
+                 label=str(group))
+        idx = idx + 1
+
+    # GRID
+    makeGrid(ax1)
+
+    # Y-AXIS
+    ax1.yaxis.set_major_locator(LinearLocator(YAXIS_TICKS))
+    ax1.minorticks_off()
+
+    # LATENCY
+    if plot_mode == MOTIVATION_LATENCY_MODE:
+        ax1.set_ylabel("Query latency (ms)", fontproperties=LABEL_FP)
+    # INDEX
+    elif plot_mode == MOTIVATION_INDEX_MODE:
+        ax1.set_ylabel("Index count", fontproperties=LABEL_FP)
+
+    #ax1.set_yscale('log', basey=10)
+
+    # X-AXIS
+    #ax1.set_xticks(ind + 0.5)
+    major_ticks = np.arange(0, MOTIVATION_EXP_QUERY_COUNT + 1, 
+                            MOTIVATION_OPT_MARKER_FREQUENCY)
+    ax1.set_xticks(major_ticks)
+    ax1.set_xlabel("Query Sequence", fontproperties=LABEL_FP)
+    #ax1.set_xticklabels(x_values)
+
+    for label in ax1.get_yticklabels() :
+        label.set_fontproperties(TICK_FP)
+    for label in ax1.get_xticklabels() :
+        label.set_fontproperties(TICK_FP)
+
+    return fig
+
+
 ###################################################################################
 # PLOT HELPERS
 ###################################################################################
@@ -1295,6 +1374,54 @@ def run_experiment(
     subprocess.call(arg_list,
                     stdout = PROGRAM_OUTPUT_FILE)
     subprocess.call(["rm -f " + PROGRAM_OUTPUT_FILE_NAME], shell=True)
+
+# MOTIVATION -- PLOT
+def motivation_plot():
+
+    num_graphs = len(MOTIVATION_EXP_WRITE_RATIOS)
+
+    for graph_itr in range(0, num_graphs):
+
+        # Pick parameters for time series graph set
+        query_complexity = MOTIVATION_EXP_QUERY_COMPLEXITY
+        write_ratio = MOTIVATION_EXP_WRITE_RATIOS[graph_itr]
+
+        for phase_length in MOTIVATION_EXP_PHASE_LENGTHS:
+
+            for plot_mode in MOTIVATION_PLOT_MODES:
+
+                # LATENCY
+                if plot_mode == MOTIVATION_LATENCY_MODE:
+                    CSV_FILE = MOTIVATION_LATENCY_CSV
+                    OUTPUT_STRING = "latency"
+                # INDEX COUNT
+                elif plot_mode == MOTIVATION_INDEX_MODE:
+                    CSV_FILE = MOTIVATION_INDEX_CSV
+                    OUTPUT_STRING = "index"
+
+                datasets = []
+                for tuner_mode in MOTIVATION_EXP_TUNER_MODES:
+
+                        # Get result file
+                        result_dir_list = [TUNER_MODE_STRINGS[tuner_mode],
+                                           WRITE_RATIO_STRINGS[write_ratio],
+                                           QUERY_COMPLEXITY_STRINGS[query_complexity],
+                                           str(phase_length)]
+                        result_file = get_result_file(MOTIVATION_DIR,
+                                                      result_dir_list,
+                                                      CSV_FILE)
+
+                        dataset = loadDataFile(result_file)
+                        datasets.append(dataset)
+
+                fig = create_motivation_line_chart(datasets, plot_mode)
+
+                file_name = "motivation" + "-" + OUTPUT_STRING + "-" + \
+                            QUERY_COMPLEXITY_STRINGS[query_complexity] + "-" + \
+                            WRITE_RATIO_STRINGS[write_ratio] + "-" + \
+                            str(phase_length) + ".pdf"
+
+                saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH * 3.0, height=OPT_GRAPH_HEIGHT)
 
 
 ###################################################################################
@@ -1686,6 +1813,59 @@ def layout_eval():
                     # Collect stat
                     collect_aggregate_stat(phase_length, result_file)
 
+# MOTIVATION -- EVAL
+def motivation_eval():
+
+    # CLEAN UP RESULT DIR
+    clean_up_dir(MOTIVATION_DIR)
+    print("MOTIVATION EVAL")
+
+    num_graphs = len(MOTIVATION_EXP_WRITE_RATIOS)
+
+    for graph_itr in range(0, num_graphs):
+        print(MAJOR_STRING)
+
+        # Pick parameters for time series graph set
+        query_complexity = MOTIVATION_EXP_QUERY_COMPLEXITY
+        write_ratio = MOTIVATION_EXP_WRITE_RATIOS[graph_itr]
+
+        for phase_length in MOTIVATION_EXP_PHASE_LENGTHS:
+            print(MINOR_STRING)
+
+            for tuner_mode in MOTIVATION_EXP_TUNER_MODES:
+                    print("> query_complexity: " + str(query_complexity) +
+                            " write_ratio: " + str(write_ratio) +
+                            " phase_length: " + str(phase_length) +
+                            " tuner_mode: " + str(tuner_mode) )
+
+                    # Get result file
+                    result_dir_list = [TUNER_MODE_STRINGS[tuner_mode],
+                                       WRITE_RATIO_STRINGS[write_ratio],
+                                       QUERY_COMPLEXITY_STRINGS[query_complexity],
+                                       str(phase_length)]
+
+                    latency_result_file = get_result_file(MOTIVATION_DIR,
+                                                          result_dir_list,
+                                                          MOTIVATION_LATENCY_CSV)
+                    index_result_file = get_result_file(MOTIVATION_DIR,
+                                                        result_dir_list,
+                                                        MOTIVATION_INDEX_CSV)
+
+                    # Run experiment
+                    run_experiment(phase_length=phase_length,
+                                   tuner_mode=tuner_mode,
+                                   write_ratio=write_ratio,
+                                   index_count_threshold=MOTIVATION_EXP_INDEX_COUNT_THRESHOLD,
+                                   query_count=MOTIVATION_EXP_QUERY_COUNT,
+                                   query_complexity=query_complexity)
+
+                    # Collect stat
+                    stat_offset = -1
+                    collect_stat(DEFAULT_QUERY_COUNT, latency_result_file, stat_offset)
+                    stat_offset = -2
+                    collect_stat(DEFAULT_QUERY_COUNT, index_result_file, stat_offset)
+
+
 ###################################################################################
 # MAIN
 ###################################################################################
@@ -1701,7 +1881,8 @@ if __name__ == '__main__':
     parser.add_argument("-f", "--index_count_eval", help="eval index_count", action='store_true')
     parser.add_argument("-g", "--index_utility_eval", help="eval index_utility", action='store_true')
     parser.add_argument("-i", "--write_ratio_eval", help="eval write_ratio", action='store_true')
-    parser.add_argument("-j", "--layout_eval", help="eval index tuning with query experiment", action="store_true")
+    parser.add_argument("-j", "--layout_eval", help="eval layout", action="store_true")
+    parser.add_argument("-k", "--motivation_eval", help="eval motivation", action="store_true")
 
     parser.add_argument("-m", "--reflex_plot", help="plot query", action='store_true')
     parser.add_argument("-n", "--convergence_plot", help="plot convergence", action='store_true')
@@ -1712,6 +1893,7 @@ if __name__ == '__main__':
     parser.add_argument("-s", "--index_utility_plot", help="plot index_utility", action='store_true')
     parser.add_argument("-t", "--write_ratio_plot", help="plot write_ratio", action='store_true')
     parser.add_argument("-u", "--layout_plot", help="plot layout", action='store_true')
+    parser.add_argument("-v", "--motivation_plot", help="plot motivation", action='store_true')
 
     parser.add_argument("-z", "--trend_plot", help="plot trend", action='store_true')
 
@@ -1746,6 +1928,9 @@ if __name__ == '__main__':
     if args.layout_eval:
         layout_eval()
 
+    if args.motivation_eval:
+        motivation_eval()
+
     ## PLOT
 
     if args.reflex_plot:
@@ -1777,6 +1962,10 @@ if __name__ == '__main__':
 
     if args.trend_plot:
         trend_plot()
+
+    if args.motivation_plot:
+        motivation_plot()
+
 
     #create_legend_tuner_mode()
     #create_bar_legend_tuner_mode()
