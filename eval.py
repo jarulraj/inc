@@ -145,6 +145,8 @@ QUERY_COMPLEXITY_SIMPLE   = 1
 QUERY_COMPLEXITY_MODERATE = 2
 QUERY_COMPLEXITY_COMPLEX  = 3
 
+QUERY_COMPLEXITYS_ALL = [QUERY_COMPLEXITY_SIMPLE, QUERY_COMPLEXITY_MODERATE, QUERY_COMPLEXITY_COMPLEX]
+
 QUERY_COMPLEXITY_STRINGS = {
     1 : "simple",
     2 : "moderate",
@@ -165,6 +167,9 @@ WRITE_RATIO_READ_ONLY   = 0.0
 WRITE_RATIO_READ_HEAVY  = 0.1
 WRITE_RATIO_BALANCED    = 0.5
 WRITE_RATIO_WRITE_HEAVY = 0.9
+
+WRITE_RATIOS_ALL = [WRITE_RATIO_READ_ONLY, WRITE_RATIO_READ_HEAVY, 
+                    WRITE_RATIO_BALANCED, WRITE_RATIO_WRITE_HEAVY]
 
 WRITE_RATIO_STRINGS = {
     0.0 : "read-only",
@@ -232,10 +237,10 @@ INDEX_USAGE_TYPES_MOTIVATION = [INDEX_USAGE_TYPE_PARTIAL_FAST, INDEX_USAGE_TYPE_
 
 ## QUERY EXPERIMENT
 REFLEX_EXP_INDEX_USAGE_TYPES = INDEX_USAGE_TYPES_ALL
-REFLEX_EXP_WRITE_RATIOS = [WRITE_RATIO_READ_ONLY]
-REFLEX_EXP_QUERY_COMPLEXITYS = [QUERY_COMPLEXITY_SIMPLE]
+REFLEX_EXP_WRITE_RATIOS = WRITE_RATIOS_ALL
+REFLEX_EXP_QUERY_COMPLEXITYS = QUERY_COMPLEXITYS_ALL
 REFLEX_EXP_PHASE_LENGTHS = [50, 100, 250, 500]
-QUERY_CSV = "query.csv"
+REFLEX_CSV = "reflex.csv"
 
 ##  CONVERGENCE EXPERIMENT
 CONVERGENCE_EXP_CONVERGENCE_MODE = 1
@@ -1068,7 +1073,7 @@ def reflex_plot():
                 result_dir_list = [INDEX_USAGE_TYPES_STRINGS[index_usage_type],
                                    WRITE_RATIO_STRINGS[write_ratio],
                                    QUERY_COMPLEXITY_STRINGS[query_complexity]]
-                result_file = get_result_file(QUERY_DIR, result_dir_list, QUERY_CSV)
+                result_file = get_result_file(QUERY_DIR, result_dir_list, REFLEX_CSV)
 
                 dataset = loadDataFile(result_file)
                 datasets.append(dataset)
@@ -1501,7 +1506,7 @@ def reflex_eval():
                     result_dir_list = [INDEX_USAGE_TYPES_STRINGS[index_usage_type],
                                        WRITE_RATIO_STRINGS[write_ratio],
                                        QUERY_COMPLEXITY_STRINGS[query_complexity]]
-                    result_file = get_result_file(QUERY_DIR, result_dir_list, QUERY_CSV)
+                    result_file = get_result_file(QUERY_DIR, result_dir_list, REFLEX_CSV)
 
                     # Run experiment
                     run_experiment(phase_length=phase_length,
