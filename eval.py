@@ -189,8 +189,8 @@ DEFAULT_INDEX_UTILITY_THRESHOLD = 0.25
 DEFAULT_WRITE_RATIO_THRESHOLD = 1.0
 DEFAULT_LAYOUT_MODE = LAYOUT_MODE_ROW
 DEFAULT_ANALYZE_SAMPLE_COUNT_THRESHOLD = 50
-DEFAULT_DURATION_BETWEEN_PAUSES = 10000
-DEFAULT_DURATION_OF_PAUSE = 10000
+DEFAULT_ITERATIONS_BETWEEN_PAUSES = 5
+DEFAULT_DURATION_OF_PAUSE = 1000
 
 SELECTIVITY = (0.2, 0.4, 0.6, 0.8, 1.0)
 PROJECTIVITY = (0.01, 0.1, 0.5)
@@ -1326,7 +1326,7 @@ def run_experiment(
     index_usage_type=DEFAULT_INDEX_USAGE_TYPE,
     analyze_sample_count_threshold=DEFAULT_ANALYZE_SAMPLE_COUNT_THRESHOLD,
     tuples_per_tg=DEFAULT_TUPLES_PER_TG,
-    duration_between_pauses=DEFAULT_DURATION_BETWEEN_PAUSES,
+    iterations_between_pauses=DEFAULT_ITERATIONS_BETWEEN_PAUSES,
     duration_of_pause=DEFAULT_DURATION_OF_PAUSE,
     scale_factor=DEFAULT_SCALE_FACTOR,
     convergence_mode=DEFAULT_CONVERGENCE_MODE,
@@ -1353,7 +1353,7 @@ def run_experiment(
                      "-e", str(index_usage_type),
                      "-f", str(analyze_sample_count_threshold),
                      "-g", str(tuples_per_tg),
-                     "-i", str(duration_between_pauses),
+                     "-i", str(iterations_between_pauses),
                      "-j", str(duration_of_pause),
                      "-k", str(scale_factor),
                      "-o", str(convergence_mode),
