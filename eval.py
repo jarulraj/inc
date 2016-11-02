@@ -1986,8 +1986,6 @@ if __name__ == '__main__':
     if args.motivation_plot:
         motivation_plot()
 
-    create_legend_layout()
-
     #create_legend_index_usage_type()
     #create_bar_legend_index_usage_type()
     #create_legend_trend()
