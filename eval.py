@@ -201,6 +201,7 @@ DEFAULT_ANALYZE_SAMPLE_COUNT_THRESHOLD = 10
 DEFAULT_DURATION_BETWEEN_PAUSES = 5000
 DEFAULT_DURATION_OF_PAUSE = 2000
 DEFAULT_TILE_GROUPS_INDEXED_PER_ITERATION = 10
+DEFAULT_DO_AGGREGATE = True
 
 SELECTIVITY = (0.2, 0.4, 0.6, 0.8, 1.0)
 PROJECTIVITY = (0.01, 0.1, 0.5)
@@ -319,6 +320,7 @@ LAYOUT_EXP_SETTINGS = [
 LAYOUT_EXP_PHASE_LENGTH = 100
 LAYOUT_EXP_QUERY_COUNT = 400
 LAYOUT_EXP_SCALE_FACTOR = 200
+LAYOUT_EXP_DO_AGGREGATE = False
 
 LAYOUT_CSV = "layout.csv"
 
@@ -1367,7 +1369,8 @@ def run_experiment(
     index_count_threshold=DEFAULT_INDEX_COUNT_THRESHOLD,
     index_utility_threshold=DEFAULT_INDEX_UTILITY_THRESHOLD,
     write_ratio_threshold=DEFAULT_WRITE_RATIO_THRESHOLD,
-    layout_mode=DEFAULT_LAYOUT_MODE):
+    layout_mode=DEFAULT_LAYOUT_MODE,
+    do_aggregate=DEFAULT_DO_AGGREGATE):
 
     subprocess.call(["rm -f " + OUTPUT_FILE], shell=True)
     PROGRAM_OUTPUT_FILE_NAME = "program.txt"
@@ -1380,13 +1383,14 @@ def run_experiment(
                      "-e", str(index_usage_type),
                      "-f", str(analyze_sample_count_threshold),
                      "-g", str(tuples_per_tg),
-                     # "-i", str(duration_between_pauses),
-                     # "-j", str(duration_of_pause),
+                     "-i", str(duration_between_pauses),
+                     "-j", str(duration_of_pause),
                      "-k", str(scale_factor),
                      "-m", str(tile_groups_indexed_per_iteration),
                      "-o", str(convergence_mode),
                      "-p", str(projectivity),
                      "-q", str(query_count),
+                     "-r", str(do_aggregate),
                      "-s", str(selectivity),
                      "-t", str(phase_length),
                      "-v", str(verbosity),
