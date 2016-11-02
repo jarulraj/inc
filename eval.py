@@ -173,7 +173,7 @@ DEFAULT_INDEX_USAGE_TYPE = INDEX_USAGE_TYPE_PARTIAL
 DEFAULT_QUERY_COMPLEXITY = QUERY_COMPLEXITY_SIMPLE
 DEFAULT_WRITE_COMPLEXITY = WRITE_COMPLEXITY_COMPLEX
 DEFAULT_SCALE_FACTOR = 100
-DEFAULT_COLUMN_COUNT = 20
+DEFAULT_COLUMN_COUNT = 200
 DEFAULT_WRITE_RATIO = WRITE_RATIO_READ_ONLY
 DEFAULT_TUPLES_PER_TG = 1000
 DEFAULT_PHASE_LENGTH = 100
@@ -189,8 +189,8 @@ DEFAULT_INDEX_UTILITY_THRESHOLD = 0.25
 DEFAULT_WRITE_RATIO_THRESHOLD = 1.0
 DEFAULT_LAYOUT_MODE = LAYOUT_MODE_ROW
 DEFAULT_ANALYZE_SAMPLE_COUNT_THRESHOLD = 50
-DEFAULT_DURATION_BETWEEN_PAUSES = 5
-DEFAULT_DURATION_OF_PAUSE = 1000
+DEFAULT_DURATION_BETWEEN_PAUSES = 5000
+DEFAULT_DURATION_OF_PAUSE = 2000
 
 SELECTIVITY = (0.2, 0.4, 0.6, 0.8, 1.0)
 PROJECTIVITY = (0.01, 0.1, 0.5)
@@ -226,24 +226,24 @@ INDEX_USAGE_TYPES_PARTIAL = [INDEX_USAGE_TYPE_PARTIAL]
 INDEX_USAGE_TYPES_MOTIVATION = [INDEX_USAGE_TYPE_PARTIAL, INDEX_USAGE_TYPE_FULL, INDEX_USAGE_TYPE_NEVER]
 
 ## QUERY EXPERIMENT
-QUERY_EXP_TUNER_MODES = INDEX_USAGE_TYPES_ALL
-QUERY_EXP_WRITE_RATIOS = [WRITE_RATIO_READ_ONLY]
-QUERY_EXP_QUERY_COMPLEXITYS = [QUERY_COMPLEXITY_SIMPLE]
-QUERY_EXP_PHASE_LENGTHS = [50, 100, 250, 500]
+REFLEX_EXP_INDEX_USAGE_TYPES = INDEX_USAGE_TYPES_ALL
+REFLEX_EXP_WRITE_RATIOS = [WRITE_RATIO_READ_ONLY]
+REFLEX_EXP_QUERY_COMPLEXITYS = [QUERY_COMPLEXITY_SIMPLE]
+REFLEX_EXP_PHASE_LENGTHS = [50, 100, 250, 500]
 QUERY_CSV = "query.csv"
 
 ##  CONVERGENCE EXPERIMENT
 CONVERGENCE_EXP_CONVERGENCE_MODE = 1
 CONVERGENCE_EXP_VARIABILITY_THRESHOLD = 15
 CONVERGENCE_EXP_PHASE_LENGTH = 5
-CONVERGENCE_EXP_TUNER_MODES = INDEX_USAGE_TYPES_PARTIAL
-CONVERGENCE_EXP_WRITE_RATIOS = QUERY_EXP_WRITE_RATIOS
-CONVERGENCE_EXP_QUERY_COMPLEXITYS = QUERY_EXP_QUERY_COMPLEXITYS
+CONVERGENCE_EXP_INDEX_USAGE_TYPES = INDEX_USAGE_TYPES_PARTIAL
+CONVERGENCE_EXP_WRITE_RATIOS = REFLEX_EXP_WRITE_RATIOS
+CONVERGENCE_EXP_QUERY_COMPLEXITYS = REFLEX_EXP_QUERY_COMPLEXITYS
 CONVERGENCE_CSV = "convergence.csv"
 
 ##  TIME SERIES EXPERIMENT
 TIME_SERIES_EXP_PHASE_LENGTHS = [50]
-TIME_SERIES_EXP_TUNER_MODES = INDEX_USAGE_TYPES_ALL
+TIME_SERIES_EXP_INDEX_USAGE_TYPES = INDEX_USAGE_TYPES_ALL
 TIME_SERIES_EXP_INDEX_COUNT_THRESHOLD = 5
 TIME_SERIES_EXP_QUERY_COUNT = 3000
 TIME_SERIES_EXP_WRITE_RATIOS = [WRITE_RATIO_READ_HEAVY, WRITE_RATIO_WRITE_HEAVY]
@@ -256,23 +256,23 @@ TIME_SERIES_INDEX_CSV = "time_series_index.csv"
 
 ##  VARIABILITY EXPERIMENT
 VARIABILITY_EXP_PHASE_LENGTH = 50
-VARIABILITY_EXP_TUNER_MODES = QUERY_EXP_TUNER_MODES
+VARIABILITY_EXP_INDEX_USAGE_TYPES = REFLEX_EXP_INDEX_USAGE_TYPES
 VARIABILITY_EXP_WRITE_RATIO = WRITE_RATIO_READ_ONLY
-VARIABILITY_EXP_QUERY_COMPLEXITYS = QUERY_EXP_QUERY_COMPLEXITYS
+VARIABILITY_EXP_QUERY_COMPLEXITYS = REFLEX_EXP_QUERY_COMPLEXITYS
 VARIABILITY_EXP_VARIABILITY_THRESHOLDS = [5, 10, 15, 25]
 VARIABILITY_CSV = "variability.csv"
 
 ## SELECTIVITY EXPERIMENT
-SELECTIVITY_EXP_TUNER_MODES = INDEX_USAGE_TYPES_ALL
+SELECTIVITY_EXP_INDEX_USAGE_TYPES = INDEX_USAGE_TYPES_ALL
 SELECTIVITY_EXP_WRITE_RATIO = WRITE_RATIO_READ_ONLY
 SELECTIVITY_EXP_QUERY_COMPLEXITY = QUERY_COMPLEXITY_SIMPLE
-SELECTIVITY_EXP_PHASE_LENGTHS = QUERY_EXP_PHASE_LENGTHS
+SELECTIVITY_EXP_PHASE_LENGTHS = REFLEX_EXP_PHASE_LENGTHS
 SELECTIVITY_EXP_SELECTIVITYS = [0.1, 0.01]
 SELECTIVITY_EXP_SCALE_FACTORS = [100, 1000]
 SELECTIVITY_CSV = "selectivity.csv"
 
 ## INDEX_COUNT EXPERIMENT
-INDEX_COUNT_EXP_TUNER_MODES = INDEX_USAGE_TYPES_ALL
+INDEX_COUNT_EXP_INDEX_USAGE_TYPES = INDEX_USAGE_TYPES_ALL
 INDEX_COUNT_EXP_WRITE_RATIOS = [WRITE_RATIO_READ_ONLY, WRITE_RATIO_READ_HEAVY, WRITE_RATIO_BALANCED, WRITE_RATIO_WRITE_HEAVY]
 INDEX_COUNT_EXP_QUERY_COMPLEXITY = QUERY_COMPLEXITY_SIMPLE
 INDEX_COUNT_EXP_INDEX_COUNT_THRESHOLDS = [5, 10, 15, 20]
@@ -280,7 +280,7 @@ INDEX_COUNT_EXP_PHASE_LENGTH = 50
 INDEX_COUNT_CSV = "index_count.csv"
 
 ## INDEX_UTILITY EXPERIMENT
-INDEX_UTILITY_EXP_TUNER_MODES = INDEX_USAGE_TYPES_ALL
+INDEX_UTILITY_EXP_INDEX_USAGE_TYPES = INDEX_USAGE_TYPES_ALL
 INDEX_UTILITY_EXP_WRITE_RATIO = WRITE_RATIO_BALANCED
 INDEX_UTILITY_EXP_QUERY_COMPLEXITY = QUERY_COMPLEXITY_SIMPLE
 INDEX_UTILITY_EXP_INDEX_UTILITY_THRESHOLDS = [0, 0.25, 0.5, 0.75]
@@ -289,7 +289,7 @@ INDEX_UTILITY_EXP_PHASE_LENGTH = INDEX_COUNT_EXP_PHASE_LENGTH
 INDEX_UTILITY_CSV = "index_utility.csv"
 
 ## WRITE_RATIO EXPERIMENT
-WRITE_RATIO_EXP_TUNER_MODES = INDEX_USAGE_TYPES_ALL
+WRITE_RATIO_EXP_INDEX_USAGE_TYPES = INDEX_USAGE_TYPES_ALL
 WRITE_RATIO_EXP_WRITE_RATIOS = [WRITE_RATIO_READ_HEAVY, WRITE_RATIO_WRITE_HEAVY]
 WRITE_RATIO_EXP_QUERY_COMPLEXITY = QUERY_COMPLEXITY_SIMPLE
 WRITE_RATIO_EXP_WRITE_RATIO_THRESHOLDS = [0.75, 0.9]
@@ -303,7 +303,7 @@ LAYOUT_EXP_QUERY_COMPLEXITY = QUERY_COMPLEXITY_MODERATE
 LAYOUT_EXP_SELECTIVITYS = [0.01, 0.9]
 LAYOUT_EXP_PROJECTIVITYS = [0.01, 0.9]
 LAYOUT_EXP_COLUMN_COUNT = 100 # COLUMN_COUNT * PROJECTIVITY should > 0
-LAYOUT_EXP_TUNER_MODES = [INDEX_USAGE_TYPE_PARTIAL, INDEX_USAGE_TYPE_NEVER]
+LAYOUT_EXP_INDEX_USAGE_TYPES = [INDEX_USAGE_TYPE_PARTIAL, INDEX_USAGE_TYPE_NEVER]
 LAYOUT_EXP_PHASE_LENGTH=250
 LAYOUT_CSV = "layout.csv"
 
@@ -314,17 +314,17 @@ TREND_CSV = "trend.csv"
 TREND_LINE_COLORS = ( '#594F4F', '#45ADA8')
 
 ## MOTIVATION EXPERIMENT
-MOTIVATION_EXP_TUNER_MODES = INDEX_USAGE_TYPES_MOTIVATION
+MOTIVATION_EXP_INDEX_USAGE_TYPES = INDEX_USAGE_TYPES_MOTIVATION
 MOTIVATION_EXP_INDEX_COUNT_THRESHOLD = 5
 MOTIVATION_EXP_QUERY_COUNT = 3000
 MOTIVATION_EXP_PHASE_LENGTHS = [MOTIVATION_EXP_QUERY_COUNT * 10]
 MOTIVATION_EXP_WRITE_RATIOS = [WRITE_RATIO_READ_ONLY]
 MOTIVATION_EXP_QUERY_COMPLEXITY = QUERY_COMPLEXITY_SIMPLE
 MOTIVATION_LATENCY_MODE = 1
-MOTIVATION_INDEX_MODE = 2
 MOTIVATION_PLOT_MODES = [MOTIVATION_LATENCY_MODE]
 MOTIVATION_LATENCY_CSV = "motivation_latency.csv"
-MOTIVATION_INDEX_CSV = "motivation_index.csv"
+MOTIVATION_EXP_DURATION_BETWEEN_PAUSES = 5
+MOTIVATION_EXP_DURATION_OF_PAUSE = 1000
 
 ###################################################################################
 # UTILS
@@ -439,7 +439,7 @@ def create_legend_index_usage_type():
                      handleheight=1, handlelength=3)
 
     figlegend.savefig('legend_index_usage.pdf')
-    
+
 def create_bar_legend_index_usage_type():
     fig = pylab.figure()
     ax1 = fig.add_subplot(111)
@@ -502,10 +502,10 @@ def create_legend_trend():
     idx = 1
 
     for group in xrange(len(TREND_EXP_METHODS)):
-        lines[idx], = ax1.plot(x_values, data, 
-                               color=TREND_LINE_COLORS[idx - 1], 
+        lines[idx], = ax1.plot(x_values, data,
+                               color=TREND_LINE_COLORS[idx - 1],
                                linewidth=OPT_LINE_WIDTH,
-                               marker=OPT_MARKERS[idx - 1], 
+                               marker=OPT_MARKERS[idx - 1],
                                markersize=OPT_MARKER_SIZE)
         idx = idx + 1
 
@@ -517,7 +517,7 @@ def create_legend_trend():
                      handleheight=1, handlelength=3)
 
     figlegend.savefig('legend_trend.pdf')
-    
+
 ###################################################################################
 # PLOT
 ###################################################################################
@@ -527,7 +527,7 @@ def create_query_line_chart(datasets):
     ax1 = fig.add_subplot(111)
 
     # X-AXIS
-    x_values = [str(i) for i in QUERY_EXP_PHASE_LENGTHS]
+    x_values = [str(i) for i in REFLEX_EXP_PHASE_LENGTHS]
     N = len(x_values)
     ind = np.arange(N)
 
@@ -594,7 +594,7 @@ def create_convergence_bar_chart(datasets):
                 if col == 1:
                     y_values.append(datasets[group][line][col])
         LOG.info("group_data = %s", str(y_values))
-        bars[group] =  ax1.bar(ind + margin + (group * width), 
+        bars[group] =  ax1.bar(ind + margin + (group * width),
                                y_values, width,
                                color=OPT_COLORS[group],
                                hatch=OPT_PATTERNS[group],
@@ -672,7 +672,7 @@ def create_time_series_line_chart(datasets, plot_mode):
 
     # X-AXIS
     #ax1.set_xticks(ind + 0.5)
-    major_ticks = np.arange(0, TIME_SERIES_EXP_QUERY_COUNT + 1, 
+    major_ticks = np.arange(0, TIME_SERIES_EXP_QUERY_COUNT + 1,
                             TIME_SERIES_OPT_MARKER_FREQUENCY)
     ax1.set_xticks(major_ticks)
     ax1.set_xlabel("Query Sequence", fontproperties=LABEL_FP)
@@ -755,7 +755,7 @@ def create_index_count_bar_chart(datasets):
                 if col == 1:
                     y_values.append(datasets[group][line][col])
         LOG.info("group_data = %s", str(y_values))
-        bars[group] =  ax1.bar(ind + margin + (group * width), 
+        bars[group] =  ax1.bar(ind + margin + (group * width),
                        y_values, width,
                        color=OPT_COLORS[group],
                        hatch=OPT_PATTERNS[group],
@@ -974,7 +974,7 @@ def create_trend_line_chart(datasets):
     #ax1.set_yscale('log', basey=10)
 
     # X-AXIS
-    major_ticks = np.arange(0, TREND_EXP_TUNING_COUNT + 1, 
+    major_ticks = np.arange(0, TREND_EXP_TUNING_COUNT + 1,
                             TREND_OPT_MARKER_FREQUENCY)
     ax1.set_xticks(major_ticks)
     ax1.set_xlabel("Tuning Period", fontproperties=LABEL_FP)
@@ -995,7 +995,7 @@ def create_motivation_line_chart(datasets, plot_mode):
     x_values = [str(i) for i in range(1, MOTIVATION_EXP_QUERY_COUNT + 1)]
     N = len(x_values)
     ind = np.arange(N)
-    
+
     MOTIVATION_OPT_LINE_WIDTH = 3.0
     MOTIVATION_OPT_MARKER_SIZE = 5.0
     MOTIVATION_OPT_MARKER_FREQUENCY = MOTIVATION_EXP_QUERY_COUNT/10
@@ -1028,15 +1028,12 @@ def create_motivation_line_chart(datasets, plot_mode):
     # LATENCY
     if plot_mode == MOTIVATION_LATENCY_MODE:
         ax1.set_ylabel("Query latency (ms)", fontproperties=LABEL_FP)
-    # INDEX
-    elif plot_mode == MOTIVATION_INDEX_MODE:
-        ax1.set_ylabel("Index count", fontproperties=LABEL_FP)
 
     #ax1.set_yscale('log', basey=10)
 
     # X-AXIS
     #ax1.set_xticks(ind + 0.5)
-    major_ticks = np.arange(0, MOTIVATION_EXP_QUERY_COUNT + 1, 
+    major_ticks = np.arange(0, MOTIVATION_EXP_QUERY_COUNT + 1,
                             MOTIVATION_OPT_MARKER_FREQUENCY)
     ax1.set_xticks(major_ticks)
     ax1.set_xlabel("Query Sequence", fontproperties=LABEL_FP)
@@ -1057,11 +1054,11 @@ def create_motivation_line_chart(datasets, plot_mode):
 # QUERY -- PLOT
 def reflex_plot():
 
-    for query_complexity in QUERY_EXP_QUERY_COMPLEXITYS:
-        for write_ratio in QUERY_EXP_WRITE_RATIOS:
+    for query_complexity in REFLEX_EXP_QUERY_COMPLEXITYS:
+        for write_ratio in REFLEX_EXP_WRITE_RATIOS:
 
             datasets = []
-            for index_usage_type in QUERY_EXP_TUNER_MODES:
+            for index_usage_type in REFLEX_EXP_INDEX_USAGE_TYPES:
                 # Get result file
                 result_dir_list = [INDEX_USAGE_TYPES_STRINGS[index_usage_type],
                                    WRITE_RATIO_STRINGS[write_ratio],
@@ -1073,7 +1070,7 @@ def reflex_plot():
 
             fig = create_query_line_chart(datasets)
 
-            file_name = "query" + "-" + \
+            file_name = "reflex" + "-" + \
                         QUERY_COMPLEXITY_STRINGS[query_complexity] + "-" + \
                         WRITE_RATIO_STRINGS[write_ratio] + ".pdf"
 
@@ -1085,7 +1082,7 @@ def convergence_plot():
     for query_complexity in CONVERGENCE_EXP_QUERY_COMPLEXITYS:
 
             datasets = []
-            for index_usage_type in CONVERGENCE_EXP_TUNER_MODES:
+            for index_usage_type in CONVERGENCE_EXP_INDEX_USAGE_TYPES:
                 # Get result file
                 result_dir_list = [INDEX_USAGE_TYPES_STRINGS[index_usage_type],
                                    QUERY_COMPLEXITY_STRINGS[query_complexity]]
@@ -1126,7 +1123,7 @@ def time_series_plot():
                     OUTPUT_STRING = "index"
 
                 datasets = []
-                for index_usage_type in TIME_SERIES_EXP_TUNER_MODES:
+                for index_usage_type in TIME_SERIES_EXP_INDEX_USAGE_TYPES:
 
                         # Get result file
                         result_dir_list = [INDEX_USAGE_TYPES_STRINGS[index_usage_type],
@@ -1155,7 +1152,7 @@ def variability_plot():
     for query_complexity in VARIABILITY_EXP_QUERY_COMPLEXITYS:
 
             datasets = []
-            for index_usage_type in VARIABILITY_EXP_TUNER_MODES:
+            for index_usage_type in VARIABILITY_EXP_INDEX_USAGE_TYPES:
 
                 # Get result file
                 result_dir_list = [INDEX_USAGE_TYPES_STRINGS[index_usage_type],
@@ -1179,7 +1176,7 @@ def selectivity_plot():
         for scale_factor in SELECTIVITY_EXP_SCALE_FACTORS:
 
             datasets = []
-            for index_usage_type in SELECTIVITY_EXP_TUNER_MODES:
+            for index_usage_type in SELECTIVITY_EXP_INDEX_USAGE_TYPES:
                 # Get result file
                 result_dir_list = [INDEX_USAGE_TYPES_STRINGS[index_usage_type],
                                    str(selectivity),
@@ -1203,7 +1200,7 @@ def index_count_plot():
     for write_ratio in INDEX_COUNT_EXP_WRITE_RATIOS:
 
         datasets = []
-        for index_usage_type in INDEX_COUNT_EXP_TUNER_MODES:
+        for index_usage_type in INDEX_COUNT_EXP_INDEX_USAGE_TYPES:
             # Get result file
             result_dir_list = [INDEX_USAGE_TYPES_STRINGS[index_usage_type],
                                WRITE_RATIO_STRINGS[write_ratio]]
@@ -1225,7 +1222,7 @@ def index_utility_plot():
     for index_count_threshold in INDEX_UTILITY_EXP_INDEX_COUNT_THRESHOLDS:
 
         datasets = []
-        for index_usage_type in INDEX_UTILITY_EXP_TUNER_MODES:
+        for index_usage_type in INDEX_UTILITY_EXP_INDEX_USAGE_TYPES:
             # Get result file
             result_dir_list = [INDEX_USAGE_TYPES_STRINGS[index_usage_type],
                                str(index_count_threshold)]
@@ -1247,7 +1244,7 @@ def write_ratio_plot():
     for write_ratio in WRITE_RATIO_EXP_WRITE_RATIOS:
 
         datasets = []
-        for index_usage_type in WRITE_RATIO_EXP_TUNER_MODES:
+        for index_usage_type in WRITE_RATIO_EXP_INDEX_USAGE_TYPES:
             # Get result file
             result_dir_list = [INDEX_USAGE_TYPES_STRINGS[index_usage_type],
                                str(write_ratio)]
@@ -1262,7 +1259,7 @@ def write_ratio_plot():
                     str(write_ratio) + ".pdf"
 
         saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH, height=OPT_GRAPH_HEIGHT)
-        
+
 # TREND -- PLOT
 def trend_plot():
 
@@ -1270,7 +1267,7 @@ def trend_plot():
 
     datasets = []
     for line_itr in range(0, num_lines):
-        
+
         # Get result file
         result_dir_list = [str(line_itr)]
         result_file = get_result_file(TREND_DIR, result_dir_list, TREND_CSV)
@@ -1282,14 +1279,14 @@ def trend_plot():
 
     file_name = "trend" + ".pdf"
 
-    saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH * 2.0, height=OPT_GRAPH_HEIGHT)        
+    saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH * 2.0, height=OPT_GRAPH_HEIGHT)
 
 def layout_plot():
     print('plotting layout')
     for selectivity in LAYOUT_EXP_SELECTIVITYS:
         for projectivity in LAYOUT_EXP_PROJECTIVITYS:
             datasets = []
-            for index_usage_type in LAYOUT_EXP_TUNER_MODES:
+            for index_usage_type in LAYOUT_EXP_INDEX_USAGE_TYPES:
                 result_dir_list = [INDEX_USAGE_TYPES_STRINGS[index_usage_type],
                                    str(selectivity), str(projectivity)]
 
@@ -1394,13 +1391,9 @@ def motivation_plot():
                 if plot_mode == MOTIVATION_LATENCY_MODE:
                     CSV_FILE = MOTIVATION_LATENCY_CSV
                     OUTPUT_STRING = "latency"
-                # INDEX COUNT
-                elif plot_mode == MOTIVATION_INDEX_MODE:
-                    CSV_FILE = MOTIVATION_INDEX_CSV
-                    OUTPUT_STRING = "index"
 
                 datasets = []
-                for index_usage_type in MOTIVATION_EXP_TUNER_MODES:
+                for index_usage_type in MOTIVATION_EXP_INDEX_USAGE_TYPES:
 
                         # Get result file
                         result_dir_list = [INDEX_USAGE_TYPES_STRINGS[index_usage_type],
@@ -1484,14 +1477,14 @@ def reflex_eval():
     clean_up_dir(QUERY_DIR)
     print("QUERY EVAL")
 
-    for query_complexity in QUERY_EXP_QUERY_COMPLEXITYS:
+    for query_complexity in REFLEX_EXP_QUERY_COMPLEXITYS:
         print(MAJOR_STRING)
 
-        for write_ratio in QUERY_EXP_WRITE_RATIOS:
+        for write_ratio in REFLEX_EXP_WRITE_RATIOS:
             print(MINOR_STRING)
 
-            for index_usage_type in QUERY_EXP_TUNER_MODES:
-                for phase_length in QUERY_EXP_PHASE_LENGTHS:
+            for index_usage_type in REFLEX_EXP_INDEX_USAGE_TYPES:
+                for phase_length in REFLEX_EXP_PHASE_LENGTHS:
                     print("> query_complexity: " + str(query_complexity) +
                             " write_ratio: " + str(write_ratio) +
                             " index_usage_type: " + str(index_usage_type) +
@@ -1522,7 +1515,7 @@ def convergence_eval():
     for query_complexity in CONVERGENCE_EXP_QUERY_COMPLEXITYS:
         print(MAJOR_STRING)
 
-        for index_usage_type in CONVERGENCE_EXP_TUNER_MODES:
+        for index_usage_type in CONVERGENCE_EXP_INDEX_USAGE_TYPES:
             print(MINOR_STRING)
 
             for write_ratio in CONVERGENCE_EXP_WRITE_RATIOS:
@@ -1565,7 +1558,7 @@ def time_series_eval():
         for phase_length in TIME_SERIES_EXP_PHASE_LENGTHS:
             print(MINOR_STRING)
 
-            for index_usage_type in TIME_SERIES_EXP_TUNER_MODES:
+            for index_usage_type in TIME_SERIES_EXP_INDEX_USAGE_TYPES:
                     print("> query_complexity: " + str(query_complexity) +
                             " write_ratio: " + str(write_ratio) +
                             " phase_length: " + str(phase_length) +
@@ -1608,7 +1601,7 @@ def variability_eval():
     for query_complexity in VARIABILITY_EXP_QUERY_COMPLEXITYS:
         print(MAJOR_STRING)
 
-        for index_usage_type in VARIABILITY_EXP_TUNER_MODES:
+        for index_usage_type in VARIABILITY_EXP_INDEX_USAGE_TYPES:
             print(MINOR_STRING)
 
             for variability_threshold in VARIABILITY_EXP_VARIABILITY_THRESHOLDS:
@@ -1645,7 +1638,7 @@ def selectivity_eval():
         for scale_factor in SELECTIVITY_EXP_SCALE_FACTORS:
             print(MINOR_STRING)
 
-            for index_usage_type in SELECTIVITY_EXP_TUNER_MODES:
+            for index_usage_type in SELECTIVITY_EXP_INDEX_USAGE_TYPES:
                 for phase_length in SELECTIVITY_EXP_PHASE_LENGTHS:
                     print("> selectivity: " + str(selectivity) +
                             " scale_factor: " + str(scale_factor) +
@@ -1679,7 +1672,7 @@ def index_count_eval():
     for write_ratio in INDEX_COUNT_EXP_WRITE_RATIOS:
         print(MAJOR_STRING)
 
-        for index_usage_type in INDEX_COUNT_EXP_TUNER_MODES:
+        for index_usage_type in INDEX_COUNT_EXP_INDEX_USAGE_TYPES:
             print(MINOR_STRING)
 
             for index_count_threshold in INDEX_COUNT_EXP_INDEX_COUNT_THRESHOLDS:
@@ -1709,7 +1702,7 @@ def index_utility_eval():
     clean_up_dir(INDEX_UTILITY_DIR)
     print("INDEX UTILITY EVAL")
 
-    for index_usage_type in INDEX_UTILITY_EXP_TUNER_MODES:
+    for index_usage_type in INDEX_UTILITY_EXP_INDEX_USAGE_TYPES:
         print(MAJOR_STRING)
 
         for index_count_threshold in INDEX_UTILITY_EXP_INDEX_COUNT_THRESHOLDS:
@@ -1743,7 +1736,7 @@ def write_ratio_eval():
     clean_up_dir(WRITE_RATIO_DIR)
     print("WRITE RATIO EVAL")
 
-    for index_usage_type in WRITE_RATIO_EXP_TUNER_MODES:
+    for index_usage_type in WRITE_RATIO_EXP_INDEX_USAGE_TYPES:
         print(MAJOR_STRING)
 
         for write_ratio in WRITE_RATIO_EXP_WRITE_RATIOS:
@@ -1777,7 +1770,7 @@ def layout_eval():
     for layout_mode in LAYOUT_EXP_LAYOUT_MODES: # Different lines
         print(MAJOR_STRING)
 
-        for index_usage_type in LAYOUT_EXP_TUNER_MODES:
+        for index_usage_type in LAYOUT_EXP_INDEX_USAGE_TYPES:
             print(MINOR_STRING)
 
             for projectivity in LAYOUT_EXP_PROJECTIVITYS:
@@ -1832,7 +1825,7 @@ def motivation_eval():
         for phase_length in MOTIVATION_EXP_PHASE_LENGTHS:
             print(MINOR_STRING)
 
-            for index_usage_type in MOTIVATION_EXP_TUNER_MODES:
+            for index_usage_type in MOTIVATION_EXP_INDEX_USAGE_TYPES:
                     print("> query_complexity: " + str(query_complexity) +
                             " write_ratio: " + str(write_ratio) +
                             " phase_length: " + str(phase_length) +
@@ -1847,9 +1840,6 @@ def motivation_eval():
                     latency_result_file = get_result_file(MOTIVATION_DIR,
                                                           result_dir_list,
                                                           MOTIVATION_LATENCY_CSV)
-                    index_result_file = get_result_file(MOTIVATION_DIR,
-                                                        result_dir_list,
-                                                        MOTIVATION_INDEX_CSV)
 
                     # Run experiment
                     run_experiment(phase_length=phase_length,
@@ -1857,13 +1847,13 @@ def motivation_eval():
                                    write_ratio=write_ratio,
                                    index_count_threshold=MOTIVATION_EXP_INDEX_COUNT_THRESHOLD,
                                    query_count=MOTIVATION_EXP_QUERY_COUNT,
-                                   query_complexity=query_complexity)
+                                   query_complexity=query_complexity,
+                                   duration_between_pauses=MOTIVATION_EXP_DURATION_BETWEEN_PAUSES,
+                                   duration_of_pause=MOTIVATION_EXP_DURATION_OF_PAUSE)
 
                     # Collect stat
                     stat_offset = -1
                     collect_stat(DEFAULT_QUERY_COUNT, latency_result_file, stat_offset)
-                    stat_offset = -2
-                    collect_stat(DEFAULT_QUERY_COUNT, index_result_file, stat_offset)
 
 
 ###################################################################################
@@ -1965,7 +1955,6 @@ if __name__ == '__main__':
 
     if args.motivation_plot:
         motivation_plot()
-
 
     #create_legend_index_usage_type()
     #create_bar_legend_index_usage_type()
