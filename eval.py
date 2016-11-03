@@ -129,6 +129,12 @@ INDEX_USAGE_TYPES_STRINGS = {
     5 : "never"
 }
 
+INDEX_USAGE_TYPES_STRINGS_SUBSET = INDEX_USAGE_TYPES_STRINGS.copy()
+INDEX_USAGE_TYPES_STRINGS_SUBSET.pop(4, None)
+
+MOTIVATION_STRINGS_SUBSET = INDEX_USAGE_TYPES_STRINGS.copy()
+MOTIVATION_STRINGS_SUBSET.pop(2, None)
+
 ## LAYOUT TYPES
 LAYOUT_MODE_ROW = 1
 LAYOUT_MODE_COLUMN = 2
@@ -191,8 +197,8 @@ DEFAULT_SELECTIVITY = 0.001
 DEFAULT_PROJECTIVITY = 0.1
 DEFAULT_VERBOSITY = 0
 DEFAULT_CONVERGENCE_MODE = 0
-DEFAULT_CONVERGENCE_QUERY_THRESHOLD = 400
-DEFAULT_VARIABILITY_THRESHOLD = 25
+DEFAULT_CONVERGENCE_QUERY_THRESHOLD = 100
+DEFAULT_VARIABILITY_THRESHOLD = 100
 DEFAULT_INDEX_COUNT_THRESHOLD = 20
 DEFAULT_INDEX_UTILITY_THRESHOLD = 0.25
 DEFAULT_WRITE_RATIO_THRESHOLD = 1.0
@@ -244,11 +250,13 @@ REFLEX_CSV = "reflex.csv"
 
 ##  CONVERGENCE EXPERIMENT
 CONVERGENCE_EXP_CONVERGENCE_MODE = 1
-CONVERGENCE_EXP_VARIABILITY_THRESHOLD = 15
-CONVERGENCE_EXP_PHASE_LENGTH = DEFAULT_PHASE_LENGTH
+CONVERGENCE_EXP_PHASE_LENGTH = 50
+CONVERGENCE_EXP_VARIABILITY_THRESHOLD = 10
+CONVERGENCE_EXP_QUERY_COUNT = 3000
+CONVERGENCE_EXP_INDEX_COUNT = 30
 CONVERGENCE_EXP_INDEX_USAGE_TYPES = INDEX_USAGE_TYPES_PARTIAL
-CONVERGENCE_EXP_WRITE_RATIOS = [WRITE_RATIO_READ_ONLY]
-CONVERGENCE_EXP_QUERY_COMPLEXITYS = [QUERY_COMPLEXITY_SIMPLE]
+CONVERGENCE_EXP_WRITE_RATIOS = WRITE_RATIOS_ALL
+CONVERGENCE_EXP_QUERY_COMPLEXITYS = QUERY_COMPLEXITYS_ALL
 CONVERGENCE_CSV = "convergence.csv"
 
 ##  TIME SERIES EXPERIMENT
@@ -422,16 +430,16 @@ def create_legend_index_usage_type():
     fig = pylab.figure()
     ax1 = fig.add_subplot(111)
 
-    LEGEND_VALUES = INDEX_USAGE_TYPES_STRINGS.values()
+    LEGEND_VALUES = INDEX_USAGE_TYPES_STRINGS_SUBSET.values()
 
-    figlegend = pylab.figure(figsize=(11, 0.5))
+    figlegend = pylab.figure(figsize=(15, 0.5))
     idx = 0
     lines = [None] * (len(LEGEND_VALUES) + 1)
     data = [1]
     x_values = [1]
 
     TITLE = "INDEX USAGE TYPES:"
-    LABELS = [TITLE, "PARTIAL", "FULL", "NEVER"]
+    LABELS = [TITLE, "PARTIAL-FAST", "PARTIAL-MODERATE", "PARTIAL-SLOW", "NEVER"]
 
     lines[idx], = ax1.plot(x_values, data, linewidth = 0)
     idx = 1
@@ -449,6 +457,39 @@ def create_legend_index_usage_type():
                      handleheight=1, handlelength=3)
 
     figlegend.savefig('legend_index_usage.pdf')
+
+def create_legend_motivation():
+    fig = pylab.figure()
+    ax1 = fig.add_subplot(111)
+
+    LEGEND_VALUES = MOTIVATION_STRINGS_SUBSET.values()
+
+    figlegend = pylab.figure(figsize=(11, 0.5))
+    idx = 0
+    lines = [None] * (len(LEGEND_VALUES) + 1)
+    data = [1]
+    x_values = [1]
+
+    TITLE = "INDEX USAGE TYPES:"
+    LABELS = [TITLE, "PARTIAL", "FULL", "NEVER"]
+    
+    lines[idx], = ax1.plot(x_values, data, linewidth = 0)
+    idx = 1
+
+    for group in xrange(len(LEGEND_VALUES)):
+        lines[idx], = ax1.plot(x_values, data, color=OPT_LINE_COLORS[idx - 1], linewidth=OPT_LINE_WIDTH,
+                               marker=OPT_MARKERS[idx - 1], markersize=OPT_MARKER_SIZE)
+        idx = idx + 1
+
+    # LEGEND
+    figlegend.legend(lines, LABELS, prop=LEGEND_FP,
+                     loc=1, ncol=7,
+                     mode="expand", shadow=OPT_LEGEND_SHADOW,
+                     frameon=False, borderaxespad=0.0,
+                     handleheight=1, handlelength=3)
+
+    figlegend.savefig('legend_motivation.pdf')
+
 
 def create_bar_legend_index_usage_type():
     fig = pylab.figure()
@@ -1542,6 +1583,8 @@ def convergence_eval():
 
                     # Run experiment (only one phase)
                     run_experiment(phase_length=CONVERGENCE_EXP_PHASE_LENGTH,
+                                   query_count=CONVERGENCE_EXP_QUERY_COUNT,
+                                   index_count_threshold=CONVERGENCE_EXP_INDEX_COUNT,
                                    index_usage_type=index_usage_type,
                                    write_ratio=write_ratio,
                                    query_complexity=query_complexity,
@@ -1969,5 +2012,6 @@ if __name__ == '__main__':
         motivation_plot()
 
     #create_legend_index_usage_type()
+    #create_legend_motivation()
     #create_bar_legend_index_usage_type()
     #create_legend_trend()
