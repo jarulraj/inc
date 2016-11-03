@@ -129,10 +129,10 @@ INDEX_USAGE_TYPES_STRINGS = {
     5 : "never"
 }
 
-INDEX_USAGE_TYPES_STRINGS_SUBSET = INDEX_USAGE_TYPES_STRINGS
+INDEX_USAGE_TYPES_STRINGS_SUBSET = INDEX_USAGE_TYPES_STRINGS.copy()
 INDEX_USAGE_TYPES_STRINGS_SUBSET.pop(4, None)
 
-MOTIVATION_STRINGS_SUBSET = INDEX_USAGE_TYPES_STRINGS
+MOTIVATION_STRINGS_SUBSET = INDEX_USAGE_TYPES_STRINGS.copy()
 MOTIVATION_STRINGS_SUBSET.pop(2, None)
 
 ## LAYOUT TYPES
@@ -197,8 +197,8 @@ DEFAULT_SELECTIVITY = 0.001
 DEFAULT_PROJECTIVITY = 0.1
 DEFAULT_VERBOSITY = 0
 DEFAULT_CONVERGENCE_MODE = 0
-DEFAULT_CONVERGENCE_QUERY_THRESHOLD = 400
-DEFAULT_VARIABILITY_THRESHOLD = 25
+DEFAULT_CONVERGENCE_QUERY_THRESHOLD = 100
+DEFAULT_VARIABILITY_THRESHOLD = 100
 DEFAULT_INDEX_COUNT_THRESHOLD = 20
 DEFAULT_INDEX_UTILITY_THRESHOLD = 0.25
 DEFAULT_WRITE_RATIO_THRESHOLD = 1.0
@@ -250,11 +250,13 @@ REFLEX_CSV = "reflex.csv"
 
 ##  CONVERGENCE EXPERIMENT
 CONVERGENCE_EXP_CONVERGENCE_MODE = 1
-CONVERGENCE_EXP_VARIABILITY_THRESHOLD = 15
-CONVERGENCE_EXP_PHASE_LENGTH = DEFAULT_PHASE_LENGTH
+CONVERGENCE_EXP_PHASE_LENGTH = 50
+CONVERGENCE_EXP_VARIABILITY_THRESHOLD = 10
+CONVERGENCE_EXP_QUERY_COUNT = 3000
+CONVERGENCE_EXP_INDEX_COUNT = 30
 CONVERGENCE_EXP_INDEX_USAGE_TYPES = INDEX_USAGE_TYPES_PARTIAL
-CONVERGENCE_EXP_WRITE_RATIOS = [WRITE_RATIO_READ_ONLY, WRITE_RATIO_READ_HEAVY]
-CONVERGENCE_EXP_QUERY_COMPLEXITYS = [QUERY_COMPLEXITY_SIMPLE]
+CONVERGENCE_EXP_WRITE_RATIOS = WRITE_RATIOS_ALL
+CONVERGENCE_EXP_QUERY_COMPLEXITYS = QUERY_COMPLEXITYS_ALL
 CONVERGENCE_CSV = "convergence.csv"
 
 ##  TIME SERIES EXPERIMENT
@@ -643,7 +645,6 @@ def create_convergence_bar_chart(datasets):
                 if col == 1:
                     y_values.append(datasets[group][line][col])
         LOG.info("group_data = %s", str(y_values))
-        pprint.pprint(group)
         bars[group] =  ax1.bar(ind + margin + (group * width),
                                y_values, width,
                                color=OPT_COLORS[group],
@@ -1582,6 +1583,8 @@ def convergence_eval():
 
                     # Run experiment (only one phase)
                     run_experiment(phase_length=CONVERGENCE_EXP_PHASE_LENGTH,
+                                   query_count=CONVERGENCE_EXP_QUERY_COUNT,
+                                   index_count_threshold=CONVERGENCE_EXP_INDEX_COUNT,
                                    index_usage_type=index_usage_type,
                                    write_ratio=write_ratio,
                                    query_complexity=query_complexity,
