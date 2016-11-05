@@ -262,10 +262,11 @@ CONVERGENCE_CSV = "convergence.csv"
 ##  TIME SERIES EXPERIMENT
 TIME_SERIES_EXP_PHASE_LENGTHS = [250]
 TIME_SERIES_EXP_INDEX_USAGE_TYPES = INDEX_USAGE_TYPES_ALL
-TIME_SERIES_EXP_INDEX_COUNT_THRESHOLD = 5
+TIME_SERIES_EXP_INDEX_COUNT_THRESHOLD = 20
 TIME_SERIES_EXP_QUERY_COUNT = 3000
-TIME_SERIES_EXP_WRITE_RATIOS = [WRITE_RATIO_READ_HEAVY, WRITE_RATIO_WRITE_HEAVY]
+TIME_SERIES_EXP_WRITE_RATIOS = [WRITE_RATIO_READ_HEAVY]
 TIME_SERIES_EXP_QUERY_COMPLEXITY = QUERY_COMPLEXITY_MODERATE
+TIME_SERIES_EXP_VARIABILITY_THRESHOLD = 5
 TIME_SERIES_LATENCY_MODE = 1
 TIME_SERIES_INDEX_MODE = 2
 TIME_SERIES_PLOT_MODES = [TIME_SERIES_LATENCY_MODE, TIME_SERIES_INDEX_MODE]
@@ -1637,6 +1638,7 @@ def time_series_eval():
                                    index_usage_type=index_usage_type,
                                    write_ratio=write_ratio,
                                    index_count_threshold=TIME_SERIES_EXP_INDEX_COUNT_THRESHOLD,
+                                   variability_threshold=TIME_SERIES_EXP_VARIABILITY_THRESHOLD,
                                    query_count=TIME_SERIES_EXP_QUERY_COUNT,
                                    query_complexity=query_complexity)
 
