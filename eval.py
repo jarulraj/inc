@@ -702,7 +702,7 @@ def create_time_series_line_chart(datasets, plot_mode):
                  linewidth=TIME_SERIES_OPT_LINE_WIDTH,
                  marker=OPT_MARKERS[idx],
                  markersize=TIME_SERIES_OPT_MARKER_SIZE,
-                 markevery=TIME_SERIES_OPT_MARKER_FREQUENCY,
+                 markevery=TIME_SERIES_EXP_QUERY_COUNT/30,
                  label=str(group))
         idx = idx + 1
 
