@@ -702,7 +702,7 @@ def create_time_series_line_chart(datasets, plot_mode):
                  linewidth=TIME_SERIES_OPT_LINE_WIDTH,
                  marker=OPT_MARKERS[idx],
                  markersize=TIME_SERIES_OPT_MARKER_SIZE,
-                 markevery=TIME_SERIES_EXP_QUERY_COUNT/30,
+                 markevery=TIME_SERIES_OPT_MARKER_FREQUENCY,
                  label=str(group))
         idx = idx + 1
 
@@ -715,7 +715,7 @@ def create_time_series_line_chart(datasets, plot_mode):
 
     # LATENCY
     if plot_mode == TIME_SERIES_LATENCY_MODE:
-        ax1.set_ylabel("Query latency (ms)", fontproperties=LABEL_FP)
+        ax1.set_ylabel("Latency (ms)", fontproperties=LABEL_FP)
     # INDEX
     elif plot_mode == TIME_SERIES_INDEX_MODE:
         ax1.set_ylabel("Index count", fontproperties=LABEL_FP)
@@ -1196,7 +1196,7 @@ def time_series_plot():
                             WRITE_RATIO_STRINGS[write_ratio] + "-" + \
                             str(phase_length) + ".pdf"
 
-                saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH * 3.0, height=OPT_GRAPH_HEIGHT)
+                saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH * 3.0, height=OPT_GRAPH_HEIGHT/1.5)
 
 # VARIABILITY -- PLOT
 def variability_plot():
