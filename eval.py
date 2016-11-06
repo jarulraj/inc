@@ -54,7 +54,7 @@ OPT_GRAPH_WIDTH = 400
 NUM_COLORS = 5
 COLOR_MAP = ( '#418259', '#bd5632', '#e1a94c', '#7d6c5b', '#364d38', '#c4e1c6')
 
-OPT_COLORS = COLOR_MAP
+OPT_COLORS = ( '#F58A87', '#80CA86', '#9EC9E9', '#FED113', '#D89761' )
 
 OPT_GRID_COLOR = 'gray'
 OPT_LEGEND_SHADOW = False
@@ -488,7 +488,7 @@ def create_bar_legend_index_usage_type():
     fig = pylab.figure()
     ax1 = fig.add_subplot(111)
 
-    figlegend = pylab.figure(figsize=(13, 0.5))
+    figlegend = pylab.figure(figsize=(15, 0.5))
 
     LEGEND_VALUES = INDEX_USAGE_TYPES_STRINGS.values()
     LEGEND_VALUES = LEGEND_VALUES[:-1]
@@ -515,8 +515,8 @@ def create_bar_legend_index_usage_type():
                               linewidth=BAR_LINEWIDTH)
         idx = idx + 1
 
-    TITLE = "ADAPTATION MODES:"
-    LABELS = [TITLE, "AGGRESSIVE", "BALANCED", "CONSERVATIVE"]
+    TITLE = "INDEX USAGE TYPES:"
+    LABELS = [TITLE, "PARTIAL-FAST", "PARTIAL-MODERATE", "PARTIAL-SLOW"]
 
     # LEGEND
     figlegend.legend(bars, LABELS, prop=LEGEND_FP,
@@ -655,7 +655,7 @@ def create_convergence_bar_chart(datasets):
 
     # X-AXIS
     ax1.set_xticks(ind + 0.5)
-    ax1.set_xlabel("Read-write ratio", fontproperties=LABEL_FP)
+    ax1.set_xlabel("Fraction of updates", fontproperties=LABEL_FP)
     ax1.set_xticklabels(x_values)
     #ax1.set_xlim([XAXIS_MIN, XAXIS_MAX])
 
@@ -1939,7 +1939,7 @@ if __name__ == '__main__':
     if args.motivation_plot:
         motivation_plot()
 
-    #screate_legend_index_usage_type()
+    #create_legend_index_usage_type()
     #create_legend_motivation()
     #create_bar_legend_index_usage_type()
     #create_legend_trend()
