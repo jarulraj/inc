@@ -53,8 +53,9 @@ OPT_GRAPH_WIDTH = 400
 # to match the length of your data.
 NUM_COLORS = 5
 COLOR_MAP = ( '#418259', '#bd5632', '#e1a94c', '#7d6c5b', '#364d38', '#c4e1c6')
+COLOR_MAP_2 = ( '#F58A87', '#80CA86', '#9EC9E9', '#FED113', '#D89761' )
 
-OPT_COLORS = ( '#F58A87', '#80CA86', '#9EC9E9', '#FED113', '#D89761' )
+OPT_COLORS = COLOR_MAP
 
 OPT_GRID_COLOR = 'gray'
 OPT_LEGEND_SHADOW = False
@@ -134,6 +135,11 @@ INDEX_USAGE_TYPES_STRINGS_SUBSET.pop(4, None)
 
 MOTIVATION_STRINGS_SUBSET = INDEX_USAGE_TYPES_STRINGS.copy()
 MOTIVATION_STRINGS_SUBSET.pop(2, None)
+
+INDEX_USAGE_TYPES_SCALE = INDEX_USAGE_TYPES_STRINGS.copy()
+INDEX_USAGE_TYPES_SCALE.pop(2, None)
+INDEX_USAGE_TYPES_SCALE.pop(3, None)
+INDEX_USAGE_TYPES_SCALE.pop(4, None)
 
 ## LAYOUT TYPES
 LAYOUT_MODE_ROW = 1
@@ -510,7 +516,7 @@ def create_bar_legend_index_usage_type():
     idx = 1
     for group in xrange(len(LEGEND_VALUES)):
         bars[idx] = ax1.bar(ind + margin + (idx * width), data, width,
-                              color=OPT_COLORS[idx - 1],
+                              color=COLOR_MAP_2[idx - 1],
                               hatch=OPT_PATTERNS[idx - 1],
                               linewidth=BAR_LINEWIDTH)
         idx = idx + 1
@@ -561,6 +567,41 @@ def create_legend_trend():
                      handleheight=1, handlelength=3)
 
     figlegend.savefig('legend_trend.pdf')
+
+def create_legend_index_usage_type_subset():
+    fig = pylab.figure()
+    ax1 = fig.add_subplot(111)
+
+    LEGEND_SIZE = 3
+    
+    figlegend = pylab.figure(figsize=(9, 0.5))
+    idx = 0
+    lines = [None] * (LEGEND_SIZE + 1)
+    data = [1]
+    x_values = [1]
+
+    TITLE = "INDEX USAGE TYPES:"
+    LABELS = [TITLE, "PARTIAL-FAST", "NEVER"]
+
+    lines[idx], = ax1.plot(x_values, data, linewidth = 0)
+    idx = 1
+
+    for group in xrange(LEGEND_SIZE):
+        color_idx = idx
+        if idx == 2:
+            color_idx = 4
+        lines[idx], = ax1.plot(x_values, data, color=OPT_LINE_COLORS[color_idx - 1], linewidth=OPT_LINE_WIDTH,
+                               marker=OPT_MARKERS[color_idx - 1], markersize=OPT_MARKER_SIZE)
+        idx = idx + 1
+
+    # LEGEND
+    figlegend.legend(lines, LABELS, prop=LEGEND_FP,
+                     loc=1, ncol=4,
+                     mode="expand", shadow=OPT_LEGEND_SHADOW,
+                     frameon=False, borderaxespad=0.0,
+                     handleheight=1, handlelength=3)
+
+    figlegend.savefig('legend_index_usage_subset.pdf')
 
 ###################################################################################
 # PLOT
@@ -640,7 +681,7 @@ def create_convergence_bar_chart(datasets):
         LOG.info("group_data = %s", str(y_values))
         bars[group] =  ax1.bar(ind + margin + (group * width),
                                y_values, width,
-                               color=OPT_COLORS[group],
+                               color=COLOR_MAP_2[group],
                                hatch=OPT_PATTERNS[group],
                                linewidth=BAR_LINEWIDTH)
 
@@ -795,10 +836,13 @@ def create_selectivity_line_chart(datasets):
                 if col == 1:
                     y_values.append(datasets[group][line][col])
         LOG.info("group_data = %s", str(y_values))
+        color_idx = idx       
+        if idx == 1:
+            color_idx = 3        
         ax1.plot(ind + 0.5, y_values,
-                 color=OPT_COLORS[idx],
+                 color=OPT_COLORS[color_idx],
                  linewidth=OPT_LINE_WIDTH,
-                 marker=OPT_MARKERS[idx],
+                 marker=OPT_MARKERS[color_idx],
                  markersize=OPT_MARKER_SIZE,
                  label=str(group))
         idx = idx + 1
@@ -846,10 +890,13 @@ def create_scale_line_chart(datasets):
                 if col == 1:
                     y_values.append(datasets[group][line][col])
         LOG.info("group_data = %s", str(y_values))
+        color_idx = idx       
+        if idx == 1:
+            color_idx = 3        
         ax1.plot(ind + 0.5, y_values,
-                 color=OPT_COLORS[idx],
+                 color=OPT_COLORS[color_idx],
                  linewidth=OPT_LINE_WIDTH,
-                 marker=OPT_MARKERS[idx],
+                 marker=OPT_MARKERS[color_idx],
                  markersize=OPT_MARKER_SIZE,
                  label=str(group))
         idx = idx + 1
@@ -858,13 +905,12 @@ def create_scale_line_chart(datasets):
     makeGrid(ax1)
 
     # Y-AXIS
-    YAXIS_MIN = 0
     ax1.yaxis.set_major_locator(LinearLocator(YAXIS_TICKS))
     ax1.minorticks_off()
-    ax1.set_ylabel("Execution time (ms)", fontproperties=LABEL_FP)
-    ax1.set_ylim(bottom=YAXIS_MIN)
-    #ax1.set_ylim([YAXIS_MIN, YAXIS_MAX])
-    #ax1.set_yscale('log', basey=10)
+    ax1.set_ylabel("Execution time (s)", fontproperties=LABEL_FP)
+    ax1.set_yscale('log', nonposy='clip')
+    ax1.tick_params(axis='y', which='minor', left='off', right='off')
+    ax1.set_yticklabels(["", "", "1", "10", "100", "1000"])
 
     # X-AXIS
     ax1.set_xticks(ind + 0.5)
@@ -1943,3 +1989,4 @@ if __name__ == '__main__':
     #create_legend_motivation()
     #create_bar_legend_index_usage_type()
     #create_legend_trend()
+    create_legend_index_usage_type_subset()
