@@ -641,6 +641,38 @@ def create_legend_index_count():
 
     figlegend.savefig('legend_index_count.pdf')
 
+def create_legend_layout():
+    fig = pylab.figure()
+    ax1 = fig.add_subplot(111)
+
+    LEGEND_SIZE = 4
+    
+    figlegend = pylab.figure(figsize=(9, 0.5))
+    idx = 0
+    lines = [None] * (LEGEND_SIZE + 1)
+    data = [1]
+    x_values = [1]
+
+    TITLE = "SELECTIVITY:"
+    LABELS = [TITLE, "0.1%", "1%", "10%"]
+
+    lines[idx], = ax1.plot(x_values, data, linewidth = 0)
+    idx = 1
+    
+    for group in xrange(LEGEND_SIZE):
+        lines[idx], = ax1.plot(x_values, data, color=COLOR_MAP_2[idx - 1], linewidth=OPT_LINE_WIDTH,
+                               marker=OPT_MARKERS[idx - 1], markersize=OPT_MARKER_SIZE)
+        idx = idx + 1
+
+    # LEGEND
+    figlegend.legend(lines, LABELS, prop=LEGEND_FP,
+                     loc=1, ncol=4,
+                     mode="expand", shadow=OPT_LEGEND_SHADOW,
+                     frameon=False, borderaxespad=0.0,
+                     handleheight=1, handlelength=3)
+
+    figlegend.savefig('legend_layout.pdf')
+
 ###################################################################################
 # PLOT
 ###################################################################################
@@ -680,8 +712,6 @@ def create_query_line_chart(datasets):
     ax1.minorticks_off()
     ax1.set_ylabel("Execution time (ms)", fontproperties=LABEL_FP)
     ax1.set_ylim(bottom=YAXIS_MIN)
-    #ax1.set_ylim([YAXIS_MIN, YAXIS_MAX])
-    #ax1.set_yscale('log', basey=10)
 
     # X-AXIS
     ax1.set_xticks(ind + 0.5)
@@ -730,7 +760,6 @@ def create_convergence_bar_chart(datasets):
     ax1.yaxis.set_major_locator(LinearLocator(YAXIS_TICKS))
     ax1.minorticks_off()
     ax1.set_ylabel("Convergence time (ms)", fontproperties=LABEL_FP)
-    #ax1.set_yscale('log', basey=10)
 
     # X-AXIS
     ax1.set_xticks(ind + 0.5)
@@ -791,8 +820,6 @@ def create_time_series_line_chart(datasets, plot_mode):
     elif plot_mode == TIME_SERIES_INDEX_MODE:
         ax1.set_ylabel("Index count", fontproperties=LABEL_FP)
 
-    #ax1.set_yscale('log', basey=10)
-
     # X-AXIS
     #ax1.set_xticks(ind + 0.5)
     major_ticks = np.arange(0, TIME_SERIES_EXP_QUERY_COUNT + 1,
@@ -841,7 +868,6 @@ def create_variability_line_chart(datasets):
     ax1.yaxis.set_major_locator(LinearLocator(YAXIS_TICKS))
     ax1.minorticks_off()
     ax1.set_ylabel("Execution time (ms)", fontproperties=LABEL_FP)
-    #ax1.set_yscale('log', basey=10)
 
     # X-AXIS
     ax1.set_xticks(ind + 0.5)
@@ -894,8 +920,6 @@ def create_selectivity_line_chart(datasets):
     ax1.minorticks_off()
     ax1.set_ylabel("Execution time (ms)", fontproperties=LABEL_FP)
     ax1.set_ylim(bottom=YAXIS_MIN)
-    #ax1.set_ylim([YAXIS_MIN, YAXIS_MAX])
-    #ax1.set_yscale('log', basey=10)
 
     # X-AXIS
     ax1.set_xticks(ind + 0.5)
@@ -1008,8 +1032,6 @@ def create_index_count_line_chart(datasets, plot_mode):
     elif plot_mode == INDEX_COUNT_INDEX_MODE:
         ax1.set_ylabel("Index count", fontproperties=LABEL_FP)
 
-    #ax1.set_yscale('log', basey=10)
-
     # X-AXIS
     #ax1.set_xticks(ind + 0.5)
     major_ticks = np.arange(0, INDEX_COUNT_EXP_QUERY_COUNT + 1,
@@ -1026,23 +1048,16 @@ def create_index_count_line_chart(datasets, plot_mode):
     return fig
 
 
-def create_layout_bar_chart(datasets, title=""):
+def create_layout_line_chart(datasets, title=""):
     fig = plot.figure()
     ax1 = fig.add_subplot(111)
 
-    # datasets = [[d] for d in datasets[0]]
-
     # X-AXIS
-    x_values = ['None', 'Index', 'Layout', 'Both']
+    x_values = ['Disabled', 'Index-Only', 'Layout-Only', 'Both']
     N = len(x_values)
     ind = np.arange(N)
-    M = 1
-    margin = 0.05
-    margin_left_right = 0.3
-    width = (1.-2.*margin)/M
-    print(width)
-    bars = [None] * 1
 
+    idx = 0
     for group in xrange(len(datasets)):
         # GROUP
         y_values = []
@@ -1051,27 +1066,31 @@ def create_layout_bar_chart(datasets, title=""):
                 if col == 1:
                     y_values.append(datasets[group][line][col])
         LOG.info("group_data = %s", str(y_values))
-
-        bars[group] =  ax1.bar(ind + margin_left_right + (group * width),
-                               y_values, width,
-                               color=OPT_COLORS,
-                               # hatch=OPT_PATTERNS,
-                               linewidth=BAR_LINEWIDTH)
+        ax1.plot(ind + 0.5, y_values,
+                 color=COLOR_MAP_2[idx],
+                 linewidth=OPT_LINE_WIDTH,
+                 marker=OPT_MARKERS[idx],
+                 markersize=OPT_MARKER_SIZE,
+                 label=str(group))
+        idx = idx + 1
 
     # GRID
     makeGrid(ax1)
 
     # Y-AXIS
+    #YAXIS_MIN = 0
     ax1.yaxis.set_major_locator(LinearLocator(YAXIS_TICKS))
     ax1.minorticks_off()
-    ax1.set_ylabel("Execution time (ms)", fontproperties=LABEL_FP)
-    #ax1.set_yscale('log', basey=10)
+    ax1.set_ylabel("Total time (s)", fontproperties=LABEL_FP)
+    ax1.set_yscale('log', basey=10)
+    ax1.tick_params(axis='y', which='minor', left='off', right='off')
+    ax1.set_yticklabels(["", "10", "100", "1000", "10000"])
 
     # X-AXIS
-    ax1.set_xticks(np.arange(N)+0.75)
+    ax1.set_xticks(ind + 0.5)
+    ax1.set_xlabel("Tuning Mode", fontproperties=LABEL_FP)
     ax1.set_xticklabels(x_values)
-    ax1.set_xlabel('Tuning Method', fontproperties=LABEL_FP)
-    #ax1.set_xlim([XAXIS_MIN, XAXIS_MAX])
+    ax1.set_xlim([XAXIS_MIN, XAXIS_MAX])
 
     for label in ax1.get_yticklabels() :
         label.set_fontproperties(TICK_FP)
@@ -1120,7 +1139,6 @@ def create_trend_line_chart(datasets):
     ax1.set_ylabel("Index Utility", fontproperties=LABEL_FP)
     YAXIS_MIN = 0
     ax1.set_ylim(bottom=YAXIS_MIN)
-    #ax1.set_yscale('log', basey=10)
 
     # X-AXIS
     major_ticks = np.arange(0, TREND_EXP_TUNING_COUNT + 1,
@@ -1177,8 +1195,6 @@ def create_motivation_line_chart(datasets, plot_mode):
     # LATENCY
     if plot_mode == MOTIVATION_LATENCY_MODE:
         ax1.set_ylabel("Query latency (ms)", fontproperties=LABEL_FP)
-
-    #ax1.set_yscale('log', basey=10)
 
     # X-AXIS
     #ax1.set_xticks(ind + 0.5)
@@ -1408,32 +1424,25 @@ def trend_plot():
 
     saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH * 2.0, height=OPT_GRAPH_HEIGHT)
 
+# LAYOUT -- PLOT
 def layout_plot():
-    print('plotting layout')
 
-    def get_dataset(selectivity, projectivity, index_usage):
-        result_dir_list = [INDEX_USAGE_TYPES_STRINGS[index_usage],
-                               str(selectivity), str(projectivity)]
-        result_file = get_result_file(LAYOUT_DIR, result_dir_list, LAYOUT_CSV)
-        dataset = loadDataFile(result_file)
-        return dataset
+    for projectivity in LAYOUT_EXP_PROJECTIVITIES:
 
-    for selectivity in LAYOUT_EXP_SELECTIVITIES:
-        for projectivity in LAYOUT_EXP_PROJECTIVITIES:
-            datasets = []
+        datasets = []
+        for selectivity in LAYOUT_EXP_SELECTIVITIES:
+
+            # Get result file
             result_dir_list = [str(selectivity), str(projectivity)]
             result_file = get_result_file(LAYOUT_DIR, result_dir_list, LAYOUT_CSV)
-            if not os.path.exists(result_file):
-                print(selectivity, projectivity, 'is missing')
-                continue
+
             dataset = loadDataFile(result_file)
             datasets.append(dataset)
-            print(datasets)
 
-            fig = create_layout_bar_chart(datasets)
+        fig = create_layout_line_chart(datasets)
 
-            file_name = "layout-index-" + str(selectivity) + "-" + str(projectivity) + ".pdf"
-            saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH, height=OPT_GRAPH_HEIGHT)
+        file_name = "layout-" + str(projectivity) + ".pdf"
+        saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH, height=OPT_GRAPH_HEIGHT/1.5)
 
 
 ###################################################################################
@@ -1886,8 +1895,7 @@ def layout_eval():
                     else:
                         phase_length = 1000
 
-                    run_experiment(
-                                   layout_mode=layout_mode,
+                    run_experiment(layout_mode=layout_mode,
                                    index_usage_type=index_usage_type,
                                    write_ratio=LAYOUT_EXP_WRITE_RATIO,
                                    query_complexity=LAYOUT_EXP_QUERY_COMPLEXITY,
@@ -2049,4 +2057,5 @@ if __name__ == '__main__':
     #create_bar_legend_index_usage_type()
     #create_legend_trend()
     #create_legend_index_usage_type_subset()
-    create_legend_index_count()
+    #create_legend_index_count()
+    create_legend_layout()
