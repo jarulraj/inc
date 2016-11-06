@@ -1249,7 +1249,7 @@ def scale_plot():
     for index_usage_type in SELECTIVITY_EXP_INDEX_USAGE_TYPES:
         # Get result file
         result_dir_list = [INDEX_USAGE_TYPES_STRINGS[index_usage_type]]
-        result_file = get_result_file(SELECTIVITY_DIR, result_dir_list, SELECTIVITY_CSV)
+        result_file = get_result_file(SCALE_DIR, result_dir_list, SCALE_CSV)
 
         dataset = loadDataFile(result_file)
         datasets.append(dataset)
