@@ -306,8 +306,9 @@ SCALE_CSV = "scale.csv"
 INDEX_COUNT_EXP_INDEX_USAGE_TYPE = INDEX_USAGE_TYPE_PARTIAL_FAST
 INDEX_COUNT_EXP_WRITE_RATIO = WRITE_RATIO_READ_ONLY
 INDEX_COUNT_EXP_QUERY_COMPLEXITY = QUERY_COMPLEXITY_MODERATE
-INDEX_COUNT_EXP_INDEX_COUNT_THRESHOLDS = [3, 5, 10, 20]
-INDEX_COUNT_EXP_PHASE_LENGTH = 50
+INDEX_COUNT_EXP_INDEX_COUNT_THRESHOLDS = [3, 5, 10]
+INDEX_COUNT_EXP_PHASE_LENGTH = 250
+INDEX_COUNT_EXP_VARIABILITY_THRESHOLD = 10
 INDEX_COUNT_LATENCY_MODE = 1
 INDEX_COUNT_INDEX_MODE = 2
 INDEX_COUNT_PLOT_MODES = [INDEX_COUNT_LATENCY_MODE, INDEX_COUNT_INDEX_MODE]
@@ -1744,7 +1745,9 @@ def index_count_eval():
             run_experiment(phase_length=INDEX_COUNT_EXP_PHASE_LENGTH,
                            index_usage_type=INDEX_COUNT_EXP_INDEX_USAGE_TYPE,
                            write_ratio=INDEX_COUNT_EXP_WRITE_RATIO,
-                           index_count_threshold=index_count_threshold)
+                           query_count=TIME_SERIES_EXP_QUERY_COUNT,
+                           index_count_threshold=index_count_threshold,
+                           variability_threshold=INDEX_COUNT_EXP_VARIABILITY_THRESHOLD)
 
             # Collect stat
             stat_offset = -1
