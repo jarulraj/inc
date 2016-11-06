@@ -292,7 +292,8 @@ SELECTIVITY_CSV = "selectivity.csv"
 SCALE_EXP_INDEX_USAGE_TYPES = INDEX_USAGE_TYPES_SCALE
 SCALE_EXP_WRITE_RATIO = WRITE_RATIO_READ_ONLY
 SCALE_EXP_QUERY_COMPLEXITY = QUERY_COMPLEXITY_SIMPLE
-SCALE_EXP_SCALES = [10, 100, 1000, 10000]
+SCALE_EXP_PHASE_LENGTH = 500
+SCALE_EXP_SCALES = [1, 10, 100, 1000]
 SCALE_CSV = "scale.csv"
 
 ## INDEX_COUNT EXPERIMENT
@@ -1708,7 +1709,8 @@ def scale_eval():
             run_experiment(write_ratio=SCALE_EXP_WRITE_RATIO,
                            query_complexity=SCALE_EXP_QUERY_COMPLEXITY,
                            index_usage_type=index_usage_type,
-                           scale_factor=scale_factor)
+                           scale_factor=scale_factor,
+                           phase_length=SCALE_EXP_PHASE_LENGTH)
 
             # Collect stat
             collect_aggregate_stat(scale_factor, result_file)
