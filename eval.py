@@ -309,6 +309,7 @@ INDEX_COUNT_EXP_QUERY_COMPLEXITY = QUERY_COMPLEXITY_MODERATE
 INDEX_COUNT_EXP_INDEX_COUNT_THRESHOLDS = [3, 5, 10]
 INDEX_COUNT_EXP_PHASE_LENGTH = 250
 INDEX_COUNT_EXP_VARIABILITY_THRESHOLD = 10
+INDEX_COUNT_EXP_QUERY_COUNT = 3000
 INDEX_COUNT_LATENCY_MODE = 1
 INDEX_COUNT_INDEX_MODE = 2
 INDEX_COUNT_PLOT_MODES = [INDEX_COUNT_LATENCY_MODE, INDEX_COUNT_INDEX_MODE]
@@ -607,6 +608,38 @@ def create_legend_index_usage_type_subset():
                      handleheight=1, handlelength=3)
 
     figlegend.savefig('legend_index_usage_subset.pdf')
+
+def create_legend_index_count():
+    fig = pylab.figure()
+    ax1 = fig.add_subplot(111)
+
+    LEGEND_SIZE = 4
+    
+    figlegend = pylab.figure(figsize=(9, 0.5))
+    idx = 0
+    lines = [None] * (LEGEND_SIZE + 1)
+    data = [1]
+    x_values = [1]
+
+    TITLE = "INDEX COUNT THRESHOLDS:"
+    LABELS = [TITLE, "3", "5", "10"]
+
+    lines[idx], = ax1.plot(x_values, data, linewidth = 0)
+    idx = 1
+    
+    for group in xrange(LEGEND_SIZE):
+        lines[idx], = ax1.plot(x_values, data, color=COLOR_MAP_2[idx - 1], linewidth=OPT_LINE_WIDTH,
+                               marker=OPT_MARKERS[idx - 1], markersize=OPT_MARKER_SIZE)
+        idx = idx + 1
+
+    # LEGEND
+    figlegend.legend(lines, LABELS, prop=LEGEND_FP,
+                     loc=1, ncol=4,
+                     mode="expand", shadow=OPT_LEGEND_SHADOW,
+                     frameon=False, borderaxespad=0.0,
+                     handleheight=1, handlelength=3)
+
+    figlegend.savefig('legend_index_count.pdf')
 
 ###################################################################################
 # PLOT
@@ -930,18 +963,18 @@ def create_scale_line_chart(datasets):
 
     return fig
 
-def create_index_count_bar_chart(datasets):
+def create_index_count_line_chart(datasets, plot_mode):
     fig = plot.figure()
     ax1 = fig.add_subplot(111)
 
     # X-AXIS
-    x_values = [str(i) for i in INDEX_COUNT_EXP_INDEX_COUNT_THRESHOLDS]
+    x_values = [str(i) for i in range(1, INDEX_COUNT_EXP_QUERY_COUNT + 1)]
     N = len(x_values)
     ind = np.arange(N)
-    M = len(INDEX_USAGE_TYPES_ALL)
-    margin = 0.1
-    width = (1.-2.*margin)/M
-    bars = [None] * N
+
+    INDEX_COUNT_OPT_LINE_WIDTH = 3.0
+    INDEX_COUNT_OPT_MARKER_SIZE = 5.0
+    INDEX_COUNT_OPT_MARKER_FREQUENCY = INDEX_COUNT_EXP_QUERY_COUNT/10
 
     idx = 0
     for group in xrange(len(datasets)):
@@ -952,29 +985,38 @@ def create_index_count_bar_chart(datasets):
                 if col == 1:
                     y_values.append(datasets[group][line][col])
         LOG.info("group_data = %s", str(y_values))
-        bars[group] =  ax1.bar(ind + margin + (group * width),
-                       y_values, width,
-                       color=OPT_COLORS[group],
-                       hatch=OPT_PATTERNS[group],
-                       linewidth=BAR_LINEWIDTH)
+        ax1.plot(ind + 0.5, y_values,
+                 color=COLOR_MAP_2[idx],
+                 linewidth=INDEX_COUNT_OPT_LINE_WIDTH,
+                 marker=OPT_MARKERS[idx],
+                 markersize=INDEX_COUNT_OPT_MARKER_SIZE,
+                 markevery=INDEX_COUNT_OPT_MARKER_FREQUENCY,
+                 label=str(group))
         idx = idx + 1
 
     # GRID
     makeGrid(ax1)
 
     # Y-AXIS
-    YAXIS_MIN = 0
     ax1.yaxis.set_major_locator(LinearLocator(YAXIS_TICKS))
     ax1.minorticks_off()
-    ax1.set_ylabel("Execution time (ms)", fontproperties=LABEL_FP)
-    ax1.set_ylim(bottom=YAXIS_MIN)
+
+    # LATENCY
+    if plot_mode == INDEX_COUNT_LATENCY_MODE:
+        ax1.set_ylabel("Latency (ms)", fontproperties=LABEL_FP)
+    # INDEX
+    elif plot_mode == INDEX_COUNT_INDEX_MODE:
+        ax1.set_ylabel("Index count", fontproperties=LABEL_FP)
+
     #ax1.set_yscale('log', basey=10)
 
     # X-AXIS
-    ax1.set_xticks(ind + 0.5)
-    ax1.set_xlabel("Index count threshold", fontproperties=LABEL_FP)
-    ax1.set_xticklabels(x_values)
-    #ax1.set_xlim([XAXIS_MIN, XAXIS_MAX])
+    #ax1.set_xticks(ind + 0.5)
+    major_ticks = np.arange(0, INDEX_COUNT_EXP_QUERY_COUNT + 1,
+                            INDEX_COUNT_OPT_MARKER_FREQUENCY)
+    ax1.set_xticks(major_ticks)
+    ax1.set_xlabel("Query Sequence", fontproperties=LABEL_FP)
+    #ax1.set_xticklabels(x_values)
 
     for label in ax1.get_yticklabels() :
         label.set_fontproperties(TICK_FP)
@@ -982,6 +1024,7 @@ def create_index_count_bar_chart(datasets):
         label.set_fontproperties(TICK_FP)
 
     return fig
+
 
 def create_layout_bar_chart(datasets, title=""):
     fig = plot.figure()
@@ -1337,7 +1380,7 @@ def index_count_plot():
             dataset = loadDataFile(result_file)
             datasets.append(dataset)
 
-        fig = create_time_series_line_chart(datasets, plot_mode)
+        fig = create_index_count_line_chart(datasets, plot_mode)
 
         file_name = "index-count" + "-" + OUTPUT_STRING + ".pdf"
 
@@ -2005,4 +2048,5 @@ if __name__ == '__main__':
     #create_legend_motivation()
     #create_bar_legend_index_usage_type()
     #create_legend_trend()
-    create_legend_index_usage_type_subset()
+    #create_legend_index_usage_type_subset()
+    create_legend_index_count()
