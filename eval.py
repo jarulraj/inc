@@ -303,12 +303,16 @@ SCALE_EXP_SCALES = [1, 10, 100, 1000]
 SCALE_CSV = "scale.csv"
 
 ## INDEX_COUNT EXPERIMENT
-INDEX_COUNT_EXP_INDEX_USAGE_TYPES = INDEX_USAGE_TYPES_ALL
-INDEX_COUNT_EXP_WRITE_RATIOS = WRITE_RATIOS_ALL
+INDEX_COUNT_EXP_INDEX_USAGE_TYPE = INDEX_USAGE_TYPE_PARTIAL_FAST
+INDEX_COUNT_EXP_WRITE_RATIO = WRITE_RATIO_READ_ONLY
 INDEX_COUNT_EXP_QUERY_COMPLEXITY = QUERY_COMPLEXITY_MODERATE
 INDEX_COUNT_EXP_INDEX_COUNT_THRESHOLDS = [3, 5, 10, 20]
-INDEX_COUNT_EXP_PHASE_LENGTH = DEFAULT_PHASE_LENGTH
-INDEX_COUNT_CSV = "index_count.csv"
+INDEX_COUNT_EXP_PHASE_LENGTH = 50
+INDEX_COUNT_LATENCY_MODE = 1
+INDEX_COUNT_INDEX_MODE = 2
+INDEX_COUNT_PLOT_MODES = [INDEX_COUNT_LATENCY_MODE, INDEX_COUNT_INDEX_MODE]
+INDEX_COUNT_LATENCY_CSV = "index_count_latency.csv"
+INDEX_COUNT_INDEX_CSV = "index_count_index.csv"
 
 ## LAYOUT EXPERIMENT
 LAYOUT_EXP_LAYOUT_MODES = [LAYOUT_MODE_ROW, LAYOUT_MODE_HYBRID]
@@ -1306,27 +1310,38 @@ def scale_plot():
 
     saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH, height=OPT_GRAPH_HEIGHT)
 
-# INDEX_COUNT -- PLOT
+# INDEX COUNT -- PLOT
 def index_count_plot():
 
-    for write_ratio in INDEX_COUNT_EXP_WRITE_RATIOS:
+    for plot_mode in INDEX_COUNT_PLOT_MODES:
+
+        # LATENCY
+        if plot_mode == INDEX_COUNT_LATENCY_MODE:
+            CSV_FILE = INDEX_COUNT_LATENCY_CSV
+            OUTPUT_STRING = "latency"
+        # INDEX COUNT
+        elif plot_mode == INDEX_COUNT_INDEX_MODE:
+            CSV_FILE = INDEX_COUNT_INDEX_CSV
+            OUTPUT_STRING = "index"
 
         datasets = []
-        for index_usage_type in INDEX_COUNT_EXP_INDEX_USAGE_TYPES:
+        for index_count_threshold in INDEX_COUNT_EXP_INDEX_COUNT_THRESHOLDS:
+
             # Get result file
-            result_dir_list = [INDEX_USAGE_TYPES_STRINGS[index_usage_type],
-                               WRITE_RATIO_STRINGS[write_ratio]]
-            result_file = get_result_file(INDEX_COUNT_DIR, result_dir_list, INDEX_COUNT_CSV)
+            result_dir_list = [str(index_count_threshold)]
+            result_file = get_result_file(INDEX_COUNT_DIR,
+                                          result_dir_list,
+                                          CSV_FILE)
 
             dataset = loadDataFile(result_file)
             datasets.append(dataset)
 
-        fig = create_index_count_bar_chart(datasets)
+        fig = create_time_series_line_chart(datasets, plot_mode)
 
-        file_name = "index-count" + "-" + \
-                    WRITE_RATIO_STRINGS[write_ratio] + ".pdf"
+        file_name = "index-count" + "-" + OUTPUT_STRING + ".pdf"
 
-        saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH, height=OPT_GRAPH_HEIGHT)
+        saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH * 3.0, height=OPT_GRAPH_HEIGHT/1.5)
+
 
 # TREND -- PLOT
 def trend_plot():
@@ -1705,6 +1720,38 @@ def variability_eval():
                 # Collect stat
                 collect_aggregate_stat(variability_threshold, result_file)
 
+# INDEX COUNT -- EVAL
+def index_count_eval():
+
+    # CLEAN UP RESULT DIR
+    clean_up_dir(INDEX_COUNT_DIR)
+    print("INDEX COUNT EVAL")
+
+    for index_count_threshold in INDEX_COUNT_EXP_INDEX_COUNT_THRESHOLDS:
+            print("> index_count_threshold: " + str(index_count_threshold))
+
+            # Get result file
+            result_dir_list = [str(index_count_threshold)]
+
+            latency_result_file = get_result_file(INDEX_COUNT_DIR,
+                                                  result_dir_list,
+                                                  INDEX_COUNT_LATENCY_CSV)
+            index_result_file = get_result_file(INDEX_COUNT_DIR,
+                                                result_dir_list,
+                                                INDEX_COUNT_INDEX_CSV)
+
+            # Run experiment
+            run_experiment(phase_length=INDEX_COUNT_EXP_PHASE_LENGTH,
+                           index_usage_type=INDEX_COUNT_EXP_INDEX_USAGE_TYPE,
+                           write_ratio=INDEX_COUNT_EXP_WRITE_RATIO,
+                           index_count_threshold=index_count_threshold)
+
+            # Collect stat
+            stat_offset = -1
+            collect_stat(DEFAULT_QUERY_COUNT, latency_result_file, stat_offset)
+            stat_offset = -2
+            collect_stat(DEFAULT_QUERY_COUNT, index_result_file, stat_offset)
+
 # SELECTIVITY -- EVAL
 def selectivity_eval():
 
@@ -1760,40 +1807,6 @@ def scale_eval():
 
             # Collect stat
             collect_aggregate_stat(scale_factor, result_file)
-
-
-# INDEX_COUNT -- EVAL
-def index_count_eval():
-
-    # CLEAN UP RESULT DIR
-    clean_up_dir(INDEX_COUNT_DIR)
-    print("INDEX COUNT EVAL")
-
-    for write_ratio in INDEX_COUNT_EXP_WRITE_RATIOS:
-        print(MAJOR_STRING)
-
-        for index_usage_type in INDEX_COUNT_EXP_INDEX_USAGE_TYPES:
-            print(MINOR_STRING)
-
-            for index_count_threshold in INDEX_COUNT_EXP_INDEX_COUNT_THRESHOLDS:
-                print("> write_ratio: " + str(write_ratio) +
-                        " index_usage_type: " + str(index_usage_type) +
-                        " index_count_threshold: " + str(index_count_threshold) )
-
-                # Get result file
-                result_dir_list = [INDEX_USAGE_TYPES_STRINGS[index_usage_type],
-                                   WRITE_RATIO_STRINGS[write_ratio]]
-                result_file = get_result_file(INDEX_COUNT_DIR, result_dir_list, INDEX_COUNT_CSV)
-
-                # Run experiment
-                run_experiment(query_complexity=INDEX_COUNT_EXP_QUERY_COMPLEXITY,
-                               phase_length=INDEX_COUNT_EXP_PHASE_LENGTH,
-                               index_usage_type=index_usage_type,
-                               write_ratio=write_ratio,
-                               index_count_threshold=index_count_threshold)
-
-                # Collect stat
-                collect_aggregate_stat(index_count_threshold, result_file)
 
 def layout_eval():
     # CLEAN UP RESULT DIR
