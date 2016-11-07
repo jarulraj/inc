@@ -53,7 +53,7 @@ OPT_GRAPH_WIDTH = 400
 # to match the length of your data.
 NUM_COLORS = 5
 COLOR_MAP = ( '#418259', '#bd5632', '#e1a94c', '#7d6c5b', '#364d38', '#c4e1c6')
-COLOR_MAP_2 = ( '#F58A87', '#80CA86', '#9EC9E9', '#FED113', '#D89761' )
+COLOR_MAP_2 = ( '#F58A87', '#80CA86', '#9EC9E9', '#D89761', '#FED113' )
 
 OPT_COLORS = COLOR_MAP
 
@@ -321,8 +321,8 @@ LAYOUT_EXP_LAYOUT_MODES = [LAYOUT_MODE_ROW, LAYOUT_MODE_HYBRID]
 LAYOUT_EXP_WRITE_RATIO = WRITE_RATIO_READ_ONLY
 LAYOUT_EXP_QUERY_COMPLEXITY = QUERY_COMPLEXITY_MODERATE
 LAYOUT_EXP_COLUMN_COUNT = 500
-LAYOUT_EXP_SELECTIVITIES = [0.001, 0.1, 0.5]
-LAYOUT_EXP_PROJECTIVITIES = [0.01, 0.1, 0.5]
+LAYOUT_EXP_SELECTIVITIES = [0.01, 0.1]
+LAYOUT_EXP_PROJECTIVITIES = [0.01, 0.1]
 LAYOUT_EXP_INDEX_USAGES_TYPES = [INDEX_USAGE_TYPE_NEVER, INDEX_USAGE_TYPE_PARTIAL_MEDIUM]
 LAYOUT_EXP_PHASE_LENGTH = 100
 LAYOUT_EXP_QUERY_COUNT = 1000
@@ -1048,16 +1048,20 @@ def create_index_count_line_chart(datasets, plot_mode):
     return fig
 
 
-def create_layout_line_chart(datasets, title=""):
+def create_layout_bar_chart(datasets, title=""):
     fig = plot.figure()
     ax1 = fig.add_subplot(111)
 
     # X-AXIS
-    x_values = ['Disabled', 'Index-Only', 'Layout-Only', 'Both']
+    x_values = ['Disabled', 'Index', 'Layout', 'Both']
     N = len(x_values)
     ind = np.arange(N)
+    M = 1
+    margin = 0.05
+    margin_left_right = 0.3
+    width = (1.-2.*margin)/M
+    bars = [None] * 1
 
-    idx = 0
     for group in xrange(len(datasets)):
         # GROUP
         y_values = []
@@ -1066,31 +1070,27 @@ def create_layout_line_chart(datasets, title=""):
                 if col == 1:
                     y_values.append(datasets[group][line][col])
         LOG.info("group_data = %s", str(y_values))
-        ax1.plot(ind + 0.5, y_values,
-                 color=COLOR_MAP_2[idx],
-                 linewidth=OPT_LINE_WIDTH,
-                 marker=OPT_MARKERS[idx],
-                 markersize=OPT_MARKER_SIZE,
-                 label=str(group))
-        idx = idx + 1
+
+        bars[group] =  ax1.bar(ind + margin_left_right + (group * width),
+                               y_values, width,
+                               color=COLOR_MAP_2,
+                               # hatch=OPT_PATTERNS,
+                               linewidth=BAR_LINEWIDTH)
 
     # GRID
     makeGrid(ax1)
 
     # Y-AXIS
-    #YAXIS_MIN = 0
     ax1.yaxis.set_major_locator(LinearLocator(YAXIS_TICKS))
     ax1.minorticks_off()
-    ax1.set_ylabel("Total time (s)", fontproperties=LABEL_FP)
-    ax1.set_yscale('log', basey=10)
-    ax1.tick_params(axis='y', which='minor', left='off', right='off')
-    ax1.set_yticklabels(["", "10", "100", "1000", "10000"])
+    ax1.set_ylabel("Execution time (ms)", fontproperties=LABEL_FP)
+    #ax1.set_yscale('log', basey=10)
 
     # X-AXIS
-    ax1.set_xticks(ind + 0.5)
-    ax1.set_xlabel("Tuning Mode", fontproperties=LABEL_FP)
+    ax1.set_xticks(np.arange(N)+0.75)
     ax1.set_xticklabels(x_values)
-    ax1.set_xlim([XAXIS_MIN, XAXIS_MAX])
+    ax1.set_xlabel('Tuning Mode', fontproperties=LABEL_FP)
+    #ax1.set_xlim([XAXIS_MIN, XAXIS_MAX])
 
     for label in ax1.get_yticklabels() :
         label.set_fontproperties(TICK_FP)
@@ -1428,9 +1428,9 @@ def trend_plot():
 def layout_plot():
 
     for projectivity in LAYOUT_EXP_PROJECTIVITIES:
-
-        datasets = []
         for selectivity in LAYOUT_EXP_SELECTIVITIES:
+
+            datasets = []
 
             # Get result file
             result_dir_list = [str(selectivity), str(projectivity)]
@@ -1439,10 +1439,10 @@ def layout_plot():
             dataset = loadDataFile(result_file)
             datasets.append(dataset)
 
-        fig = create_layout_line_chart(datasets)
-
-        file_name = "layout-" + str(projectivity) + ".pdf"
-        saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH, height=OPT_GRAPH_HEIGHT/1.5)
+            fig = create_layout_bar_chart(datasets)
+    
+            file_name = "layout-" + str(projectivity) + "-" + str(selectivity) + ".pdf"
+            saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH, height=OPT_GRAPH_HEIGHT)
 
 
 ###################################################################################
