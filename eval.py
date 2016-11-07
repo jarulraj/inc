@@ -645,31 +645,38 @@ def create_legend_layout():
     fig = pylab.figure()
     ax1 = fig.add_subplot(111)
 
-    LEGEND_SIZE = 4
-    
-    figlegend = pylab.figure(figsize=(9, 0.5))
-    idx = 0
-    lines = [None] * (LEGEND_SIZE + 1)
+    figlegend = pylab.figure(figsize=(12, 0.5))
+
+    TITLE = "TUNING MODES:"
+    LABELS = [TITLE, "NONE", "INDEX", "LAYOUT", "BOTH"]
+
+    num_items = len(LABELS) + 1
+    ind = np.arange(1)
+    margin = 0.10
+    width = (1.-2.*margin)/num_items
     data = [1]
-    x_values = [1]
 
-    TITLE = "SELECTIVITY:"
-    LABELS = [TITLE, "0.1%", "1%", "10%"]
+    bars = [None] * num_items
 
-    lines[idx], = ax1.plot(x_values, data, linewidth = 0)
+    # TITLE
+    idx = 0
+    bars[idx] = ax1.bar(ind + margin + (idx * width), data, width,
+                        color = 'w',
+                        linewidth=0)
+
     idx = 1
-    
-    for group in xrange(LEGEND_SIZE):
-        lines[idx], = ax1.plot(x_values, data, color=COLOR_MAP_2[idx - 1], linewidth=OPT_LINE_WIDTH,
-                               marker=OPT_MARKERS[idx - 1], markersize=OPT_MARKER_SIZE)
+    for group in xrange(len(LABELS)):
+        bars[idx] = ax1.bar(ind + margin + (idx * width), data, width,
+                              color=COLOR_MAP_2[idx - 1],
+                              linewidth=BAR_LINEWIDTH)
         idx = idx + 1
 
     # LEGEND
-    figlegend.legend(lines, LABELS, prop=LEGEND_FP,
-                     loc=1, ncol=4,
+    figlegend.legend(bars, LABELS, prop=LEGEND_FP,
+                     loc=1, ncol=5,
                      mode="expand", shadow=OPT_LEGEND_SHADOW,
                      frameon=False, borderaxespad=0.0,
-                     handleheight=1, handlelength=3)
+                     handleheight=1, handlelength=4)
 
     figlegend.savefig('legend_layout.pdf')
 
@@ -1070,11 +1077,9 @@ def create_layout_bar_chart(datasets, title=""):
                 if col == 1:
                     y_values.append(datasets[group][line][col])
         LOG.info("group_data = %s", str(y_values))
-
         bars[group] =  ax1.bar(ind + margin_left_right + (group * width),
                                y_values, width,
                                color=COLOR_MAP_2,
-                               # hatch=OPT_PATTERNS,
                                linewidth=BAR_LINEWIDTH)
 
     # GRID
@@ -2058,4 +2063,4 @@ if __name__ == '__main__':
     #create_legend_trend()
     #create_legend_index_usage_type_subset()
     #create_legend_index_count()
-    create_legend_layout()
+    #create_legend_layout()
