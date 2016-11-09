@@ -250,7 +250,9 @@ INDEX_USAGE_TYPES_SCALE = [INDEX_USAGE_TYPE_PARTIAL_FAST, INDEX_USAGE_TYPE_NEVER
 REFLEX_EXP_INDEX_USAGE_TYPES = INDEX_USAGE_TYPES_ALL
 REFLEX_EXP_WRITE_RATIOS = WRITE_RATIOS_ALL
 REFLEX_EXP_QUERY_COMPLEXITYS = QUERY_COMPLEXITYS_ALL
+REFLEX_EXP_QUERY_COUNT = 3000
 REFLEX_EXP_PHASE_LENGTHS = [50, 100, 250, 500]
+
 REFLEX_CSV = "reflex.csv"
 
 ##  CONVERGENCE EXPERIMENT
@@ -1650,6 +1652,7 @@ def reflex_eval():
                     run_experiment(phase_length=phase_length,
                                    index_usage_type=index_usage_type,
                                    write_ratio=write_ratio,
+                                   query_count=REFLEX_EXP_QUERY_COUNT,
                                    query_complexity=query_complexity)
 
                     # Collect stat
