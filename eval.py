@@ -341,6 +341,7 @@ TREND_LINE_COLORS = ( '#594F4F', '#45ADA8')
 ## MOTIVATION EXPERIMENT
 MOTIVATION_EXP_INDEX_USAGE_TYPES = INDEX_USAGE_TYPES_MOTIVATION
 MOTIVATION_EXP_INDEX_COUNT_THRESHOLD = 5
+MOTIVATION_EXP_SCALE_FACTOR = 200
 MOTIVATION_EXP_QUERY_COUNT = 3000
 MOTIVATION_EXP_PHASE_LENGTHS = [MOTIVATION_EXP_QUERY_COUNT * 10]
 MOTIVATION_EXP_WRITE_RATIOS = [WRITE_RATIO_READ_ONLY]
@@ -1970,6 +1971,7 @@ def motivation_eval():
                                    write_ratio=write_ratio,
                                    index_count_threshold=MOTIVATION_EXP_INDEX_COUNT_THRESHOLD,
                                    query_count=MOTIVATION_EXP_QUERY_COUNT,
+                                   scale_factor=MOTIVATION_EXP_SCALE_FACTOR,
                                    query_complexity=query_complexity,
                                    duration_between_pauses=MOTIVATION_EXP_DURATION_BETWEEN_PAUSES,
                                    duration_of_pause=MOTIVATION_EXP_DURATION_OF_PAUSE)
