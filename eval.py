@@ -1166,9 +1166,9 @@ def create_motivation_line_chart(datasets, plot_mode):
     ax1 = fig.add_subplot(111)
 
     # X-AXIS
-    x_values = [str(i) for i in range(1, MOTIVATION_EXP_QUERY_COUNT + 1)]
-    N = len(x_values)
-    ind = np.arange(N)
+    # x_values = [str(i) for i in range(1, MOTIVATION_EXP_QUERY_COUNT + 1)]
+    # N = len(x_values)
+    ind = np.arange(MOTIVATION_EXP_QUERY_COUNT)
 
     MOTIVATION_OPT_LINE_WIDTH = 3.0
     MOTIVATION_OPT_MARKER_SIZE = 5.0
@@ -1177,13 +1177,20 @@ def create_motivation_line_chart(datasets, plot_mode):
     idx = 0
     for group in xrange(len(datasets)):
         # GROUP
+        x_values = []
         y_values = []
         for line in  xrange(len(datasets[group])):
-            for col in  xrange(len(datasets[group][line])):
+            for col in xrange(len(datasets[group][line])):
                 if col == 1:
                     y_values.append(datasets[group][line][col])
+                    if line == 0:
+                      x_values.append(0.0)
+                    else:
+                      x_values.append(x_values[line-1] + datasets[group][line][col])
+        # Convert to second
+        x_values = [float(x_val / 1000.0) for x_val in x_values]
         LOG.info("group_data = %s", str(y_values))
-        ax1.plot(ind + 0.5, y_values,
+        ax1.plot(x_values, y_values,
                  color=OPT_COLORS[idx],
                  linewidth=MOTIVATION_OPT_LINE_WIDTH,
                  marker=OPT_MARKERS[idx],
@@ -1205,10 +1212,9 @@ def create_motivation_line_chart(datasets, plot_mode):
 
     # X-AXIS
     #ax1.set_xticks(ind + 0.5)
-    major_ticks = np.arange(0, MOTIVATION_EXP_QUERY_COUNT + 1,
-                            MOTIVATION_OPT_MARKER_FREQUENCY)
+    major_ticks = np.arange(0, 60, 60/10)
     ax1.set_xticks(major_ticks)
-    ax1.set_xlabel("Query Sequence", fontproperties=LABEL_FP)
+    ax1.set_xlabel("Workload Duration (s)", fontproperties=LABEL_FP)
     #ax1.set_xticklabels(x_values)
 
     for label in ax1.get_yticklabels() :
