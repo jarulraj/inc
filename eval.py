@@ -1184,9 +1184,9 @@ def create_motivation_line_chart(datasets, plot_mode):
                 if col == 1:
                     y_values.append(datasets[group][line][col])
                     if line == 0:
-                      x_values.append(0.0)
+                        x_values.append(0.0)
                     else:
-                      x_values.append(x_values[line-1] + datasets[group][line][col])
+                        x_values.append(x_values[line-1] + datasets[group][line][col])
         # Convert to second
         x_values = [float(x_val / 1000.0) for x_val in x_values]
         LOG.info("group_data = %s", str(y_values))
@@ -1208,14 +1208,19 @@ def create_motivation_line_chart(datasets, plot_mode):
 
     # LATENCY
     if plot_mode == MOTIVATION_LATENCY_MODE:
-        ax1.set_ylabel("Query latency (ms)", fontproperties=LABEL_FP)
+        ax1.set_ylabel("Latency (ms)", fontproperties=LABEL_FP)
 
     # X-AXIS
     #ax1.set_xticks(ind + 0.5)
-    major_ticks = np.arange(0, 60, 60/10)
+    major_ticks = np.arange(0, 61, 60/10)
     ax1.set_xticks(major_ticks)
-    ax1.set_xlabel("Workload Duration (s)", fontproperties=LABEL_FP)
+    ax1.set_xlabel("Cumulative Workload Execution Time (s)", fontproperties=LABEL_FP)
     #ax1.set_xticklabels(x_values)
+
+    # ADD VLINES
+    plot.axvline(x=36.42, color='k', linewidth=2.0)
+    plot.axvline(x=51.28, color='k', linewidth=2.0)
+    plot.axvline(x=57.04, color='k', linewidth=2.0)
 
     for label in ax1.get_yticklabels() :
         label.set_fontproperties(TICK_FP)
@@ -1572,7 +1577,7 @@ def motivation_plot():
                             WRITE_RATIO_STRINGS[write_ratio] + "-" + \
                             str(phase_length) + ".pdf"
 
-                saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH * 3.0, height=OPT_GRAPH_HEIGHT)
+                saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH * 3.0, height=OPT_GRAPH_HEIGHT/1.5)
 
 
 ###################################################################################
