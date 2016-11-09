@@ -445,7 +445,7 @@ def create_legend_index_usage_type():
     data = [1]
     x_values = [1]
 
-    TITLE = "INDEX USAGE TYPES:"
+    TITLE = "INDEX USAGE MODE:"
     LABELS = [TITLE, "PARTIAL-FAST", "PARTIAL-MODERATE", "PARTIAL-SLOW", "NEVER"]
 
     lines[idx], = ax1.plot(x_values, data, linewidth = 0)
@@ -477,7 +477,7 @@ def create_legend_motivation():
     data = [1]
     x_values = [1]
 
-    TITLE = "INDEX USAGE TYPES:"
+    TITLE = "INDEX USAGE MODE:"
     LABELS = [TITLE, "PARTIAL", "FULL", "NEVER"]
 
     lines[idx], = ax1.plot(x_values, data, linewidth = 0)
@@ -490,7 +490,7 @@ def create_legend_motivation():
 
     # LEGEND
     figlegend.legend(lines, LABELS, prop=LEGEND_FP,
-                     loc=1, ncol=7,
+                     loc=1, ncol=4,
                      mode="expand", shadow=OPT_LEGEND_SHADOW,
                      frameon=False, borderaxespad=0.0,
                      handleheight=1, handlelength=3)
@@ -529,7 +529,7 @@ def create_bar_legend_index_usage_type():
                               linewidth=BAR_LINEWIDTH)
         idx = idx + 1
 
-    TITLE = "INDEX USAGE TYPES:"
+    TITLE = "INDEX USAGE MODE:"
     LABELS = [TITLE, "PARTIAL-FAST", "PARTIAL-MODERATE", "PARTIAL-SLOW"]
 
     # LEGEND
@@ -588,7 +588,7 @@ def create_legend_index_usage_type_subset():
     data = [1]
     x_values = [1]
 
-    TITLE = "INDEX USAGE TYPES:"
+    TITLE = "INDEX USAGE MODE:"
     LABELS = [TITLE, "PARTIAL-FAST", "NEVER"]
 
     lines[idx], = ax1.plot(x_values, data, linewidth = 0)
