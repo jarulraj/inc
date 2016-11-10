@@ -878,7 +878,7 @@ def create_holistic_line_chart(datasets):
 
     TIME_SERIES_OPT_LINE_WIDTH = 3.0
     TIME_SERIES_OPT_MARKER_SIZE = 5.0
-    TIME_SERIES_OPT_MARKER_FREQUENCY = TIME_SERIES_EXP_QUERY_COUNT/10
+    TIME_SERIES_OPT_MARKER_FREQUENCY = TIME_SERIES_EXP_QUERY_COUNT/30
 
     idx = 0
     for group in xrange(len(datasets)):
@@ -891,7 +891,7 @@ def create_holistic_line_chart(datasets):
         LOG.info("group_data = %s", str(y_values))
         print(len(ind), len(y_values))
         ax1.plot(ind + 0.5, y_values,
-                 color=OPT_COLORS[idx],
+                 color=COLOR_MAP_2[idx],
                  linewidth=TIME_SERIES_OPT_LINE_WIDTH,
                  marker=OPT_MARKERS[idx],
                  markersize=TIME_SERIES_OPT_MARKER_SIZE,
@@ -912,10 +912,25 @@ def create_holistic_line_chart(datasets):
     # X-AXIS
     #ax1.set_xticks(ind + 0.5)
     major_ticks = np.arange(0, len(x_values) + 1,
-                            250)
+                            300)
     ax1.set_xticks(major_ticks)
     ax1.set_xlabel("Query Sequence", fontproperties=LABEL_FP)
     #ax1.set_xticklabels(x_values)
+
+    # LABELS
+    y_mark = 0.8
+    x_mark_count = 1.0/3
+    x_mark_offset = x_mark_count/2 - x_mark_count/4
+    x_marks = np.arange(0, 1, x_mark_count)
+
+    ADAPT_LABELS = (["Scan (Copying)", "Scan (Proactive)", "Insert (Dropping)"])
+
+    for idx, x_mark in enumerate(x_marks):
+            ax1.text(x_mark + x_mark_offset,
+                     y_mark,
+                     ADAPT_LABELS[idx],
+                     transform=ax1.transAxes,
+                     bbox=dict(facecolor='lightgrey', alpha=0.75))
 
     for label in ax1.get_yticklabels() :
         label.set_fontproperties(TICK_FP)
@@ -1559,7 +1574,7 @@ def holistic_plot():
 
     file_name = "holistic.pdf";
 
-    saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH * 2.0, height=OPT_GRAPH_HEIGHT/1.5)
+    saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH * 3.0, height=OPT_GRAPH_HEIGHT/1.5)
 
 ###################################################################################
 # EVAL HELPERS
