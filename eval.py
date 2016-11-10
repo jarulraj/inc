@@ -350,7 +350,8 @@ MOTIVATION_LATENCY_MODE = 1
 MOTIVATION_PLOT_MODES = [MOTIVATION_LATENCY_MODE]
 MOTIVATION_LATENCY_CSV = "motivation_latency.csv"
 MOTIVATION_EXP_DURATION_BETWEEN_PAUSES = 5
-MOTIVATION_EXP_DURATION_OF_PAUSE = 4000
+MOTIVATION_EXP_DURATION_OF_PAUSE = 2000
+MOTIVATION_EXP_TILE_GROUPS_INDEXED_PER_ITERATION = 1
 
 ###################################################################################
 # UTILS
@@ -1973,6 +1974,7 @@ def motivation_eval():
                                    query_count=MOTIVATION_EXP_QUERY_COUNT,
                                    scale_factor=MOTIVATION_EXP_SCALE_FACTOR,
                                    query_complexity=query_complexity,
+                                   tile_groups_indexed_per_iteration=MOTIVATION_EXP_TILE_GROUPS_INDEXED_PER_ITERATION,
                                    duration_between_pauses=MOTIVATION_EXP_DURATION_BETWEEN_PAUSES,
                                    duration_of_pause=MOTIVATION_EXP_DURATION_OF_PAUSE)
 
