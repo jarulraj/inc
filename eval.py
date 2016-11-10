@@ -345,15 +345,16 @@ TREND_LINE_COLORS = ( '#594F4F', '#45ADA8')
 ## MOTIVATION EXPERIMENT
 MOTIVATION_EXP_INDEX_USAGE_TYPES = INDEX_USAGE_TYPES_MOTIVATION
 MOTIVATION_EXP_INDEX_COUNT_THRESHOLD = 5
-MOTIVATION_EXP_QUERY_COUNT = 3000
+MOTIVATION_EXP_SCALE_FACTOR = 500
+MOTIVATION_EXP_QUERY_COUNT = 1000
 MOTIVATION_EXP_PHASE_LENGTHS = [MOTIVATION_EXP_QUERY_COUNT * 10]
 MOTIVATION_EXP_WRITE_RATIOS = [WRITE_RATIO_READ_ONLY]
 MOTIVATION_EXP_QUERY_COMPLEXITY = QUERY_COMPLEXITY_SIMPLE
 MOTIVATION_LATENCY_MODE = 1
 MOTIVATION_PLOT_MODES = [MOTIVATION_LATENCY_MODE]
 MOTIVATION_LATENCY_CSV = "motivation_latency.csv"
-MOTIVATION_EXP_DURATION_BETWEEN_PAUSES = 5
-MOTIVATION_EXP_DURATION_OF_PAUSE = 1000
+MOTIVATION_EXP_DURATION_OF_PAUSE = 40000
+MOTIVATION_EXP_TILE_GROUPS_INDEXED_PER_ITERATION = 20
 
 ## HOLISTIC EXPERIMENT
 HOLISTIC_EXPERIMENT_MULTI_STAGE = 1
@@ -467,7 +468,7 @@ def create_legend_index_usage_type():
     data = [1]
     x_values = [1]
 
-    TITLE = "INDEX USAGE TYPES:"
+    TITLE = "INDEX USAGE MODE:"
     LABELS = [TITLE, "PARTIAL-FAST", "PARTIAL-MODERATE", "PARTIAL-SLOW", "NEVER"]
 
     lines[idx], = ax1.plot(x_values, data, linewidth = 0)
@@ -499,7 +500,7 @@ def create_legend_motivation():
     data = [1]
     x_values = [1]
 
-    TITLE = "INDEX USAGE TYPES:"
+    TITLE = "INDEX USAGE MODE:"
     LABELS = [TITLE, "PARTIAL", "FULL", "NEVER"]
 
     lines[idx], = ax1.plot(x_values, data, linewidth = 0)
@@ -512,7 +513,7 @@ def create_legend_motivation():
 
     # LEGEND
     figlegend.legend(lines, LABELS, prop=LEGEND_FP,
-                     loc=1, ncol=7,
+                     loc=1, ncol=4,
                      mode="expand", shadow=OPT_LEGEND_SHADOW,
                      frameon=False, borderaxespad=0.0,
                      handleheight=1, handlelength=3)
@@ -551,7 +552,7 @@ def create_bar_legend_index_usage_type():
                               linewidth=BAR_LINEWIDTH)
         idx = idx + 1
 
-    TITLE = "INDEX USAGE TYPES:"
+    TITLE = "INDEX USAGE MODE:"
     LABELS = [TITLE, "PARTIAL-FAST", "PARTIAL-MODERATE", "PARTIAL-SLOW"]
 
     # LEGEND
@@ -610,7 +611,7 @@ def create_legend_index_usage_type_subset():
     data = [1]
     x_values = [1]
 
-    TITLE = "INDEX USAGE TYPES:"
+    TITLE = "INDEX USAGE MODE:"
     LABELS = [TITLE, "PARTIAL-FAST", "NEVER"]
 
     lines[idx], = ax1.plot(x_values, data, linewidth = 0)
@@ -1263,9 +1264,9 @@ def create_motivation_line_chart(datasets, plot_mode):
                 if col == 1:
                     y_values.append(datasets[group][line][col])
                     if line == 0:
-                      x_values.append(0.0)
+                        x_values.append(0.0)
                     else:
-                      x_values.append(x_values[line-1] + datasets[group][line][col])
+                        x_values.append(x_values[line-1] + datasets[group][line][col])
         # Convert to second
         x_values = [float(x_val / 1000.0) for x_val in x_values]
         LOG.info("group_data = %s", str(y_values))
@@ -1287,14 +1288,19 @@ def create_motivation_line_chart(datasets, plot_mode):
 
     # LATENCY
     if plot_mode == MOTIVATION_LATENCY_MODE:
-        ax1.set_ylabel("Query latency (ms)", fontproperties=LABEL_FP)
+        ax1.set_ylabel("Latency (ms)", fontproperties=LABEL_FP)
 
     # X-AXIS
     #ax1.set_xticks(ind + 0.5)
-    major_ticks = np.arange(0, 60, 60/10)
+    major_ticks = np.arange(0, 151, 150/10)
     ax1.set_xticks(major_ticks)
-    ax1.set_xlabel("Workload Duration (s)", fontproperties=LABEL_FP)
+    ax1.set_xlabel("Cumulative Workload Execution Time (s)", fontproperties=LABEL_FP)
     #ax1.set_xticklabels(x_values)
+
+    # ADD VLINES
+    plot.axvline(x=83.1, color='k', linewidth=2.0)
+    plot.axvline(x=122.3, color='k', linewidth=2.0)
+    plot.axvline(x=125.6, color='k', linewidth=2.0)
 
     for label in ax1.get_yticklabels() :
         label.set_fontproperties(TICK_FP)
@@ -1673,7 +1679,7 @@ def motivation_plot():
                             WRITE_RATIO_STRINGS[write_ratio] + "-" + \
                             str(phase_length) + ".pdf"
 
-                saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH * 3.0, height=OPT_GRAPH_HEIGHT)
+                saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH * 3.0, height=OPT_GRAPH_HEIGHT/1.5)
 
 
 ###################################################################################
@@ -2066,8 +2072,9 @@ def motivation_eval():
                                    write_ratio=write_ratio,
                                    index_count_threshold=MOTIVATION_EXP_INDEX_COUNT_THRESHOLD,
                                    query_count=MOTIVATION_EXP_QUERY_COUNT,
+                                   scale_factor=MOTIVATION_EXP_SCALE_FACTOR,
                                    query_complexity=query_complexity,
-                                   duration_between_pauses=MOTIVATION_EXP_DURATION_BETWEEN_PAUSES,
+                                   tile_groups_indexed_per_iteration=MOTIVATION_EXP_TILE_GROUPS_INDEXED_PER_ITERATION,
                                    duration_of_pause=MOTIVATION_EXP_DURATION_OF_PAUSE)
 
                     # Collect stat
