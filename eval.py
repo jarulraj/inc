@@ -168,6 +168,7 @@ QUERY_COMPLEXITY_STRINGS = {
 ## WRITE COMPLEXITY TYPES
 WRITE_COMPLEXITY_SIMPLE   = 1
 WRITE_COMPLEXITY_COMPLEX  = 2
+WRITE_COMPLEXITY_INSERT   = 3
 
 WRITE_COMPLEXITY_STRINGS = {
     1 : "simple",
@@ -357,10 +358,15 @@ MOTIVATION_EXP_DURATION_OF_PAUSE = 1000
 ## HOLISTIC EXPERIMENT
 HOLISTIC_EXPERIMENT_MULTI_STAGE = 1
 HOLISTIC_EXPERIMENT_HOLISTIC_INDEXING = [0, 1]
-HOLISTIC_EXPERIMENT_PHASE_LENGTH = 100
+HOLISTIC_EXPERIMENT_PHASE_LENGTH = 200
 HOLISTIC_EXPERIMENT_QUERY_COUNT = 1000
 HOLISTIC_EXPERIMENT_SCALE_FACTOR = 1000
+HOLISTIC_EXPERIMENT_COLUMN_COUNT = 60
+HOLISTIC_EXPERIMENT_INDEX_USAGE_TYPE = INDEX_USAGE_TYPE_PARTIAL_FAST
 HOLISTIC_EXPERIMENT_QUERY_COMPLEXITY = QUERY_COMPLEXITY_MODERATE
+HOLISTIC_EXPERIMENT_WRITE_COMPLEXITY = WRITE_COMPLEXITY_INSERT
+HOLISTIC_EXPERIMENT_WRITE_RATIO_THRESHOLD = 0.5
+HOLISTIC_EXPERIMENT_LAYOUT_MODE = LAYOUT_MODE_COLUMN
 HOLISTIC_EXPERIMENT_HOLISTIC_INDEXING_STRINGS = {
     0 : 'peloton',
     1 : 'holistic'
@@ -882,6 +888,7 @@ def create_holistic_line_chart(datasets):
                 if col == 1:
                     y_values.append(datasets[group][line][col])
         LOG.info("group_data = %s", str(y_values))
+        print(len(ind), len(y_values))
         ax1.plot(ind + 0.5, y_values,
                  color=OPT_COLORS[idx],
                  linewidth=TIME_SERIES_OPT_LINE_WIDTH,
@@ -1539,6 +1546,9 @@ def holistic_plot():
 
         dataset = loadDataFile(result_file)
         datasets.append(dataset)
+
+    # Reverse the order of the lines for better visual
+    datasets = datasets[::-1]
     fig = create_holistic_line_chart(datasets)
 
     file_name = "holistic.pdf";
@@ -2075,7 +2085,8 @@ def holistic_eval():
         print(MAJOR_STRING)
 
         print("> holistic: " + str(holistic_index_enabled) +
-                " multi_stage: " + str(HOLISTIC_EXPERIMENT_MULTI_STAGE))
+                " multi_stage: " + str(HOLISTIC_EXPERIMENT_MULTI_STAGE) +
+                " layout: " + LAYOUT_MODE_STRINGS[HOLISTIC_EXPERIMENT_LAYOUT_MODE])
 
         # Get result file
         result_dir_list = [HOLISTIC_EXPERIMENT_HOLISTIC_INDEXING_STRINGS[holistic_index_enabled]]
@@ -2088,7 +2099,12 @@ def holistic_eval():
             query_count=HOLISTIC_EXPERIMENT_QUERY_COUNT,
             phase_length=HOLISTIC_EXPERIMENT_PHASE_LENGTH,
             scale_factor=HOLISTIC_EXPERIMENT_SCALE_FACTOR,
-            query_complexity=HOLISTIC_EXPERIMENT_QUERY_COMPLEXITY)
+            query_complexity=HOLISTIC_EXPERIMENT_QUERY_COMPLEXITY,
+            index_usage_type=HOLISTIC_EXPERIMENT_INDEX_USAGE_TYPE,
+            write_complexity=HOLISTIC_EXPERIMENT_WRITE_COMPLEXITY,
+            write_ratio_threshold=HOLISTIC_EXPERIMENT_WRITE_RATIO_THRESHOLD,
+            column_count=HOLISTIC_EXPERIMENT_COLUMN_COUNT,
+            layout_mode=HOLISTIC_EXPERIMENT_LAYOUT_MODE)
         print("Executed in", time.time() - start, "s")
 
         stat_offset = -1
