@@ -1173,7 +1173,7 @@ def create_motivation_line_chart(datasets, plot_mode):
 
     MOTIVATION_OPT_LINE_WIDTH = 3.0
     MOTIVATION_OPT_MARKER_SIZE = 5.0
-    MOTIVATION_OPT_MARKER_FREQUENCY = MOTIVATION_EXP_QUERY_COUNT/12
+    MOTIVATION_OPT_MARKER_FREQUENCY = MOTIVATION_EXP_QUERY_COUNT/10
 
     idx = 0
     for group in xrange(len(datasets)):
@@ -1213,15 +1213,15 @@ def create_motivation_line_chart(datasets, plot_mode):
 
     # X-AXIS
     #ax1.set_xticks(ind + 0.5)
-    major_ticks = np.arange(0, 61, 60/12)
+    major_ticks = np.arange(0, 151, 150/10)
     ax1.set_xticks(major_ticks)
     ax1.set_xlabel("Cumulative Workload Execution Time (s)", fontproperties=LABEL_FP)
     #ax1.set_xticklabels(x_values)
 
     # ADD VLINES
-    plot.axvline(x=36.44, color='k', linewidth=2.0)
-    plot.axvline(x=49.06, color='k', linewidth=2.0)
-    plot.axvline(x=57.03, color='k', linewidth=2.0)
+    plot.axvline(x=83.1, color='k', linewidth=2.0)
+    plot.axvline(x=122.3, color='k', linewidth=2.0)
+    plot.axvline(x=125.6, color='k', linewidth=2.0)
 
     for label in ax1.get_yticklabels() :
         label.set_fontproperties(TICK_FP)
