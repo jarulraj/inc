@@ -604,7 +604,7 @@ def create_legend_index_usage_type_subset():
     ax1 = fig.add_subplot(111)
 
     LEGEND_SIZE = 3
-    
+
     figlegend = pylab.figure(figsize=(9, 0.5))
     idx = 0
     lines = [None] * (LEGEND_SIZE + 1)
@@ -639,7 +639,7 @@ def create_legend_index_count():
     ax1 = fig.add_subplot(111)
 
     LEGEND_SIZE = 4
-    
+
     figlegend = pylab.figure(figsize=(9, 0.5))
     idx = 0
     lines = [None] * (LEGEND_SIZE + 1)
@@ -651,7 +651,7 @@ def create_legend_index_count():
 
     lines[idx], = ax1.plot(x_values, data, linewidth = 0)
     idx = 1
-    
+
     for group in xrange(LEGEND_SIZE):
         lines[idx], = ax1.plot(x_values, data, color=COLOR_MAP_2[idx - 1], linewidth=OPT_LINE_WIDTH,
                                marker=OPT_MARKERS[idx - 1], markersize=OPT_MARKER_SIZE)
@@ -704,6 +704,38 @@ def create_legend_layout():
                      handleheight=1, handlelength=4)
 
     figlegend.savefig('legend_layout.pdf')
+
+def create_legend_holistic():
+    fig = pylab.figure()
+    ax1 = fig.add_subplot(111)
+
+    LEGEND_SIZE = 3
+
+    figlegend = pylab.figure(figsize=(9, 0.5))
+    idx = 0
+    lines = [None] * (LEGEND_SIZE + 1)
+    data = [1]
+    x_values = [1]
+
+    TITLE = "INDEX TUNING MODES:"
+    LABELS = [TITLE, "HOLISTIC", "INCREMENTAL"]
+
+    lines[idx], = ax1.plot(x_values, data, linewidth = 0)
+    idx = 1
+
+    for group in xrange(LEGEND_SIZE):
+        lines[idx], = ax1.plot(x_values, data, color=COLOR_MAP_2[idx - 1], linewidth=OPT_LINE_WIDTH,
+                               marker=OPT_MARKERS[idx - 1], markersize=OPT_MARKER_SIZE)
+        idx = idx + 1
+
+    # LEGEND
+    figlegend.legend(lines, LABELS, prop=LEGEND_FP,
+                     loc=1, ncol=4,
+                     mode="expand", shadow=OPT_LEGEND_SHADOW,
+                     frameon=False, borderaxespad=0.0,
+                     handleheight=1, handlelength=3)
+
+    figlegend.savefig('legend_holistic.pdf')
 
 ###################################################################################
 # PLOT
@@ -1004,9 +1036,9 @@ def create_selectivity_line_chart(datasets):
                 if col == 1:
                     y_values.append(datasets[group][line][col])
         LOG.info("group_data = %s", str(y_values))
-        color_idx = idx       
+        color_idx = idx
         if idx == 1:
-            color_idx = 3        
+            color_idx = 3
         ax1.plot(ind + 0.5, y_values,
                  color=OPT_COLORS[color_idx],
                  linewidth=OPT_LINE_WIDTH,
@@ -1056,9 +1088,9 @@ def create_scale_line_chart(datasets):
                 if col == 1:
                     y_values.append(datasets[group][line][col])
         LOG.info("group_data = %s", str(y_values))
-        color_idx = idx       
+        color_idx = idx
         if idx == 1:
-            color_idx = 3        
+            color_idx = 3
         ax1.plot(ind + 0.5, y_values,
                  color=OPT_COLORS[color_idx],
                  linewidth=OPT_LINE_WIDTH,
@@ -1553,7 +1585,7 @@ def layout_plot():
             datasets.append(dataset)
 
             fig = create_layout_bar_chart(datasets)
-    
+
             file_name = "layout-" + str(projectivity) + "-" + str(selectivity) + ".pdf"
             saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH, height=OPT_GRAPH_HEIGHT)
 
@@ -2241,3 +2273,4 @@ if __name__ == '__main__':
     #create_legend_index_usage_type_subset()
     #create_legend_index_count()
     #create_legend_layout()
+    #create_legend_holistic()
