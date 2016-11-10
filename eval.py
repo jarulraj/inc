@@ -168,6 +168,7 @@ QUERY_COMPLEXITY_STRINGS = {
 ## WRITE COMPLEXITY TYPES
 WRITE_COMPLEXITY_SIMPLE   = 1
 WRITE_COMPLEXITY_COMPLEX  = 2
+WRITE_COMPLEXITY_INSERT   = 3
 
 WRITE_COMPLEXITY_STRINGS = {
     1 : "simple",
@@ -213,6 +214,8 @@ DEFAULT_ANALYZE_SAMPLE_COUNT_THRESHOLD = 10
 DEFAULT_DURATION_BETWEEN_PAUSES = 5000
 DEFAULT_DURATION_OF_PAUSE = 2000
 DEFAULT_TILE_GROUPS_INDEXED_PER_ITERATION = 10
+DEFAULT_HOLISTIC_INDEX_ENABLED = 0
+DEFAULT_MULTI_STAGE = 0
 
 SELECTIVITY = (0.2, 0.4, 0.6, 0.8, 1.0)
 PROJECTIVITY = (0.01, 0.1, 0.5)
@@ -239,6 +242,7 @@ INDEX_COUNT_DIR = BASE_DIR + "/results/index_count"
 LAYOUT_DIR = BASE_DIR + "/results/layout"
 TREND_DIR = BASE_DIR + "/results/trend"
 MOTIVATION_DIR = BASE_DIR + "/results/motivation"
+HOLISTIC_DIR = BASE_DIR + "/results/holistic"
 
 ## INDEX USAGE TYPES
 INDEX_USAGE_TYPES_ALL = [INDEX_USAGE_TYPE_PARTIAL_FAST, INDEX_USAGE_TYPE_PARTIAL_MEDIUM, INDEX_USAGE_TYPE_PARTIAL_SLOW, INDEX_USAGE_TYPE_NEVER]
@@ -351,6 +355,24 @@ MOTIVATION_PLOT_MODES = [MOTIVATION_LATENCY_MODE]
 MOTIVATION_LATENCY_CSV = "motivation_latency.csv"
 MOTIVATION_EXP_DURATION_OF_PAUSE = 40000
 MOTIVATION_EXP_TILE_GROUPS_INDEXED_PER_ITERATION = 20
+
+## HOLISTIC EXPERIMENT
+HOLISTIC_EXPERIMENT_MULTI_STAGE = 1
+HOLISTIC_EXPERIMENT_HOLISTIC_INDEXING = [0, 1]
+HOLISTIC_EXPERIMENT_PHASE_LENGTH = 200
+HOLISTIC_EXPERIMENT_QUERY_COUNT = 1000
+HOLISTIC_EXPERIMENT_SCALE_FACTOR = 1000
+HOLISTIC_EXPERIMENT_COLUMN_COUNT = 60
+HOLISTIC_EXPERIMENT_INDEX_USAGE_TYPE = INDEX_USAGE_TYPE_PARTIAL_FAST
+HOLISTIC_EXPERIMENT_QUERY_COMPLEXITY = QUERY_COMPLEXITY_MODERATE
+HOLISTIC_EXPERIMENT_WRITE_COMPLEXITY = WRITE_COMPLEXITY_INSERT
+HOLISTIC_EXPERIMENT_WRITE_RATIO_THRESHOLD = 0.5
+HOLISTIC_EXPERIMENT_LAYOUT_MODE = LAYOUT_MODE_COLUMN
+HOLISTIC_EXPERIMENT_HOLISTIC_INDEXING_STRINGS = {
+    0 : 'peloton',
+    1 : 'holistic'
+}
+HOLISTIC_CSV = 'holistic.csv'
 
 ###################################################################################
 # UTILS
@@ -834,6 +856,63 @@ def create_time_series_line_chart(datasets, plot_mode):
     #ax1.set_xticks(ind + 0.5)
     major_ticks = np.arange(0, TIME_SERIES_EXP_QUERY_COUNT + 1,
                             TIME_SERIES_OPT_MARKER_FREQUENCY)
+    ax1.set_xticks(major_ticks)
+    ax1.set_xlabel("Query Sequence", fontproperties=LABEL_FP)
+    #ax1.set_xticklabels(x_values)
+
+    for label in ax1.get_yticklabels() :
+        label.set_fontproperties(TICK_FP)
+    for label in ax1.get_xticklabels() :
+        label.set_fontproperties(TICK_FP)
+
+    return fig
+
+def create_holistic_line_chart(datasets):
+    fig = plot.figure()
+    ax1 = fig.add_subplot(111)
+
+    # X-AXIS
+    x_values = [str(i) for i in range(1, len(datasets[0]) + 1)]
+    N = len(x_values)
+    ind = np.arange(N)
+
+    TIME_SERIES_OPT_LINE_WIDTH = 3.0
+    TIME_SERIES_OPT_MARKER_SIZE = 5.0
+    TIME_SERIES_OPT_MARKER_FREQUENCY = TIME_SERIES_EXP_QUERY_COUNT/10
+
+    idx = 0
+    for group in xrange(len(datasets)):
+        # GROUP
+        y_values = []
+        for line in  xrange(len(datasets[group])):
+            for col in  xrange(len(datasets[group][line])):
+                if col == 1:
+                    y_values.append(datasets[group][line][col])
+        LOG.info("group_data = %s", str(y_values))
+        print(len(ind), len(y_values))
+        ax1.plot(ind + 0.5, y_values,
+                 color=OPT_COLORS[idx],
+                 linewidth=TIME_SERIES_OPT_LINE_WIDTH,
+                 marker=OPT_MARKERS[idx],
+                 markersize=TIME_SERIES_OPT_MARKER_SIZE,
+                 markevery=TIME_SERIES_OPT_MARKER_FREQUENCY,
+                 label=str(group))
+        idx = idx + 1
+
+    # GRID
+    makeGrid(ax1)
+
+    # Y-AXIS
+    ax1.yaxis.set_major_locator(LinearLocator(YAXIS_TICKS))
+    ax1.minorticks_off()
+
+    # LATENCY
+    ax1.set_ylabel("Latency (ms)", fontproperties=LABEL_FP)
+
+    # X-AXIS
+    #ax1.set_xticks(ind + 0.5)
+    major_ticks = np.arange(0, len(x_values) + 1,
+                            250)
     ax1.set_xticks(major_ticks)
     ax1.set_xlabel("Query Sequence", fontproperties=LABEL_FP)
     #ax1.set_xticklabels(x_values)
@@ -1463,6 +1542,24 @@ def layout_plot():
             file_name = "layout-" + str(projectivity) + "-" + str(selectivity) + ".pdf"
             saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH, height=OPT_GRAPH_HEIGHT)
 
+# HOLISTIC -- PLOY
+def holistic_plot():
+    datasets = []
+    for holistic_index_enabled in HOLISTIC_EXPERIMENT_HOLISTIC_INDEXING:
+        result_dir_list = [HOLISTIC_EXPERIMENT_HOLISTIC_INDEXING_STRINGS[holistic_index_enabled]]
+
+        result_file = get_result_file(HOLISTIC_DIR, result_dir_list, HOLISTIC_CSV)
+
+        dataset = loadDataFile(result_file)
+        datasets.append(dataset)
+
+    # Reverse the order of the lines for better visual
+    datasets = datasets[::-1]
+    fig = create_holistic_line_chart(datasets)
+
+    file_name = "holistic.pdf";
+
+    saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH * 2.0, height=OPT_GRAPH_HEIGHT/1.5)
 
 ###################################################################################
 # EVAL HELPERS
@@ -1500,9 +1597,11 @@ def run_experiment(
     index_count_threshold=DEFAULT_INDEX_COUNT_THRESHOLD,
     index_utility_threshold=DEFAULT_INDEX_UTILITY_THRESHOLD,
     write_ratio_threshold=DEFAULT_WRITE_RATIO_THRESHOLD,
-    layout_mode=DEFAULT_LAYOUT_MODE):
+    layout_mode=DEFAULT_LAYOUT_MODE,
+    holistic_index_enabled=DEFAULT_HOLISTIC_INDEX_ENABLED,
+    multi_stage=DEFAULT_MULTI_STAGE):
 
-    subprocess.call(["rm -f " + OUTPUT_FILE], shell=True)
+    # subprocess.call(["rm -f " + OUTPUT_FILE], shell=True)
     PROGRAM_OUTPUT_FILE_NAME = "program.txt"
     PROGRAM_OUTPUT_FILE = open(PROGRAM_OUTPUT_FILE_NAME, "w")
     arg_list = [program,
@@ -1528,7 +1627,9 @@ def run_experiment(
                      "-x", str(index_count_threshold),
                      "-y", str(index_utility_threshold),
                      "-z", str(write_ratio_threshold),
-                     "-l", str(layout_mode)
+                     "-l", str(layout_mode),
+                     "-n", str(multi_stage),
+                     "-r", str(holistic_index_enabled)
                      ]
     arg_string = ' '.join(arg_list[1:])
     pprint.pprint(arg_string)
@@ -1980,6 +2081,43 @@ def motivation_eval():
                     stat_offset = -1
                     collect_stat(DEFAULT_QUERY_COUNT, latency_result_file, stat_offset)
 
+# HOLISTIC -- EVAL
+def holistic_eval():
+
+    # CLEAN UP RESULT DIR
+    clean_up_dir(HOLISTIC_DIR)
+    print("HOLISTIC EVAL")
+
+    for holistic_index_enabled in HOLISTIC_EXPERIMENT_HOLISTIC_INDEXING:
+        print(MAJOR_STRING)
+
+        print("> holistic: " + str(holistic_index_enabled) +
+                " multi_stage: " + str(HOLISTIC_EXPERIMENT_MULTI_STAGE) +
+                " layout: " + LAYOUT_MODE_STRINGS[HOLISTIC_EXPERIMENT_LAYOUT_MODE])
+
+        # Get result file
+        result_dir_list = [HOLISTIC_EXPERIMENT_HOLISTIC_INDEXING_STRINGS[holistic_index_enabled]]
+        holistic_result_file = get_result_file(HOLISTIC_DIR, result_dir_list, HOLISTIC_CSV)
+
+        # Run experiment
+        start = time.time()
+        run_experiment(holistic_index_enabled=holistic_index_enabled,
+            multi_stage=HOLISTIC_EXPERIMENT_MULTI_STAGE,
+            query_count=HOLISTIC_EXPERIMENT_QUERY_COUNT,
+            phase_length=HOLISTIC_EXPERIMENT_PHASE_LENGTH,
+            scale_factor=HOLISTIC_EXPERIMENT_SCALE_FACTOR,
+            query_complexity=HOLISTIC_EXPERIMENT_QUERY_COMPLEXITY,
+            index_usage_type=HOLISTIC_EXPERIMENT_INDEX_USAGE_TYPE,
+            write_complexity=HOLISTIC_EXPERIMENT_WRITE_COMPLEXITY,
+            write_ratio_threshold=HOLISTIC_EXPERIMENT_WRITE_RATIO_THRESHOLD,
+            column_count=HOLISTIC_EXPERIMENT_COLUMN_COUNT,
+            layout_mode=HOLISTIC_EXPERIMENT_LAYOUT_MODE)
+        print("Executed in", time.time() - start, "s")
+
+        stat_offset = -1
+        collect_stat(DEFAULT_QUERY_COUNT, holistic_result_file, stat_offset)
+
+
 
 ###################################################################################
 # MAIN
@@ -1997,6 +2135,7 @@ if __name__ == '__main__':
     parser.add_argument("-g", "--index_count_eval", help="eval index_count", action='store_true')
     parser.add_argument("-i", "--layout_eval", help="eval layout", action="store_true")
     parser.add_argument("-j", "--motivation_eval", help="eval motivation", action="store_true")
+    parser.add_argument("-k", "--holistic_eval", help="eval holistic index", action="store_true")
 
     parser.add_argument("-m", "--reflex_plot", help="plot query", action='store_true')
     parser.add_argument("-n", "--convergence_plot", help="plot convergence", action='store_true')
@@ -2007,6 +2146,7 @@ if __name__ == '__main__':
     parser.add_argument("-s", "--index_count_plot", help="plot index_count", action='store_true')
     parser.add_argument("-t", "--layout_plot", help="plot layout", action='store_true')
     parser.add_argument("-u", "--motivation_plot", help="plot motivation", action='store_true')
+    parser.add_argument("-v", "--holistic_plot", help="plot_holistic", action='store_true')
 
     parser.add_argument("-z", "--trend_plot", help="plot trend", action='store_true')
 
@@ -2041,6 +2181,9 @@ if __name__ == '__main__':
     if args.motivation_eval:
         motivation_eval()
 
+    if args.holistic_eval:
+        holistic_eval();
+
     ## PLOT
 
     if args.reflex_plot:
@@ -2072,6 +2215,9 @@ if __name__ == '__main__':
 
     if args.motivation_plot:
         motivation_plot()
+
+    if args.holistic_plot:
+        holistic_plot()
 
     #create_legend_index_usage_type()
     #create_legend_motivation()
