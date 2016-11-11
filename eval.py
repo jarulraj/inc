@@ -462,14 +462,14 @@ def create_legend_index_usage_type():
 
     LEGEND_VALUES = INDEX_USAGE_TYPES_STRINGS_SUBSET.values()
 
-    figlegend = pylab.figure(figsize=(15, 0.5))
+    figlegend = pylab.figure(figsize=(17, 0.5))
     idx = 0
     lines = [None] * (len(LEGEND_VALUES) + 1)
     data = [1]
     x_values = [1]
 
     TITLE = "INDEX USAGE MODE:"
-    LABELS = [TITLE, "PARTIAL-FAST", "PARTIAL-MODERATE", "PARTIAL-SLOW", "NEVER"]
+    LABELS = [TITLE, "PARTIAL-FAST", "PARTIAL-MODERATE", "PARTIAL-SLOW", "DISABLED"]
 
     lines[idx], = ax1.plot(x_values, data, linewidth = 0)
     idx = 1
@@ -501,7 +501,7 @@ def create_legend_motivation():
     x_values = [1]
 
     TITLE = "INDEX USAGE MODE:"
-    LABELS = [TITLE, "PARTIAL", "FULL", "NEVER"]
+    LABELS = [TITLE, "PARTIAL", "FULL", "DISABLED"]
 
     lines[idx], = ax1.plot(x_values, data, linewidth = 0)
     idx = 1
@@ -612,7 +612,7 @@ def create_legend_index_usage_type_subset():
     x_values = [1]
 
     TITLE = "INDEX USAGE MODE:"
-    LABELS = [TITLE, "PARTIAL-FAST", "NEVER"]
+    LABELS = [TITLE, "PARTIAL-FAST", "DISABLED"]
 
     lines[idx], = ax1.plot(x_values, data, linewidth = 0)
     idx = 1
@@ -670,10 +670,10 @@ def create_legend_layout():
     fig = pylab.figure()
     ax1 = fig.add_subplot(111)
 
-    figlegend = pylab.figure(figsize=(12, 0.5))
+    figlegend = pylab.figure(figsize=(13, 0.5))
 
     TITLE = "TUNING MODES:"
-    LABELS = [TITLE, "NONE", "INDEX", "LAYOUT", "BOTH"]
+    LABELS = [TITLE, "DISABLED", "INDEX", "LAYOUT", "BOTH"]
 
     num_items = len(LABELS) + 1
     ind = np.arange(1)
