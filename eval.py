@@ -941,6 +941,9 @@ def create_holistic_line_chart(datasets):
     # Y-AXIS
     ax1.yaxis.set_major_locator(LinearLocator(YAXIS_TICKS))
     ax1.minorticks_off()
+    ax1.set_yscale('log', nonposy='clip')
+    ax1.tick_params(axis='y', which='minor', left='off', right='off')
+    ax1.set_yticklabels(["", "1", "10", "100", "1000", "10000"])
 
     # LATENCY
     ax1.set_ylabel("Latency (ms)", fontproperties=LABEL_FP)
