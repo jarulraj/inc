@@ -971,6 +971,10 @@ def create_holistic_line_chart(datasets):
                      transform=ax1.transAxes,
                      bbox=dict(facecolor='lightgrey', alpha=0.75))
 
+    # ADD VLINES
+    plot.axvline(x=1000, color='k', linestyle='--', linewidth=1.0)
+    plot.axvline(x=2000, color='k', linestyle='--', linewidth=1.0)
+
     for label in ax1.get_yticklabels() :
         label.set_fontproperties(TICK_FP)
     for label in ax1.get_xticklabels() :
@@ -1355,9 +1359,9 @@ def create_motivation_line_chart(datasets, plot_mode):
     #ax1.set_xticklabels(x_values)
 
     # ADD VLINES
-    plot.axvline(x=83.1, color='k', linewidth=2.0)
-    plot.axvline(x=122.3, color='k', linewidth=2.0)
-    plot.axvline(x=125.6, color='k', linewidth=2.0)
+    plot.axvline(x=83.1, color='k', linestyle='--', linewidth=1.0)
+    plot.axvline(x=122.3, color='k', linestyle='--', linewidth=1.0)
+    plot.axvline(x=125.6, color='k', linestyle='--', linewidth=1.0)
 
     for label in ax1.get_yticklabels() :
         label.set_fontproperties(TICK_FP)
@@ -1597,7 +1601,7 @@ def layout_plot():
             fig = create_layout_bar_chart(datasets)
 
             file_name = "layout-" + str(projectivity) + "-" + str(selectivity) + ".pdf"
-            saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH, height=OPT_GRAPH_HEIGHT/1.5)
+            saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH, height=OPT_GRAPH_HEIGHT)
 
 # HOLISTIC -- PLOY
 def holistic_plot():
