@@ -1217,7 +1217,7 @@ def create_layout_bar_chart(datasets, title=""):
     # Y-AXIS
     ax1.yaxis.set_major_locator(LinearLocator(YAXIS_TICKS))
     ax1.minorticks_off()
-    ax1.set_ylabel("Execution time (ms)", fontproperties=LABEL_FP)
+    ax1.set_ylabel("Total time (ms)", fontproperties=LABEL_FP)
     #ax1.set_yscale('log', basey=10)
 
     # X-AXIS
@@ -1587,7 +1587,7 @@ def layout_plot():
             fig = create_layout_bar_chart(datasets)
 
             file_name = "layout-" + str(projectivity) + "-" + str(selectivity) + ".pdf"
-            saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH, height=OPT_GRAPH_HEIGHT)
+            saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH, height=OPT_GRAPH_HEIGHT/1.5)
 
 # HOLISTIC -- PLOY
 def holistic_plot():
