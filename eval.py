@@ -640,14 +640,14 @@ def create_legend_index_count():
 
     LEGEND_SIZE = 4
 
-    figlegend = pylab.figure(figsize=(9, 0.5))
+    figlegend = pylab.figure(figsize=(10, 0.5))
     idx = 0
     lines = [None] * (LEGEND_SIZE + 1)
     data = [1]
     x_values = [1]
 
-    TITLE = "INDEX COUNT THRESHOLDS:"
-    LABELS = [TITLE, "3", "5", "10"]
+    TITLE = "INDEX STORAGE BUDGET:"
+    LABELS = [TITLE, "2 GB", "4 GB", "6 GB"]
 
     lines[idx], = ax1.plot(x_values, data, linewidth = 0)
     idx = 1
