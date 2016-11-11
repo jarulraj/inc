@@ -883,6 +883,10 @@ def create_time_series_line_chart(datasets, plot_mode):
     # INDEX
     elif plot_mode == TIME_SERIES_INDEX_MODE:
         ax1.set_ylabel("Index count", fontproperties=LABEL_FP)
+        YAXIS_MIN = 0
+        YAXIS_MAX = 10
+        ax1.set_ylim([YAXIS_MIN, YAXIS_MAX])
+
 
     # X-AXIS
     #ax1.set_xticks(ind + 0.5)
@@ -1167,6 +1171,9 @@ def create_index_count_line_chart(datasets, plot_mode):
     # INDEX
     elif plot_mode == INDEX_COUNT_INDEX_MODE:
         ax1.set_ylabel("Index count", fontproperties=LABEL_FP)
+        YAXIS_MIN = 0
+        YAXIS_MAX = 8
+        ax1.set_ylim([YAXIS_MIN, YAXIS_MAX])
 
     # X-AXIS
     #ax1.set_xticks(ind + 0.5)
