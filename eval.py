@@ -110,7 +110,7 @@ YAXIS_ROUND = 1000.0
 
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 
-PELOTON_BUILD_DIR = BASE_DIR + "/../peloton/build"
+PELOTON_BUILD_DIR = BASE_DIR + "/../tuner/build"
 SDBENCH = PELOTON_BUILD_DIR + "/bin/sdbench"
 
 OUTPUT_FILE = "outputfile.summary"
@@ -358,19 +358,19 @@ MOTIVATION_EXP_TILE_GROUPS_INDEXED_PER_ITERATION = 20
 
 ## HOLISTIC EXPERIMENT
 HOLISTIC_EXPERIMENT_MULTI_STAGE = 1
-HOLISTIC_EXPERIMENT_HOLISTIC_INDEXING = [0, 1]
+HOLISTIC_EXPERIMENT_HOLISTIC_INDEXING = [0, 1, 2]
 HOLISTIC_EXPERIMENT_PHASE_LENGTH = 200
 HOLISTIC_EXPERIMENT_QUERY_COUNT = 1000
 HOLISTIC_EXPERIMENT_SCALE_FACTOR = 1000
 HOLISTIC_EXPERIMENT_COLUMN_COUNT = 60
-HOLISTIC_EXPERIMENT_INDEX_USAGE_TYPE = INDEX_USAGE_TYPE_PARTIAL_FAST
 HOLISTIC_EXPERIMENT_QUERY_COMPLEXITY = QUERY_COMPLEXITY_MODERATE
 HOLISTIC_EXPERIMENT_WRITE_COMPLEXITY = WRITE_COMPLEXITY_INSERT
 HOLISTIC_EXPERIMENT_WRITE_RATIO_THRESHOLD = 0.5
 HOLISTIC_EXPERIMENT_LAYOUT_MODE = LAYOUT_MODE_COLUMN
 HOLISTIC_EXPERIMENT_HOLISTIC_INDEXING_STRINGS = {
     0 : 'peloton',
-    1 : 'holistic'
+    1 : 'adaptive',
+    2 : 'holistic'
 }
 HOLISTIC_CSV = 'holistic.csv'
 
@@ -2152,23 +2152,33 @@ def holistic_eval():
     for holistic_index_enabled in HOLISTIC_EXPERIMENT_HOLISTIC_INDEXING:
         print(MAJOR_STRING)
 
-        print("> holistic: " + str(holistic_index_enabled) +
-                " multi_stage: " + str(HOLISTIC_EXPERIMENT_MULTI_STAGE) +
-                " layout: " + LAYOUT_MODE_STRINGS[HOLISTIC_EXPERIMENT_LAYOUT_MODE])
-
         # Get result file
         result_dir_list = [HOLISTIC_EXPERIMENT_HOLISTIC_INDEXING_STRINGS[holistic_index_enabled]]
         holistic_result_file = get_result_file(HOLISTIC_DIR, result_dir_list, HOLISTIC_CSV)
 
+        # Pick appropriate index usage type (slow for adaptive)
+        index_usage_type = INDEX_USAGE_TYPE_PARTIAL_FAST
+        if holistic_index_enabled == 1:
+            index_usage_type = INDEX_USAGE_TYPE_PARTIAL_SLOW
+
+        # Holistic index enabled (skip for adaptive)
+        holistic_mode = 0
+        if holistic_index_enabled == 2:
+            holistic_mode = 1
+
+        print("> holistic: " + str(holistic_mode) +
+                " multi_stage: " + str(HOLISTIC_EXPERIMENT_MULTI_STAGE) +
+                " layout: " + LAYOUT_MODE_STRINGS[HOLISTIC_EXPERIMENT_LAYOUT_MODE])
+                        
         # Run experiment
         start = time.time()
-        run_experiment(holistic_index_enabled=holistic_index_enabled,
+        run_experiment(holistic_index_enabled=holistic_mode,
             multi_stage=HOLISTIC_EXPERIMENT_MULTI_STAGE,
             query_count=HOLISTIC_EXPERIMENT_QUERY_COUNT,
             phase_length=HOLISTIC_EXPERIMENT_PHASE_LENGTH,
             scale_factor=HOLISTIC_EXPERIMENT_SCALE_FACTOR,
             query_complexity=HOLISTIC_EXPERIMENT_QUERY_COMPLEXITY,
-            index_usage_type=HOLISTIC_EXPERIMENT_INDEX_USAGE_TYPE,
+            index_usage_type=index_usage_type,
             write_complexity=HOLISTIC_EXPERIMENT_WRITE_COMPLEXITY,
             write_ratio_threshold=HOLISTIC_EXPERIMENT_WRITE_RATIO_THRESHOLD,
             column_count=HOLISTIC_EXPERIMENT_COLUMN_COUNT,
