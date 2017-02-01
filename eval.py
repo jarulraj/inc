@@ -230,6 +230,7 @@ SCALE_EXPERIMENT = 6
 INDEX_COUNT_EXPERIMENT = 7
 TREND_EXPERIMENT = 8
 MOTIVATION_EXPERIMENT = 9
+HYBRID_EXPERIMENT = 10
 
 ## DIRS
 QUERY_DIR = BASE_DIR + "/results/query"
@@ -243,6 +244,7 @@ LAYOUT_DIR = BASE_DIR + "/results/layout"
 TREND_DIR = BASE_DIR + "/results/trend"
 MOTIVATION_DIR = BASE_DIR + "/results/motivation"
 HOLISTIC_DIR = BASE_DIR + "/results/holistic"
+HYBRID_DIR = BASE_DIR + "/results/hybrid"
 
 ## INDEX USAGE TYPES
 INDEX_USAGE_TYPES_ALL = [INDEX_USAGE_TYPE_PARTIAL_FAST, INDEX_USAGE_TYPE_PARTIAL_MEDIUM, INDEX_USAGE_TYPE_PARTIAL_SLOW, INDEX_USAGE_TYPE_NEVER]
@@ -373,6 +375,12 @@ HOLISTIC_EXPERIMENT_HOLISTIC_INDEXING_STRINGS = {
     2 : 'holistic'
 }
 HOLISTIC_CSV = 'holistic.csv'
+
+## HYBRID EXPERIMENT
+HYBRID_EXP_INDEX_USAGE_TYPES = [INDEX_USAGE_TYPE_FULL, INDEX_USAGE_TYPE_PARTIAL_FAST]
+HYBRID_EXP_SCALES = [1000, 10000]
+HYBRID_EXP_FRACTIONS = ["0%", "20%", "40%", "60%", "80%", "100%"]
+HYBRID_CSV = 'hybrid.csv'
 
 ###################################################################################
 # UTILS
@@ -1370,6 +1378,54 @@ def create_motivation_line_chart(datasets, plot_mode):
 
     return fig
 
+def create_hybrid_bar_chart(datasets):
+    fig = plot.figure()
+    ax1 = fig.add_subplot(111)
+
+    # X-AXIS
+    x_values = HYBRID_EXP_FRACTIONS
+    N = len(x_values)
+    M = len(HYBRID_EXP_INDEX_USAGE_TYPES)
+    ind = np.arange(N)
+    margin = 0.1
+    width = (1.-2.*margin)/M
+    bars = [None] * N
+
+    for group in xrange(len(datasets)):
+        # GROUP
+        y_values = []
+        for line in  xrange(len(datasets[group])):
+            for col in  xrange(len(datasets[group][line])):
+                if col == 1:
+                    y_values.append(datasets[group][line][col])
+        LOG.info("group_data = %s", str(y_values))
+        bars[group] =  ax1.bar(ind + margin + (group * width),
+                               y_values, width,
+                               color=COLOR_MAP_2[group],
+                               hatch=OPT_PATTERNS[group],
+                               linewidth=BAR_LINEWIDTH)
+
+    # GRID
+    makeGrid(ax1)
+
+    # Y-AXIS
+    ax1.yaxis.set_major_locator(LinearLocator(YAXIS_TICKS))
+    ax1.minorticks_off()
+    ax1.set_ylabel("Execution time (ms)", fontproperties=LABEL_FP)
+
+    # X-AXIS
+    ax1.set_xticks(ind + 0.5)
+    ax1.set_xlabel("Percentage of table indexed (%)", fontproperties=LABEL_FP)
+    ax1.set_xticklabels(x_values)
+    #ax1.set_xlim([XAXIS_MIN, XAXIS_MAX])
+
+    for label in ax1.get_yticklabels() :
+        label.set_fontproperties(TICK_FP)
+    for label in ax1.get_xticklabels() :
+        label.set_fontproperties(TICK_FP)
+
+    return fig
+
 
 ###################################################################################
 # PLOT HELPERS
@@ -1603,7 +1659,7 @@ def layout_plot():
             file_name = "layout-" + str(projectivity) + "-" + str(selectivity) + ".pdf"
             saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH, height=OPT_GRAPH_HEIGHT)
 
-# HOLISTIC -- PLOY
+# HOLISTIC -- PLOT
 def holistic_plot():
     datasets = []
     for holistic_index_enabled in HOLISTIC_EXPERIMENT_HOLISTIC_INDEXING:
@@ -1621,6 +1677,30 @@ def holistic_plot():
     file_name = "holistic.pdf";
 
     saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH * 3.0, height=OPT_GRAPH_HEIGHT/1.5)
+
+# HYBRID -- PLOY
+def hybrid_plot():
+
+    for scale_factor in HYBRID_EXP_SCALES:
+
+        datasets = []
+        for index_usage_type in HYBRID_EXP_INDEX_USAGE_TYPES:
+
+            # Get result file
+            result_dir_list = [INDEX_USAGE_TYPES_STRINGS[index_usage_type],
+                               str(scale_factor)]
+            result_file = get_result_file(HYBRID_DIR, result_dir_list, HYBRID_CSV)
+
+            dataset = loadDataFile(result_file)
+            datasets.append(dataset)
+
+        fig = create_hybrid_bar_chart(datasets)
+
+        file_name = "hybrid" + "-" + \
+                    str(scale_factor) + ".pdf"
+
+        saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH, height=OPT_GRAPH_HEIGHT)
+
 
 ###################################################################################
 # EVAL HELPERS
@@ -2218,6 +2298,7 @@ if __name__ == '__main__':
     parser.add_argument("-t", "--layout_plot", help="plot layout", action='store_true')
     parser.add_argument("-u", "--motivation_plot", help="plot motivation", action='store_true')
     parser.add_argument("-v", "--holistic_plot", help="plot_holistic", action='store_true')
+    parser.add_argument("-w", "--hybrid_plot", help="plot_hybrid", action='store_true')
 
     parser.add_argument("-z", "--trend_plot", help="plot trend", action='store_true')
 
@@ -2289,6 +2370,9 @@ if __name__ == '__main__':
 
     if args.holistic_plot:
         holistic_plot()
+
+    if args.hybrid_plot:
+        hybrid_plot()
 
     #create_legend_index_usage_type()
     #create_legend_motivation()
