@@ -399,19 +399,20 @@ HYBRID_EXP_FRACTIONS = ["0%", "20%", "40%", "60%", "80%", "100%"]
 HYBRID_CSV = 'hybrid.csv'
 
 ##  MODEL EXPERIMENT
-MODEL_EXP_PHASE_LENGTHS = [2000]
+MODEL_EXP_PHASE_LENGTHS = [500]
 MODEL_EXP_INDEX_USAGE_TYPE = INDEX_USAGE_TYPE_PARTIAL_FAST
-MODEL_EXP_TUNER_MODEL_TYPES = [TUNER_MODEL_TYPE_RI, TUNER_MODEL_TYPE_COLT, TUNER_MODEL_TYPE_BC]
-MODEL_EXP_INDEX_COUNT_THRESHOLD = 30
-MODEL_EXP_QUERY_COUNT = 10000
+MODEL_EXP_TUNER_MODEL_TYPES = [TUNER_MODEL_TYPE_BC, TUNER_MODEL_TYPE_COLT, TUNER_MODEL_TYPE_RI]
+MODEL_EXP_INDEX_COUNT_THRESHOLD = 50
+MODEL_EXP_QUERY_COUNT = 3000
 MODEL_EXP_WRITE_RATIOS = [WRITE_RATIO_READ_ONLY]
 MODEL_EXP_QUERY_COMPLEXITY = QUERY_COMPLEXITY_MODERATE
-MODEL_EXP_VARIABILITY_THRESHOLD = 10
+MODEL_EXP_VARIABILITY_THRESHOLD = 30
 MODEL_LATENCY_MODE = 1
 MODEL_INDEX_MODE = 2
 MODEL_PLOT_MODES = [MODEL_LATENCY_MODE, MODEL_INDEX_MODE]
 MODEL_LATENCY_CSV = "model_latency.csv"
 MODEL_INDEX_CSV = "model_index.csv"
+MODEL_EXP_SCALE_FACTOR = 300
 
 ###################################################################################
 # UTILS
@@ -2458,6 +2459,7 @@ def model_eval():
                                    write_ratio=write_ratio,
                                    index_count_threshold=MODEL_EXP_INDEX_COUNT_THRESHOLD,
                                    variability_threshold=MODEL_EXP_VARIABILITY_THRESHOLD,
+                                   scale_factor=MODEL_EXP_SCALE_FACTOR,                                   
                                    query_count=MODEL_EXP_QUERY_COUNT,
                                    query_complexity=query_complexity)
 
