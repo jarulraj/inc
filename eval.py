@@ -115,7 +115,7 @@ SDBENCH = PELOTON_BUILD_DIR + "/bin/sdbench"
 
 OUTPUT_FILE = "outputfile.summary"
 
-## TUNER MODE TYPES
+## INDEX USAGE TYPES
 INDEX_USAGE_TYPE_PARTIAL_FAST  = 1
 INDEX_USAGE_TYPE_PARTIAL_MEDIUM  = 2
 INDEX_USAGE_TYPE_PARTIAL_SLOW  = 3
@@ -191,9 +191,23 @@ WRITE_RATIO_STRINGS = {
     0.9 : "write-heavy"
 }
 
+## TUNER MODEL TYPES
+TUNER_MODEL_TYPE_DEFAULT = 1
+TUNER_MODEL_TYPE_BC  = 2
+TUNER_MODEL_TYPE_COLT = 3
+TUNER_MODEL_TYPE_RI  = 4
+
+TUNER_MODEL_TYPES_STRINGS = {
+    1 : "default",
+    2 : "bc",
+    3 : "colt",
+    4 : "ri"
+}
+
 DEFAULT_INDEX_USAGE_TYPE = INDEX_USAGE_TYPE_PARTIAL_FAST
 DEFAULT_QUERY_COMPLEXITY = QUERY_COMPLEXITY_SIMPLE
 DEFAULT_WRITE_COMPLEXITY = WRITE_COMPLEXITY_COMPLEX
+DEFAULT_TUNER_MODEL_TYPE = TUNER_MODEL_TYPE_DEFAULT
 DEFAULT_SCALE_FACTOR = 100
 DEFAULT_COLUMN_COUNT = 100
 DEFAULT_WRITE_RATIO = WRITE_RATIO_READ_ONLY
@@ -231,6 +245,7 @@ INDEX_COUNT_EXPERIMENT = 7
 TREND_EXPERIMENT = 8
 MOTIVATION_EXPERIMENT = 9
 HYBRID_EXPERIMENT = 10
+MODEL_EXPERIMENT = 11
 
 ## DIRS
 QUERY_DIR = BASE_DIR + "/results/query"
@@ -245,6 +260,7 @@ TREND_DIR = BASE_DIR + "/results/trend"
 MOTIVATION_DIR = BASE_DIR + "/results/motivation"
 HOLISTIC_DIR = BASE_DIR + "/results/holistic"
 HYBRID_DIR = BASE_DIR + "/results/hybrid"
+MODEL_DIR = BASE_DIR + "/results/model"
 
 ## INDEX USAGE TYPES
 INDEX_USAGE_TYPES_ALL = [INDEX_USAGE_TYPE_PARTIAL_FAST, INDEX_USAGE_TYPE_PARTIAL_MEDIUM, INDEX_USAGE_TYPE_PARTIAL_SLOW, INDEX_USAGE_TYPE_NEVER]
@@ -381,6 +397,21 @@ HYBRID_EXP_INDEX_USAGE_TYPES = [INDEX_USAGE_TYPE_FULL, INDEX_USAGE_TYPE_PARTIAL_
 HYBRID_EXP_SCALES = [1000, 10000]
 HYBRID_EXP_FRACTIONS = ["0%", "20%", "40%", "60%", "80%", "100%"]
 HYBRID_CSV = 'hybrid.csv'
+
+##  MODEL EXPERIMENT
+MODEL_EXP_PHASE_LENGTHS = [2000]
+MODEL_EXP_INDEX_USAGE_TYPE = INDEX_USAGE_TYPE_PARTIAL_FAST
+MODEL_EXP_TUNER_MODEL_TYPES = [TUNER_MODEL_TYPE_RI, TUNER_MODEL_TYPE_BC, TUNER_MODEL_TYPE_COLT]
+MODEL_EXP_INDEX_COUNT_THRESHOLD = 30
+MODEL_EXP_QUERY_COUNT = 10000
+MODEL_EXP_WRITE_RATIOS = [WRITE_RATIO_READ_ONLY]
+MODEL_EXP_QUERY_COMPLEXITY = QUERY_COMPLEXITY_SIMPLE
+MODEL_EXP_VARIABILITY_THRESHOLD = 10
+MODEL_LATENCY_MODE = 1
+MODEL_INDEX_MODE = 2
+MODEL_PLOT_MODES = [MODEL_LATENCY_MODE, MODEL_INDEX_MODE]
+MODEL_LATENCY_CSV = "model_latency.csv"
+MODEL_INDEX_CSV = "model_index.csv"
 
 ###################################################################################
 # UTILS
@@ -1426,6 +1457,69 @@ def create_hybrid_bar_chart(datasets):
 
     return fig
 
+def create_model_line_chart(datasets, plot_mode):
+    fig = plot.figure()
+    ax1 = fig.add_subplot(111)
+
+    # X-AXIS
+    x_values = [str(i) for i in range(1, MODEL_EXP_QUERY_COUNT + 1)]
+    N = len(x_values)
+    ind = np.arange(N)
+
+    MODEL_OPT_LINE_WIDTH = 3.0
+    MODEL_OPT_MARKER_SIZE = 5.0
+    MODEL_OPT_MARKER_FREQUENCY = MODEL_EXP_QUERY_COUNT/10
+
+    idx = 0
+    for group in xrange(len(datasets)):
+        # GROUP
+        y_values = []
+        for line in  xrange(len(datasets[group])):
+            for col in  xrange(len(datasets[group][line])):
+                if col == 1:
+                    y_values.append(datasets[group][line][col])
+        LOG.info("group_data = %s", str(y_values))
+        ax1.plot(ind + 0.5, y_values,
+                 color=OPT_COLORS[idx],
+                 linewidth=MODEL_OPT_LINE_WIDTH,
+                 marker=OPT_MARKERS[idx],
+                 markersize=MODEL_OPT_MARKER_SIZE,
+                 markevery=MODEL_OPT_MARKER_FREQUENCY,
+                 label=str(group))
+        idx = idx + 1
+
+    # GRID
+    makeGrid(ax1)
+
+    # Y-AXIS
+    ax1.yaxis.set_major_locator(LinearLocator(YAXIS_TICKS))
+    ax1.minorticks_off()
+
+    # LATENCY
+    if plot_mode == MODEL_LATENCY_MODE:
+        ax1.set_ylabel("Latency (ms)", fontproperties=LABEL_FP)
+    # INDEX
+    elif plot_mode == MODEL_INDEX_MODE:
+        ax1.set_ylabel("Index count", fontproperties=LABEL_FP)
+        YAXIS_MIN = 0
+        YAXIS_MAX = 10
+        ax1.set_ylim([YAXIS_MIN, YAXIS_MAX])
+
+
+    # X-AXIS
+    #ax1.set_xticks(ind + 0.5)
+    major_ticks = np.arange(0, MODEL_EXP_QUERY_COUNT + 1,
+                            MODEL_OPT_MARKER_FREQUENCY)
+    ax1.set_xticks(major_ticks)
+    ax1.set_xlabel("Query Sequence", fontproperties=LABEL_FP)
+    #ax1.set_xticklabels(x_values)
+
+    for label in ax1.get_yticklabels() :
+        label.set_fontproperties(TICK_FP)
+    for label in ax1.get_xticklabels() :
+        label.set_fontproperties(TICK_FP)
+
+    return fig
 
 ###################################################################################
 # PLOT HELPERS
@@ -1701,6 +1795,54 @@ def hybrid_plot():
 
         saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH, height=OPT_GRAPH_HEIGHT)
 
+# MODEL -- PLOT
+def model_plot():
+
+    num_graphs = len(MODEL_EXP_WRITE_RATIOS)
+
+    for graph_itr in range(0, num_graphs):
+
+        # Pick parameters for time series graph set
+        query_complexity = MODEL_EXP_QUERY_COMPLEXITY
+        write_ratio = MODEL_EXP_WRITE_RATIOS[graph_itr]
+
+        for phase_length in MODEL_EXP_PHASE_LENGTHS:
+
+            for plot_mode in MODEL_PLOT_MODES:
+
+                # LATENCY
+                if plot_mode == MODEL_LATENCY_MODE:
+                    CSV_FILE = MODEL_LATENCY_CSV
+                    OUTPUT_STRING = "latency"
+                # INDEX COUNT
+                elif plot_mode == MODEL_INDEX_MODE:
+                    CSV_FILE = MODEL_INDEX_CSV
+                    OUTPUT_STRING = "index"
+
+                datasets = []
+                for tuner_model_type in MODEL_EXP_TUNER_MODEL_TYPES:
+
+                        # Get result file
+                        result_dir_list = [TUNER_MODEL_TYPES_STRINGS[tuner_model_type],
+                                           WRITE_RATIO_STRINGS[write_ratio],
+                                           QUERY_COMPLEXITY_STRINGS[query_complexity],
+                                           str(phase_length)]
+                        result_file = get_result_file(MODEL_DIR,
+                                                      result_dir_list,
+                                                      CSV_FILE)
+
+                        dataset = loadDataFile(result_file)
+                        datasets.append(dataset)
+
+                fig = create_model_line_chart(datasets, plot_mode)
+
+                file_name = "model" + "-" + OUTPUT_STRING + "-" + \
+                            QUERY_COMPLEXITY_STRINGS[query_complexity] + "-" + \
+                            WRITE_RATIO_STRINGS[write_ratio] + "-" + \
+                            str(phase_length) + ".pdf"
+
+                saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH * 3.0, height=OPT_GRAPH_HEIGHT/1.5)
+
 
 ###################################################################################
 # EVAL HELPERS
@@ -1721,6 +1863,7 @@ def run_experiment(
     query_complexity=DEFAULT_QUERY_COMPLEXITY,
     variability_threshold=DEFAULT_VARIABILITY_THRESHOLD,
     index_usage_type=DEFAULT_INDEX_USAGE_TYPE,
+    tuner_model_type=DEFAULT_TUNER_MODEL_TYPE,
     analyze_sample_count_threshold=DEFAULT_ANALYZE_SAMPLE_COUNT_THRESHOLD,
     tuples_per_tg=DEFAULT_TUPLES_PER_TG,
     duration_between_pauses=DEFAULT_DURATION_BETWEEN_PAUSES,
@@ -1762,7 +1905,7 @@ def run_experiment(
                      "-q", str(query_count),
                      "-s", str(selectivity),
                      "-t", str(phase_length),
-                     "-v", str(verbosity),
+                     "-v", str(tuner_model_type),
                      "-u", str(write_complexity),
                      "-w", str(write_ratio),
                      "-x", str(index_count_threshold),
@@ -2269,6 +2412,61 @@ def holistic_eval():
         collect_stat(DEFAULT_QUERY_COUNT, holistic_result_file, stat_offset)
 
 
+# MODEL -- EVAL
+def model_eval():
+
+    # CLEAN UP RESULT DIR
+    clean_up_dir(MODEL_DIR)
+    print("MODEL EVAL")
+
+    num_graphs = len(MODEL_EXP_WRITE_RATIOS)
+
+    for graph_itr in range(0, num_graphs):
+        print(MAJOR_STRING)
+
+        # Pick parameters for time series graph set
+        query_complexity = MODEL_EXP_QUERY_COMPLEXITY
+        write_ratio = MODEL_EXP_WRITE_RATIOS[graph_itr]
+        index_usage_type = MODEL_EXP_INDEX_USAGE_TYPE
+
+        for phase_length in MODEL_EXP_PHASE_LENGTHS:
+            print(MINOR_STRING)
+
+            for tuner_model_type in MODEL_EXP_TUNER_MODEL_TYPES:
+                    print("> tuner_model_type: " + str(tuner_model_type) +
+                            " write_ratio: " + str(write_ratio) +
+                            " phase_length: " + str(phase_length) +
+                            " index_usage_type: " + str(index_usage_type) )
+
+                    # Get result file
+                    result_dir_list = [TUNER_MODEL_TYPES_STRINGS[tuner_model_type],
+                                       WRITE_RATIO_STRINGS[write_ratio],
+                                       QUERY_COMPLEXITY_STRINGS[query_complexity],
+                                       str(phase_length)]
+
+                    latency_result_file = get_result_file(MODEL_DIR,
+                                                          result_dir_list,
+                                                          MODEL_LATENCY_CSV)
+                    index_result_file = get_result_file(MODEL_DIR,
+                                                        result_dir_list,
+                                                        MODEL_INDEX_CSV)
+
+                    # Run experiment
+                    run_experiment(phase_length=phase_length,
+                                   index_usage_type=index_usage_type,
+                                   tuner_model_type=tuner_model_type,
+                                   write_ratio=write_ratio,
+                                   index_count_threshold=MODEL_EXP_INDEX_COUNT_THRESHOLD,
+                                   variability_threshold=MODEL_EXP_VARIABILITY_THRESHOLD,
+                                   query_count=MODEL_EXP_QUERY_COUNT,
+                                   query_complexity=query_complexity)
+
+                    # Collect stat
+                    stat_offset = -1
+                    collect_stat(DEFAULT_QUERY_COUNT, latency_result_file, stat_offset)
+                    stat_offset = -2
+                    collect_stat(DEFAULT_QUERY_COUNT, index_result_file, stat_offset)
+
 
 ###################################################################################
 # MAIN
@@ -2287,6 +2485,7 @@ if __name__ == '__main__':
     parser.add_argument("-i", "--layout_eval", help="eval layout", action="store_true")
     parser.add_argument("-j", "--motivation_eval", help="eval motivation", action="store_true")
     parser.add_argument("-k", "--holistic_eval", help="eval holistic index", action="store_true")
+    parser.add_argument("-l", "--model_eval", help="eval model", action='store_true')
 
     parser.add_argument("-m", "--reflex_plot", help="plot query", action='store_true')
     parser.add_argument("-n", "--convergence_plot", help="plot convergence", action='store_true')
@@ -2299,6 +2498,7 @@ if __name__ == '__main__':
     parser.add_argument("-u", "--motivation_plot", help="plot motivation", action='store_true')
     parser.add_argument("-v", "--holistic_plot", help="plot_holistic", action='store_true')
     parser.add_argument("-w", "--hybrid_plot", help="plot_hybrid", action='store_true')
+    parser.add_argument("-x", "--model_plot", help="plot_model", action='store_true')
 
     parser.add_argument("-z", "--trend_plot", help="plot trend", action='store_true')
 
@@ -2335,6 +2535,9 @@ if __name__ == '__main__':
 
     if args.holistic_eval:
         holistic_eval();
+
+    if args.model_eval:
+        model_eval();
 
     ## PLOT
 
@@ -2373,6 +2576,9 @@ if __name__ == '__main__':
 
     if args.hybrid_plot:
         hybrid_plot()
+
+    if args.model_plot:
+        model_plot()
 
     #create_legend_index_usage_type()
     #create_legend_motivation()
