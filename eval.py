@@ -54,6 +54,7 @@ OPT_GRAPH_WIDTH = 400
 NUM_COLORS = 5
 COLOR_MAP = ( '#418259', '#bd5632', '#e1a94c', '#7d6c5b', '#364d38', '#c4e1c6')
 COLOR_MAP_2 = ( '#F58A87', '#80CA86', '#9EC9E9', '#D89761', '#FED113' )
+COLOR_MAP_3 = ( '#2b3742', '#c9b385', '#610606', '#1f1501' )
 
 OPT_COLORS = COLOR_MAP
 
@@ -751,20 +752,20 @@ def create_legend_holistic():
 
     LEGEND_SIZE = 3
 
-    figlegend = pylab.figure(figsize=(9, 0.5))
+    figlegend = pylab.figure(figsize=(12, 0.5))
     idx = 0
     lines = [None] * (LEGEND_SIZE + 1)
     data = [1]
     x_values = [1]
 
     TITLE = "INDEX TUNING MODES:"
-    LABELS = [TITLE, "HOLISTIC", "INCREMENTAL"]
+    LABELS = [TITLE, "HOLISTIC", "SMIX", "INCREMENTAL"]
 
     lines[idx], = ax1.plot(x_values, data, linewidth = 0)
     idx = 1
 
     for group in xrange(LEGEND_SIZE):
-        lines[idx], = ax1.plot(x_values, data, color=COLOR_MAP_2[idx - 1], linewidth=OPT_LINE_WIDTH,
+        lines[idx], = ax1.plot(x_values, data, color=COLOR_MAP_3[idx - 1], linewidth=OPT_LINE_WIDTH,
                                marker=OPT_MARKERS[idx - 1], markersize=OPT_MARKER_SIZE)
         idx = idx + 1
 
@@ -777,6 +778,77 @@ def create_legend_holistic():
 
     figlegend.savefig('legend_holistic.pdf')
 
+def create_legend_hybrid():
+    fig = pylab.figure()
+    ax1 = fig.add_subplot(111)
+
+    figlegend = pylab.figure(figsize=(9, 0.5))
+
+    TITLE = "SCAN TYPES:"
+    LABELS = [TITLE, "HYBRID", "INDEX"]
+
+    num_items = len(LABELS) + 1
+    ind = np.arange(1)
+    margin = 0.10
+    width = (1.-2.*margin)/num_items
+    data = [1]
+
+    bars = [None] * num_items
+
+    # TITLE
+    idx = 0
+    bars[idx] = ax1.bar(ind + margin + (idx * width), data, width,
+                        color = 'w',
+                        linewidth=0)
+
+    idx = 1
+    for group in xrange(len(LABELS)):
+        bars[idx] = ax1.bar(ind + margin + (idx * width), data, width,
+                              color=COLOR_MAP_3[idx - 1],
+                              linewidth=BAR_LINEWIDTH)
+        idx = idx + 1
+
+    # LEGEND
+    figlegend.legend(bars, LABELS, prop=LEGEND_FP,
+                     loc=1, ncol=5,
+                     mode="expand", shadow=OPT_LEGEND_SHADOW,
+                     frameon=False, borderaxespad=0.0,
+                     handleheight=1, handlelength=4)
+
+    figlegend.savefig('legend_hybrid.pdf')
+
+def create_legend_model():
+    fig = pylab.figure()
+    ax1 = fig.add_subplot(111)
+
+    LEGEND_SIZE = 3
+
+    figlegend = pylab.figure(figsize=(10, 0.5))
+    idx = 0
+    lines = [None] * (LEGEND_SIZE + 1)
+    data = [1]
+    x_values = [1]
+
+    TITLE = "FORECASTING MODES:"
+    LABELS = [TITLE, "BC", "COLT", "RI"]
+
+    lines[idx], = ax1.plot(x_values, data, linewidth = 0)
+    idx = 1
+
+    for group in xrange(LEGEND_SIZE):
+        lines[idx], = ax1.plot(x_values, data, color=COLOR_MAP_3[idx - 1], linewidth=OPT_LINE_WIDTH,
+                               marker=OPT_MARKERS[idx - 1], markersize=OPT_MARKER_SIZE)
+        idx = idx + 1
+
+    # LEGEND
+    figlegend.legend(lines, LABELS, prop=LEGEND_FP,
+                     loc=1, ncol=4,
+                     mode="expand", shadow=OPT_LEGEND_SHADOW,
+                     frameon=False, borderaxespad=0.0,
+                     handleheight=1, handlelength=3)
+
+    figlegend.savefig('legend_model.pdf')
+    
 ###################################################################################
 # PLOT
 ###################################################################################
@@ -967,7 +1039,7 @@ def create_holistic_line_chart(datasets):
         LOG.info("group_data = %s", str(y_values))
         print(len(ind), len(y_values))
         ax1.plot(ind + 0.5, y_values,
-                 color=COLOR_MAP_2[idx],
+                 color=COLOR_MAP_3[idx],
                  linewidth=TIME_SERIES_OPT_LINE_WIDTH,
                  marker=OPT_MARKERS[idx],
                  markersize=TIME_SERIES_OPT_MARKER_SIZE,
@@ -1433,7 +1505,7 @@ def create_hybrid_bar_chart(datasets):
         LOG.info("group_data = %s", str(y_values))
         bars[group] =  ax1.bar(ind + margin + (group * width),
                                y_values, width,
-                               color=COLOR_MAP_2[group],
+                               color=COLOR_MAP_3[group],
                                hatch=OPT_PATTERNS[group],
                                linewidth=BAR_LINEWIDTH)
 
@@ -1481,7 +1553,7 @@ def create_model_line_chart(datasets, plot_mode):
                     y_values.append(datasets[group][line][col])
         LOG.info("group_data = %s", str(y_values))
         ax1.plot(ind + 0.5, y_values,
-                 color=OPT_COLORS[idx],
+                 color=COLOR_MAP_3[idx],
                  linewidth=MODEL_OPT_LINE_WIDTH,
                  marker=OPT_MARKERS[idx],
                  markersize=MODEL_OPT_MARKER_SIZE,
@@ -2589,4 +2661,6 @@ if __name__ == '__main__':
     #create_legend_index_usage_type_subset()
     #create_legend_index_count()
     #create_legend_layout()
-    #create_legend_holistic()
+    create_legend_holistic()
+    create_legend_hybrid()
+    create_legend_model()
