@@ -266,7 +266,7 @@ MODEL_DIR = BASE_DIR + "/results/model"
 ## INDEX USAGE TYPES
 INDEX_USAGE_TYPES_ALL = [INDEX_USAGE_TYPE_PARTIAL_FAST, INDEX_USAGE_TYPE_PARTIAL_MEDIUM, INDEX_USAGE_TYPE_PARTIAL_SLOW, INDEX_USAGE_TYPE_NEVER]
 INDEX_USAGE_TYPES_PARTIAL = [INDEX_USAGE_TYPE_PARTIAL_FAST, INDEX_USAGE_TYPE_PARTIAL_MEDIUM, INDEX_USAGE_TYPE_PARTIAL_SLOW]
-INDEX_USAGE_TYPES_MOTIVATION = [INDEX_USAGE_TYPE_PARTIAL_FAST, INDEX_USAGE_TYPE_FULL]
+INDEX_USAGE_TYPES_MOTIVATION = [INDEX_USAGE_TYPE_PARTIAL_SLOW, INDEX_USAGE_TYPE_FULL, INDEX_USAGE_TYPE_PARTIAL_FAST]
 INDEX_USAGE_TYPES_SCALE = [INDEX_USAGE_TYPE_PARTIAL_FAST, INDEX_USAGE_TYPE_NEVER]
 
 ## QUERY EXPERIMENT
@@ -1458,6 +1458,7 @@ def create_motivation_line_chart(datasets, plot_mode):
     # Y-AXIS
     ax1.yaxis.set_major_locator(LinearLocator(YAXIS_TICKS))
     ax1.minorticks_off()
+    ax1.set_yscale('log', nonposy='clip')
 
     # LATENCY
     if plot_mode == MOTIVATION_LATENCY_MODE:
@@ -1465,8 +1466,8 @@ def create_motivation_line_chart(datasets, plot_mode):
 
     # X-AXIS
     #ax1.set_xticks(ind + 0.5)
-    major_ticks = np.arange(0, 151, 150/10)
-    ax1.set_xticks(major_ticks)
+    #major_ticks = np.arange(0, 151, 150/10)
+    #ax1.set_xticks(major_ticks)
     ax1.set_xlabel("Cumulative Workload Execution Time (s)", fontproperties=LABEL_FP)
     #ax1.set_xticklabels(x_values)
 
