@@ -1443,7 +1443,7 @@ def create_motivation_line_chart(datasets, plot_mode):
         # Convert to second
         x_values = [float(x_val / 1000.0) for x_val in x_values]
         LOG.info("group_data = %s", str(y_values))
-        ax1.plot(x_values, y_values,
+        ax1.plot(ind + 0.5, y_values,
                  color=OPT_COLORS[idx],
                  linewidth=MOTIVATION_OPT_LINE_WIDTH,
                  marker=OPT_MARKERS[idx],
@@ -1472,9 +1472,9 @@ def create_motivation_line_chart(datasets, plot_mode):
     #ax1.set_xticklabels(x_values)
 
     # ADD VLINES
-    plot.axvline(x=83.1, color='k', linestyle='--', linewidth=1.0)
-    plot.axvline(x=122.3, color='k', linestyle='--', linewidth=1.0)
-    plot.axvline(x=125.6, color='k', linestyle='--', linewidth=1.0)
+    #plot.axvline(x=83.1, color='k', linestyle='--', linewidth=1.0)
+    #plot.axvline(x=122.3, color='k', linestyle='--', linewidth=1.0)
+    #plot.axvline(x=125.6, color='k', linestyle='--', linewidth=1.0)
 
     for label in ax1.get_yticklabels() :
         label.set_fontproperties(TICK_FP)
