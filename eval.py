@@ -266,7 +266,7 @@ MODEL_DIR = BASE_DIR + "/results/model"
 ## INDEX USAGE TYPES
 INDEX_USAGE_TYPES_ALL = [INDEX_USAGE_TYPE_PARTIAL_FAST, INDEX_USAGE_TYPE_PARTIAL_MEDIUM, INDEX_USAGE_TYPE_PARTIAL_SLOW, INDEX_USAGE_TYPE_NEVER]
 INDEX_USAGE_TYPES_PARTIAL = [INDEX_USAGE_TYPE_PARTIAL_FAST, INDEX_USAGE_TYPE_PARTIAL_MEDIUM, INDEX_USAGE_TYPE_PARTIAL_SLOW]
-INDEX_USAGE_TYPES_MOTIVATION = [INDEX_USAGE_TYPE_PARTIAL_FAST, INDEX_USAGE_TYPE_FULL, INDEX_USAGE_TYPE_PARTIAL_FAST]
+INDEX_USAGE_TYPES_MOTIVATION = [INDEX_USAGE_TYPE_PARTIAL_FAST, INDEX_USAGE_TYPE_FULL]
 INDEX_USAGE_TYPES_SCALE = [INDEX_USAGE_TYPE_PARTIAL_FAST, INDEX_USAGE_TYPE_NEVER]
 
 ## QUERY EXPERIMENT
@@ -848,7 +848,7 @@ def create_legend_model():
                      handleheight=1, handlelength=3)
 
     figlegend.savefig('legend_model.pdf')
-    
+
 ###################################################################################
 # PLOT
 ###################################################################################
@@ -2465,7 +2465,7 @@ def holistic_eval():
         print("> holistic: " + str(holistic_mode) +
                 " multi_stage: " + str(HOLISTIC_EXPERIMENT_MULTI_STAGE) +
                 " layout: " + LAYOUT_MODE_STRINGS[HOLISTIC_EXPERIMENT_LAYOUT_MODE])
-                        
+
         # Run experiment
         start = time.time()
         run_experiment(holistic_index_enabled=holistic_mode,
@@ -2531,7 +2531,7 @@ def model_eval():
                                    write_ratio=write_ratio,
                                    index_count_threshold=MODEL_EXP_INDEX_COUNT_THRESHOLD,
                                    variability_threshold=MODEL_EXP_VARIABILITY_THRESHOLD,
-                                   scale_factor=MODEL_EXP_SCALE_FACTOR,                                   
+                                   scale_factor=MODEL_EXP_SCALE_FACTOR,
                                    query_count=MODEL_EXP_QUERY_COUNT,
                                    query_complexity=query_complexity)
 
