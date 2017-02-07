@@ -535,21 +535,28 @@ def create_legend_motivation():
 
     LEGEND_VALUES = MOTIVATION_STRINGS_SUBSET.values()
 
-    figlegend = pylab.figure(figsize=(11, 0.5))
+    figlegend = pylab.figure(figsize=(14, 0.5))
     idx = 0
     lines = [None] * (len(LEGEND_VALUES) + 1)
     data = [1]
     x_values = [1]
 
     TITLE = "INDEX USAGE MODE:"
-    LABELS = [TITLE, "PARTIAL", "FULL", "DISABLED"]
+    LABELS = [TITLE, "FULL", "VALUE-BASED PARTIAL", "VALUE-AGNOSTIC PARTIAL"]
 
     lines[idx], = ax1.plot(x_values, data, linewidth = 0)
     idx = 1
 
     for group in xrange(len(LEGEND_VALUES)):
-        lines[idx], = ax1.plot(x_values, data, color=OPT_LINE_COLORS[idx - 1], linewidth=OPT_LINE_WIDTH,
-                               marker=OPT_MARKERS[idx - 1], markersize=OPT_MARKER_SIZE)
+        if idx == 1:
+            color_idx = 1
+        elif idx == 2:
+            color_idx = 0
+        elif idx == 3:
+            color_idx = 2
+        
+        lines[idx], = ax1.plot(x_values, data, color=OPT_LINE_COLORS[color_idx], linewidth=OPT_LINE_WIDTH,
+                               marker=OPT_MARKERS[color_idx], markersize=OPT_MARKER_SIZE)
         idx = idx + 1
 
     # LEGEND
@@ -823,14 +830,14 @@ def create_legend_model():
 
     LEGEND_SIZE = 3
 
-    figlegend = pylab.figure(figsize=(10, 0.5))
+    figlegend = pylab.figure(figsize=(13, 0.5))
     idx = 0
     lines = [None] * (LEGEND_SIZE + 1)
     data = [1]
     x_values = [1]
 
-    TITLE = "FORECASTING MODES:"
-    LABELS = [TITLE, "BC", "COLT", "RI"]
+    TITLE = "DECISION LOGIC:"
+    LABELS = [TITLE, "RETROSPECTIVE", "COLT", "PREDICTIVE"]
 
     lines[idx], = ax1.plot(x_values, data, linewidth = 0)
     idx = 1
@@ -1915,7 +1922,7 @@ def model_plot():
                             WRITE_RATIO_STRINGS[write_ratio] + "-" + \
                             str(phase_length) + ".pdf"
 
-                saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH * 3.0, height=OPT_GRAPH_HEIGHT/1.5)
+                saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH * 2.0, height=OPT_GRAPH_HEIGHT)
 
 
 ###################################################################################
@@ -2037,7 +2044,7 @@ def motivation_plot():
                             WRITE_RATIO_STRINGS[write_ratio] + "-" + \
                             str(phase_length) + ".pdf"
 
-                saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH * 3.0, height=OPT_GRAPH_HEIGHT/1.5)
+                saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH * 2, height=OPT_GRAPH_HEIGHT)
 
 
 ###################################################################################
@@ -2656,7 +2663,7 @@ if __name__ == '__main__':
         model_plot()
 
     #create_legend_index_usage_type()
-    #create_legend_motivation()
+    create_legend_motivation()
     #create_bar_legend_index_usage_type()
     #create_legend_trend()
     #create_legend_index_usage_type_subset()
