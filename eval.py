@@ -1430,9 +1430,9 @@ def create_motivation_line_chart(datasets, plot_mode):
     # N = len(x_values)
     ind = np.arange(MOTIVATION_EXP_QUERY_COUNT)
 
-    MOTIVATION_OPT_LINE_WIDTH = 3.0
+    MOTIVATION_OPT_LINE_WIDTH = 0.0
     MOTIVATION_OPT_MARKER_SIZE = 5.0
-    MOTIVATION_OPT_MARKER_FREQUENCY = MOTIVATION_EXP_QUERY_COUNT/10
+    MOTIVATION_OPT_MARKER_FREQUENCY = MOTIVATION_EXP_QUERY_COUNT/100
 
     idx = 0
     for group in xrange(len(datasets)):
