@@ -1475,7 +1475,7 @@ def create_motivation_line_chart(datasets, plot_mode):
     #ax1.set_xticks(ind + 0.5)
     #major_ticks = np.arange(0, 151, 150/10)
     #ax1.set_xticks(major_ticks)
-    ax1.set_xlabel("Cumulative Workload Execution Time (s)", fontproperties=LABEL_FP)
+    ax1.set_xlabel("Query sequence", fontproperties=LABEL_FP)
     #ax1.set_xticklabels(x_values)
 
     # ADD VLINES
