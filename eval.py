@@ -194,13 +194,15 @@ WRITE_RATIO_STRINGS = {
 
 ## TUNER MODEL TYPES
 TUNER_MODEL_TYPE_DEFAULT = 1
-TUNER_MODEL_TYPE_BC  = 2
-TUNER_MODEL_TYPE_RI  = 3
+TUNER_MODEL_TYPE_RETROSPECTIVE  = 2
+TUNER_MODEL_TYPE_IMMEDIATE  = 3
+TUNER_MODEL_TYPE_PREDICTIVE = 4
 
 TUNER_MODEL_TYPES_STRINGS = {
     1 : "default",
-    2 : "bc",
-    3 : "ri"
+    2 : "retrospective",
+    3 : "immediate",
+    4 : "predictive"
 }
 
 DEFAULT_INDEX_USAGE_TYPE = INDEX_USAGE_TYPE_PARTIAL_FAST
@@ -398,9 +400,9 @@ HYBRID_EXP_FRACTIONS = ["0%", "20%", "40%", "60%", "80%", "100%"]
 HYBRID_CSV = 'hybrid.csv'
 
 ##  MODEL EXPERIMENT
-MODEL_EXP_PHASE_LENGTHS = [2000]
+MODEL_EXP_PHASE_LENGTHS = [1000]
 MODEL_EXP_INDEX_USAGE_TYPE = INDEX_USAGE_TYPE_PARTIAL_FAST
-MODEL_EXP_TUNER_MODEL_TYPES = [TUNER_MODEL_TYPE_BC, TUNER_MODEL_TYPE_RI]
+MODEL_EXP_TUNER_MODEL_TYPES = [TUNER_MODEL_TYPE_RETROSPECTIVE, TUNER_MODEL_TYPE_IMMEDIATE, TUNER_MODEL_TYPE_PREDICTIVE]
 MODEL_EXP_INDEX_COUNT_THRESHOLD = 50
 MODEL_EXP_QUERY_COUNT = 5000
 MODEL_EXP_WRITE_RATIOS = [WRITE_RATIO_READ_ONLY]
@@ -408,7 +410,7 @@ MODEL_EXP_QUERY_COMPLEXITY = QUERY_COMPLEXITY_MODERATE
 MODEL_EXP_VARIABILITY_THRESHOLD = 30
 MODEL_LATENCY_MODE = 1
 MODEL_INDEX_MODE = 2
-MODEL_PLOT_MODES = [MODEL_LATENCY_MODE, MODEL_INDEX_MODE]
+MODEL_PLOT_MODES = [MODEL_LATENCY_MODE]
 MODEL_LATENCY_CSV = "model_latency.csv"
 MODEL_INDEX_CSV = "model_index.csv"
 MODEL_EXP_SCALE_FACTOR = 300
@@ -828,14 +830,14 @@ def create_legend_model():
 
     LEGEND_SIZE = 3
 
-    figlegend = pylab.figure(figsize=(13, 0.5))
+    figlegend = pylab.figure(figsize=(12, 0.5))
     idx = 0
     lines = [None] * (LEGEND_SIZE + 1)
     data = [1]
     x_values = [1]
 
     TITLE = "DECISION LOGIC:"
-    LABELS = [TITLE, "RETROSPECTIVE", "COLT", "PREDICTIVE"]
+    LABELS = [TITLE, "RETROSPECTIVE", "IMMEDIATE", "PREDICTIVE"]
 
     lines[idx], = ax1.plot(x_values, data, linewidth = 0)
     idx = 1
@@ -1552,7 +1554,7 @@ def create_model_line_chart(datasets, plot_mode):
 
     MODEL_OPT_LINE_WIDTH = 3.0
     MODEL_OPT_MARKER_SIZE = 5.0
-    MODEL_OPT_MARKER_FREQUENCY = MODEL_EXP_QUERY_COUNT/10
+    MODEL_OPT_MARKER_FREQUENCY = MODEL_EXP_QUERY_COUNT/20
 
     idx = 0
     for group in xrange(len(datasets)):
@@ -1589,14 +1591,20 @@ def create_model_line_chart(datasets, plot_mode):
         YAXIS_MAX = 10
         ax1.set_ylim([YAXIS_MIN, YAXIS_MAX])
 
-
     # X-AXIS
     #ax1.set_xticks(ind + 0.5)
     major_ticks = np.arange(0, MODEL_EXP_QUERY_COUNT + 1,
-                            MODEL_OPT_MARKER_FREQUENCY)
+                            MODEL_EXP_QUERY_COUNT/5)
     ax1.set_xticks(major_ticks)
     ax1.set_xlabel("Query Sequence", fontproperties=LABEL_FP)
     #ax1.set_xticklabels(x_values)
+
+    # ADD VLINES
+    #plot.axvline(x=1000, color='k', linestyle='--', linewidth=1.0)
+    #plot.axvline(x=2000, color='k', linestyle='--', linewidth=1.0)
+    #plot.axvline(x=3000, color='k', linestyle='--', linewidth=1.0)
+    #plot.axvline(x=4000, color='k', linestyle='--', linewidth=1.0)
+    #plot.axvline(x=5000, color='k', linestyle='--', linewidth=1.0)
 
     for label in ax1.get_yticklabels() :
         label.set_fontproperties(TICK_FP)
@@ -2666,12 +2674,12 @@ if __name__ == '__main__':
         model_plot()
 
     #create_legend_index_usage_type()
-    create_legend_motivation()
+    #create_legend_motivation()
     #create_bar_legend_index_usage_type()
     #create_legend_trend()
     #create_legend_index_usage_type_subset()
     #create_legend_index_count()
     #create_legend_layout()
-    create_legend_holistic()
-    create_legend_hybrid()
+    #create_legend_holistic()
+    #create_legend_hybrid()
     create_legend_model()
