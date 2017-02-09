@@ -398,11 +398,11 @@ HYBRID_EXP_FRACTIONS = ["0%", "20%", "40%", "60%", "80%", "100%"]
 HYBRID_CSV = 'hybrid.csv'
 
 ##  MODEL EXPERIMENT
-MODEL_EXP_PHASE_LENGTHS = [500]
+MODEL_EXP_PHASE_LENGTHS = [200 * 10]
 MODEL_EXP_INDEX_USAGE_TYPE = INDEX_USAGE_TYPE_PARTIAL_FAST
 MODEL_EXP_TUNER_MODEL_TYPES = [TUNER_MODEL_TYPE_BC, TUNER_MODEL_TYPE_RI]
 MODEL_EXP_INDEX_COUNT_THRESHOLD = 50
-MODEL_EXP_QUERY_COUNT = 5000
+MODEL_EXP_QUERY_COUNT = 1000
 MODEL_EXP_WRITE_RATIOS = [WRITE_RATIO_READ_ONLY]
 MODEL_EXP_QUERY_COMPLEXITY = QUERY_COMPLEXITY_MODERATE
 MODEL_EXP_VARIABILITY_THRESHOLD = 30
@@ -552,7 +552,7 @@ def create_legend_motivation():
             color_idx = 0
         elif idx == 3:
             color_idx = 2
-        
+
         lines[idx], = ax1.plot(x_values, data, color=OPT_LINE_COLORS[color_idx], linewidth=OPT_LINE_WIDTH,
                                marker=OPT_MARKERS[color_idx], markersize=OPT_MARKER_SIZE)
         idx = idx + 1
@@ -1438,7 +1438,7 @@ def create_motivation_line_chart(datasets, plot_mode):
             MOTIVATION_OPT_LINE_WIDTH = 0.0
         else:
             MOTIVATION_OPT_LINE_WIDTH = 3.0
-        
+
         # GROUP
         x_values = []
         y_values = []
