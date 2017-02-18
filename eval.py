@@ -377,7 +377,7 @@ MOTIVATION_EXP_TILE_GROUPS_INDEXED_PER_ITERATION = 1
 
 ## HOLISTIC EXPERIMENT
 HOLISTIC_EXPERIMENT_MULTI_STAGE = 1
-HOLISTIC_EXPERIMENT_HOLISTIC_INDEXING = [0, 1, 2]
+HOLISTIC_EXPERIMENT_HOLISTIC_INDEXING = [0, 2]
 HOLISTIC_EXPERIMENT_PHASE_LENGTH = 200
 HOLISTIC_EXPERIMENT_QUERY_COUNT = 1000
 HOLISTIC_EXPERIMENT_SCALE_FACTOR = 1000
@@ -759,14 +759,14 @@ def create_legend_holistic():
 
     LEGEND_SIZE = 3
 
-    figlegend = pylab.figure(figsize=(12, 0.5))
+    figlegend = pylab.figure(figsize=(10, 0.5))
     idx = 0
     lines = [None] * (LEGEND_SIZE + 1)
     data = [1]
     x_values = [1]
 
     TITLE = "INDEX TUNING MODES:"
-    LABELS = [TITLE, "HOLISTIC", "SMIX", "INCREMENTAL"]
+    LABELS = [TITLE, "HOLISTIC", "PREDICTIVE"]
 
     lines[idx], = ax1.plot(x_values, data, linewidth = 0)
     idx = 1
@@ -1031,7 +1031,7 @@ def create_holistic_line_chart(datasets):
     N = len(x_values)
     ind = np.arange(N)
 
-    TIME_SERIES_OPT_LINE_WIDTH = 0.1
+    TIME_SERIES_OPT_LINE_WIDTH = 1.0
     TIME_SERIES_OPT_MARKER_SIZE = 5.0
     TIME_SERIES_OPT_MARKER_FREQUENCY = TIME_SERIES_EXP_QUERY_COUNT/30
 
@@ -2681,6 +2681,6 @@ if __name__ == '__main__':
     #create_legend_index_usage_type_subset()
     #create_legend_index_count()
     #create_legend_layout()
-    #create_legend_holistic()
+    create_legend_holistic()
     #create_legend_hybrid()
     #create_legend_model()
