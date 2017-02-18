@@ -359,7 +359,7 @@ LAYOUT_CSV = "layout.csv"
 TREND_EXP_TUNING_COUNT = 300
 TREND_EXP_METHODS = ["Data", "Holt-Winters Forecast"]
 TREND_CSV = "trend.csv"
-TREND_LINE_COLORS = ( '#594F4F', '#45ADA8')
+TREND_LINE_COLORS = ( '#79BD9A', '#0B486B')
 
 ## MOTIVATION EXPERIMENT
 MOTIVATION_EXP_INDEX_USAGE_TYPES = INDEX_USAGE_TYPES_MOTIVATION
@@ -625,7 +625,7 @@ def create_legend_trend():
     x_values = [1]
 
     TITLE = "TREND:"
-    LABELS = [TITLE, "DATA", "HOLT-WINTERS FORECAST"]
+    LABELS = [TITLE, "ACTUAL UTILITY", "FORECASTED UTILITY"]
 
     lines[idx], = ax1.plot(x_values, data, linewidth = 0)
     idx = 1
@@ -967,7 +967,7 @@ def create_time_series_line_chart(datasets, plot_mode):
     N = len(x_values)
     ind = np.arange(N)
 
-    TIME_SERIES_OPT_LINE_WIDTH = 3.0
+    TIME_SERIES_OPT_LINE_WIDTH = 0.1
     TIME_SERIES_OPT_MARKER_SIZE = 5.0
     TIME_SERIES_OPT_MARKER_FREQUENCY = TIME_SERIES_EXP_QUERY_COUNT/10
 
@@ -1031,7 +1031,7 @@ def create_holistic_line_chart(datasets):
     N = len(x_values)
     ind = np.arange(N)
 
-    TIME_SERIES_OPT_LINE_WIDTH = 3.0
+    TIME_SERIES_OPT_LINE_WIDTH = 0.1
     TIME_SERIES_OPT_MARKER_SIZE = 5.0
     TIME_SERIES_OPT_MARKER_FREQUENCY = TIME_SERIES_EXP_QUERY_COUNT/30
 
@@ -1375,7 +1375,7 @@ def create_trend_line_chart(datasets):
     N = len(x_values)
     ind = np.arange(N)
 
-    TREND_OPT_LINE_WIDTH = 3.0
+    TREND_OPT_LINE_WIDTH = 1.0
     TREND_OPT_MARKER_SIZE = 5.0
     TREND_OPT_MARKER_FREQUENCY = TREND_EXP_TUNING_COUNT/10
 
@@ -1430,16 +1430,16 @@ def create_motivation_line_chart(datasets, plot_mode):
     # N = len(x_values)
     ind = np.arange(MOTIVATION_EXP_QUERY_COUNT)
 
-    MOTIVATION_OPT_LINE_WIDTH = 3.0
+    MOTIVATION_OPT_LINE_WIDTH = 0.1
     MOTIVATION_OPT_MARKER_SIZE = 5.0
     MOTIVATION_OPT_MARKER_FREQUENCY = MOTIVATION_EXP_QUERY_COUNT/100
 
     idx = 0
     for group in xrange(len(datasets)):
         if idx == 0:
-            MOTIVATION_OPT_LINE_WIDTH = 0.0
+            MOTIVATION_OPT_LINE_WIDTH = 0.1
         else:
-            MOTIVATION_OPT_LINE_WIDTH = 3.0
+            MOTIVATION_OPT_LINE_WIDTH = 0.1
 
         # GROUP
         x_values = []
@@ -1543,7 +1543,7 @@ def create_hybrid_bar_chart(datasets):
 
     return fig
 
-def create_model_line_chart(datasets, plot_mode):
+def create_model_line_chart(datasets, plot_mode, color_offset):
     fig = plot.figure()
     ax1 = fig.add_subplot(111)
 
@@ -1552,9 +1552,9 @@ def create_model_line_chart(datasets, plot_mode):
     N = len(x_values)
     ind = np.arange(N)
 
-    MODEL_OPT_LINE_WIDTH = 3.0
+    MODEL_OPT_LINE_WIDTH = 0.1
     MODEL_OPT_MARKER_SIZE = 5.0
-    MODEL_OPT_MARKER_FREQUENCY = MODEL_EXP_QUERY_COUNT/20
+    MODEL_OPT_MARKER_FREQUENCY = MODEL_EXP_QUERY_COUNT/100
 
     idx = 0
     for group in xrange(len(datasets)):
@@ -1566,9 +1566,9 @@ def create_model_line_chart(datasets, plot_mode):
                     y_values.append(datasets[group][line][col])
         LOG.info("group_data = %s", str(y_values))
         ax1.plot(ind + 0.5, y_values,
-                 color=COLOR_MAP_3[idx],
+                 color=COLOR_MAP_3[color_offset],
                  linewidth=MODEL_OPT_LINE_WIDTH,
-                 marker=OPT_MARKERS[idx],
+                 marker=OPT_MARKERS[color_offset],
                  markersize=MODEL_OPT_MARKER_SIZE,
                  markevery=MODEL_OPT_MARKER_FREQUENCY,
                  label=str(group))
@@ -1911,29 +1911,30 @@ def model_plot():
                     CSV_FILE = MODEL_INDEX_CSV
                     OUTPUT_STRING = "index"
 
-                datasets = []
+                idx = 0
                 for tuner_model_type in MODEL_EXP_TUNER_MODEL_TYPES:
 
-                        # Get result file
-                        result_dir_list = [TUNER_MODEL_TYPES_STRINGS[tuner_model_type],
+                    datasets = []
+
+                    # Get result file
+                    result_dir_list = [TUNER_MODEL_TYPES_STRINGS[tuner_model_type],
                                            WRITE_RATIO_STRINGS[write_ratio],
                                            QUERY_COMPLEXITY_STRINGS[query_complexity],
                                            str(phase_length)]
-                        result_file = get_result_file(MODEL_DIR,
-                                                      result_dir_list,
-                                                      CSV_FILE)
+                    result_file = get_result_file(MODEL_DIR,
+                                                  result_dir_list,
+                                                  CSV_FILE)
 
-                        dataset = loadDataFile(result_file)
-                        datasets.append(dataset)
+                    dataset = loadDataFile(result_file)
+                    datasets.append(dataset)
 
-                fig = create_model_line_chart(datasets, plot_mode)
+                    fig = create_model_line_chart(datasets, plot_mode, idx)
+                    idx = idx + 1
 
-                file_name = "model" + "-" + OUTPUT_STRING + "-" + \
-                            QUERY_COMPLEXITY_STRINGS[query_complexity] + "-" + \
-                            WRITE_RATIO_STRINGS[write_ratio] + "-" + \
-                            str(phase_length) + ".pdf"
+                    file_name = "model" + "-" + \
+                            TUNER_MODEL_TYPES_STRINGS[tuner_model_type] + ".pdf"
 
-                saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH * 2.0, height=OPT_GRAPH_HEIGHT)
+                    saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH * 2.0, height=OPT_GRAPH_HEIGHT/1.5)
 
 
 ###################################################################################
@@ -2682,4 +2683,4 @@ if __name__ == '__main__':
     #create_legend_layout()
     #create_legend_holistic()
     #create_legend_hybrid()
-    create_legend_model()
+    #create_legend_model()
