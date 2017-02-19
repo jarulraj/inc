@@ -395,8 +395,7 @@ HOLISTIC_CSV = 'holistic.csv'
 
 ## HYBRID EXPERIMENT
 HYBRID_EXP_INDEX_USAGE_TYPES = [INDEX_USAGE_TYPE_FULL, INDEX_USAGE_TYPE_PARTIAL_FAST]
-HYBRID_EXP_SCALES = [1000, 10000]
-HYBRID_EXP_FRACTIONS = ["0%", "20%", "40%", "60%", "80%", "100%"]
+HYBRID_EXP_QUERY_COUNT = 5000
 HYBRID_CSV = 'hybrid.csv'
 
 ##  MODEL EXPERIMENT
@@ -1495,19 +1494,20 @@ def create_motivation_line_chart(datasets, plot_mode):
 
     return fig
 
-def create_hybrid_bar_chart(datasets):
+def create_hybrid_line_chart(datasets):
     fig = plot.figure()
     ax1 = fig.add_subplot(111)
 
     # X-AXIS
-    x_values = HYBRID_EXP_FRACTIONS
+    x_values = [str(i) for i in range(1, HYBRID_EXP_QUERY_COUNT + 1)]
     N = len(x_values)
-    M = len(HYBRID_EXP_INDEX_USAGE_TYPES)
     ind = np.arange(N)
-    margin = 0.1
-    width = (1.-2.*margin)/M
-    bars = [None] * N
 
+    HYBRID_OPT_LINE_WIDTH = 0.1
+    HYBRID_OPT_MARKER_SIZE = 5.0
+    HYBRID_OPT_MARKER_FREQUENCY = HYBRID_EXP_QUERY_COUNT/50
+
+    idx = 0
     for group in xrange(len(datasets)):
         # GROUP
         y_values = []
@@ -1516,11 +1516,14 @@ def create_hybrid_bar_chart(datasets):
                 if col == 1:
                     y_values.append(datasets[group][line][col])
         LOG.info("group_data = %s", str(y_values))
-        bars[group] =  ax1.bar(ind + margin + (group * width),
-                               y_values, width,
-                               color=COLOR_MAP_3[group],
-                               hatch=OPT_PATTERNS[group],
-                               linewidth=BAR_LINEWIDTH)
+        ax1.plot(ind + 0.5, y_values,
+                 color=OPT_COLORS[idx],
+                 linewidth=HYBRID_OPT_LINE_WIDTH,
+                 marker=OPT_MARKERS[idx],
+                 markersize=HYBRID_OPT_MARKER_SIZE,
+                 markevery=HYBRID_OPT_MARKER_FREQUENCY,
+                 label=str(group))
+        idx = idx + 1
 
     # GRID
     makeGrid(ax1)
@@ -1528,13 +1531,36 @@ def create_hybrid_bar_chart(datasets):
     # Y-AXIS
     ax1.yaxis.set_major_locator(LinearLocator(YAXIS_TICKS))
     ax1.minorticks_off()
-    ax1.set_ylabel("Execution time (ms)", fontproperties=LABEL_FP)
+    ax1.set_ylabel("Latency (ms)", fontproperties=LABEL_FP)
 
     # X-AXIS
-    ax1.set_xticks(ind + 0.5)
-    ax1.set_xlabel("Percentage of table indexed (%)", fontproperties=LABEL_FP)
-    ax1.set_xticklabels(x_values)
-    #ax1.set_xlim([XAXIS_MIN, XAXIS_MAX])
+    #ax1.set_xticks(ind + 0.5)
+    major_ticks = np.arange(0, HYBRID_EXP_QUERY_COUNT + 1,
+                            HYBRID_EXP_QUERY_COUNT/10)
+    ax1.set_xticks(major_ticks)
+    ax1.set_xlabel("Query Sequence", fontproperties=LABEL_FP)
+    #ax1.set_xticklabels(x_values)
+
+    # ADD VLINES
+    plot.axvline(x=72, color='k', linestyle='--', linewidth=1.0)
+    plot.axvline(x=357, color='k', linestyle='--', linewidth=1.0)
+    plot.axvline(x=1412, color='k', linestyle='--', linewidth=1.0)
+    plot.axvline(x=1845, color='k', linestyle='--', linewidth=1.0)
+    plot.axvline(x=3140, color='k', linestyle='--', linewidth=1.0)
+    plot.axvline(x=4091, color='k', linestyle='--', linewidth=1.0)
+
+    # LABELS
+    y_mark = 0.6
+
+    HYBRID_LABELS = (["25%", "50%", "75%", "80%", "90%", "95%"])
+    HYBRID_LABEL_LOCATIONS = ([112.0/5000, 397.0/5000, 1452.0/5000, 1885.0/5000, 3180.0/5000, 4131.0/5000])
+
+    for idx, x_mark in enumerate(HYBRID_LABELS):
+            ax1.text(HYBRID_LABEL_LOCATIONS[idx],
+                     y_mark,
+                     HYBRID_LABELS[idx],
+                     transform=ax1.transAxes,
+                     bbox=dict(facecolor='lightgrey', alpha=0.75))
 
     for label in ax1.get_yticklabels() :
         label.set_fontproperties(TICK_FP)
@@ -1542,7 +1568,7 @@ def create_hybrid_bar_chart(datasets):
         label.set_fontproperties(TICK_FP)
 
     return fig
-
+  
 def create_model_line_chart(datasets, plot_mode, color_offset):
     fig = plot.figure()
     ax1 = fig.add_subplot(111)
@@ -1552,7 +1578,7 @@ def create_model_line_chart(datasets, plot_mode, color_offset):
     N = len(x_values)
     ind = np.arange(N)
 
-    MODEL_OPT_LINE_WIDTH = 0.1
+    MODEL_OPT_LINE_WIDTH = 1.0
     MODEL_OPT_MARKER_SIZE = 5.0
     MODEL_OPT_MARKER_FREQUENCY = MODEL_EXP_QUERY_COUNT/100
 
@@ -1601,9 +1627,6 @@ def create_model_line_chart(datasets, plot_mode, color_offset):
 
     # ADD VLINES
     #plot.axvline(x=1000, color='k', linestyle='--', linewidth=1.0)
-    #plot.axvline(x=2000, color='k', linestyle='--', linewidth=1.0)
-    #plot.axvline(x=3000, color='k', linestyle='--', linewidth=1.0)
-    #plot.axvline(x=4000, color='k', linestyle='--', linewidth=1.0)
     #plot.axvline(x=5000, color='k', linestyle='--', linewidth=1.0)
 
     for label in ax1.get_yticklabels() :
@@ -1867,25 +1890,21 @@ def holistic_plot():
 # HYBRID -- PLOY
 def hybrid_plot():
 
-    for scale_factor in HYBRID_EXP_SCALES:
+    datasets = []
+    for index_usage_type in HYBRID_EXP_INDEX_USAGE_TYPES:
 
-        datasets = []
-        for index_usage_type in HYBRID_EXP_INDEX_USAGE_TYPES:
+        # Get result file
+        result_dir_list = [INDEX_USAGE_TYPES_STRINGS[index_usage_type]]
+        result_file = get_result_file(HYBRID_DIR, result_dir_list, HYBRID_CSV)
 
-            # Get result file
-            result_dir_list = [INDEX_USAGE_TYPES_STRINGS[index_usage_type],
-                               str(scale_factor)]
-            result_file = get_result_file(HYBRID_DIR, result_dir_list, HYBRID_CSV)
+        dataset = loadDataFile(result_file)
+        datasets.append(dataset)
 
-            dataset = loadDataFile(result_file)
-            datasets.append(dataset)
+    fig = create_hybrid_line_chart(datasets)
 
-        fig = create_hybrid_bar_chart(datasets)
+    file_name = "hybrid" + ".pdf"
 
-        file_name = "hybrid" + "-" + \
-                    str(scale_factor) + ".pdf"
-
-        saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH, height=OPT_GRAPH_HEIGHT)
+    saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH * 2.0, height=OPT_GRAPH_HEIGHT/1.5)
 
 # MODEL -- PLOT
 def model_plot():
@@ -2681,6 +2700,6 @@ if __name__ == '__main__':
     #create_legend_index_usage_type_subset()
     #create_legend_index_count()
     #create_legend_layout()
-    create_legend_holistic()
+    #create_legend_holistic()
     #create_legend_hybrid()
     #create_legend_model()
