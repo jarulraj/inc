@@ -1505,7 +1505,7 @@ def create_hybrid_line_chart(datasets):
 
     HYBRID_OPT_LINE_WIDTH = 0.1
     HYBRID_OPT_MARKER_SIZE = 5.0
-    HYBRID_OPT_MARKER_FREQUENCY = HYBRID_EXP_QUERY_COUNT/50
+    HYBRID_OPT_MARKER_FREQUENCY = HYBRID_EXP_QUERY_COUNT/100
 
     idx = 0
     for group in xrange(len(datasets)):
@@ -1553,7 +1553,8 @@ def create_hybrid_line_chart(datasets):
     y_mark = 0.6
 
     HYBRID_LABELS = (["25%", "50%", "75%", "80%", "90%", "95%"])
-    HYBRID_LABEL_LOCATIONS = ([112.0/5000, 397.0/5000, 1452.0/5000, 1885.0/5000, 3180.0/5000, 4131.0/5000])
+    HYBRID_LABEL_LOCATIONS = ([112.0/5000, 397.0/5000, 1452.0/5000, 
+                               1885.0/5000, 3180.0/5000, 4131.0/5000])
 
     for idx, x_mark in enumerate(HYBRID_LABELS):
             ax1.text(HYBRID_LABEL_LOCATIONS[idx],
