@@ -788,38 +788,31 @@ def create_legend_hybrid():
     fig = pylab.figure()
     ax1 = fig.add_subplot(111)
 
-    figlegend = pylab.figure(figsize=(8, 0.5))
+    LEGEND_SIZE = 3
+
+    figlegend = pylab.figure(figsize=(7, 0.5))
+    idx = 0
+    lines = [None] * (LEGEND_SIZE + 1)
+    data = [1]
+    x_values = [1]
 
     TITLE = "SCAN TYPES:"
-    LABELS = [TITLE, "HYBRID", "INDEX"]
+    LABELS = [TITLE, "FULL", "HYBRID"]
 
-    num_items = len(LABELS) + 1
-    ind = np.arange(1)
-    margin = 0.10
-    width = (1.-2.*margin)/num_items
-    data = [1]
-
-    bars = [None] * num_items
-
-    # TITLE
-    idx = 0
-    bars[idx] = ax1.bar(ind + margin + (idx * width), data, width,
-                        color = 'w',
-                        linewidth=0)
-
+    lines[idx], = ax1.plot(x_values, data, linewidth = 0)
     idx = 1
-    for group in xrange(len(LABELS)):
-        bars[idx] = ax1.bar(ind + margin + (idx * width), data, width,
-                              color=COLOR_MAP_3[idx - 1],
-                              linewidth=BAR_LINEWIDTH)
+
+    for group in xrange(LEGEND_SIZE):
+        lines[idx], = ax1.plot(x_values, data, color=COLOR_MAP[idx - 1], linewidth=OPT_LINE_WIDTH,
+                               marker=OPT_MARKERS[idx - 1], markersize=OPT_MARKER_SIZE)
         idx = idx + 1
 
     # LEGEND
-    figlegend.legend(bars, LABELS, prop=LEGEND_FP,
-                     loc=1, ncol=5,
+    figlegend.legend(lines, LABELS, prop=LEGEND_FP,
+                     loc=1, ncol=4,
                      mode="expand", shadow=OPT_LEGEND_SHADOW,
                      frameon=False, borderaxespad=0.0,
-                     handleheight=1, handlelength=4)
+                     handleheight=1, handlelength=3)
 
     figlegend.savefig('legend_hybrid.pdf')
 
@@ -1553,7 +1546,7 @@ def create_hybrid_line_chart(datasets):
     y_mark = 0.6
 
     HYBRID_LABELS = (["25%", "50%", "75%", "80%", "90%", "95%"])
-    HYBRID_LABEL_LOCATIONS = ([112.0/5000, 397.0/5000, 1452.0/5000, 
+    HYBRID_LABEL_LOCATIONS = ([112.0/5000, 397.0/5000, 1452.0/5000,
                                1885.0/5000, 3180.0/5000, 4131.0/5000])
 
     for idx, x_mark in enumerate(HYBRID_LABELS):
@@ -1569,7 +1562,7 @@ def create_hybrid_line_chart(datasets):
         label.set_fontproperties(TICK_FP)
 
     return fig
-  
+
 def create_model_line_chart(datasets, plot_mode, color_offset):
     fig = plot.figure()
     ax1 = fig.add_subplot(111)
