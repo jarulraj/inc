@@ -60,7 +60,7 @@ OPT_COLORS = COLOR_MAP
 
 OPT_GRID_COLOR = 'gray'
 OPT_LEGEND_SHADOW = False
-OPT_MARKERS = (['o', 's', 'v', "^", "h", "v", ">", "x", "d", "<", "|", "", "|", "_"])
+OPT_MARKERS = (['o', 's', 'v', "^", "h", ">", "x", "d", "<", "|", "", "|", "_"])
 OPT_PATTERNS = ([ "////", "o", "\\\\" , ".", "\\\\\\"])
 
 OPT_STACK_COLORS = ('#2b3742', '#c9b385', '#610606', '#1f1501')
@@ -123,12 +123,23 @@ INDEX_USAGE_TYPE_PARTIAL_SLOW  = 3
 INDEX_USAGE_TYPE_FULL = 4
 INDEX_USAGE_TYPE_NEVER = 5
 
+INDEX_USAGE_TYPE_VAP = 6
+INDEX_USAGE_TYPE_VBP_VERY_HIGH_SKEW = 7
+INDEX_USAGE_TYPE_VBP_HIGH_SKEW = 8
+INDEX_USAGE_TYPE_VBP_MODERATE_SKEW = 9
+INDEX_USAGE_TYPE_VBP_LOW_SKEW = 10
+
 INDEX_USAGE_TYPES_STRINGS = {
     1 : "partial-fast",
     2 : "partial-medium",
     3 : "partial-slow",
     4 : "full",
-    5 : "never"
+    5 : "never",
+    6 : "vap",
+    7 : "vbp-very-high",
+    8 : "vbp-high",
+    9 : "vbp-moderate",
+    10 : "vbp-low"
 }
 
 INDEX_USAGE_TYPES_STRINGS_SUBSET = INDEX_USAGE_TYPES_STRINGS.copy()
@@ -394,7 +405,13 @@ HOLISTIC_EXPERIMENT_HOLISTIC_INDEXING_STRINGS = {
 HOLISTIC_CSV = 'holistic.csv'
 
 ## HYBRID EXPERIMENT
-HYBRID_EXP_INDEX_USAGE_TYPES = [INDEX_USAGE_TYPE_FULL, INDEX_USAGE_TYPE_PARTIAL_FAST]
+HYBRID_EXP_INDEX_USAGE_TYPES = [INDEX_USAGE_TYPE_FULL, 
+                                INDEX_USAGE_TYPE_VAP,  # VAP
+                                INDEX_USAGE_TYPE_VBP_VERY_HIGH_SKEW,
+                                INDEX_USAGE_TYPE_VBP_HIGH_SKEW,
+                                INDEX_USAGE_TYPE_VBP_MODERATE_SKEW,
+                                INDEX_USAGE_TYPE_VBP_LOW_SKEW
+                                ]
 HYBRID_EXP_QUERY_COUNT = 5000
 HYBRID_CSV = 'hybrid.csv'
 
@@ -788,31 +805,35 @@ def create_legend_hybrid():
     fig = pylab.figure()
     ax1 = fig.add_subplot(111)
 
-    LEGEND_SIZE = 3
+    LEGEND_SIZE = 6
 
-    figlegend = pylab.figure(figsize=(7, 0.5))
+    figlegend = pylab.figure(figsize=(15, 0.5))
     idx = 0
     lines = [None] * (LEGEND_SIZE + 1)
     data = [1]
     x_values = [1]
 
     TITLE = "SCAN TYPES:"
-    LABELS = [TITLE, "FULL", "HYBRID"]
+    LABELS = [TITLE, "FULL", "VAP", "VBP (V. HIGH)", 
+              "VBP (HIGH)", "VBP (MOD)", "VBP (LOW)"]
 
     lines[idx], = ax1.plot(x_values, data, linewidth = 0)
     idx = 1
 
     for group in xrange(LEGEND_SIZE):
-        lines[idx], = ax1.plot(x_values, data, color=COLOR_MAP[idx - 1], linewidth=OPT_LINE_WIDTH,
-                               marker=OPT_MARKERS[idx - 1], markersize=OPT_MARKER_SIZE)
+        lines[idx], = ax1.plot(x_values, data, 
+                               color=OPT_COLORS[idx - 1], 
+                               linewidth=OPT_LINE_WIDTH,
+                               marker=OPT_MARKERS[idx - 1], 
+                               markersize=OPT_MARKER_SIZE)
         idx = idx + 1
 
     # LEGEND
     figlegend.legend(lines, LABELS, prop=LEGEND_FP,
-                     loc=1, ncol=4,
+                     loc=1, ncol=7,
                      mode="expand", shadow=OPT_LEGEND_SHADOW,
                      frameon=False, borderaxespad=0.0,
-                     handleheight=1, handlelength=3)
+                     handleheight=1, handlelength=2.5)
 
     figlegend.savefig('legend_hybrid.pdf')
 
@@ -1487,7 +1508,7 @@ def create_motivation_line_chart(datasets, plot_mode):
 
     return fig
 
-def create_hybrid_line_chart(datasets):
+def create_hybrid_line_chart(datasets, plot_offset):
     fig = plot.figure()
     ax1 = fig.add_subplot(111)
 
@@ -1510,9 +1531,9 @@ def create_hybrid_line_chart(datasets):
                     y_values.append(datasets[group][line][col])
         LOG.info("group_data = %s", str(y_values))
         ax1.plot(ind + 0.5, y_values,
-                 color=OPT_COLORS[idx],
+                 color=OPT_COLORS[plot_offset],
                  linewidth=HYBRID_OPT_LINE_WIDTH,
-                 marker=OPT_MARKERS[idx],
+                 marker=OPT_MARKERS[plot_offset],
                  markersize=HYBRID_OPT_MARKER_SIZE,
                  markevery=HYBRID_OPT_MARKER_FREQUENCY,
                  label=str(group))
@@ -1522,9 +1543,12 @@ def create_hybrid_line_chart(datasets):
     makeGrid(ax1)
 
     # Y-AXIS
+    Y_MIN = 0
+    Y_MAX = 300
     ax1.yaxis.set_major_locator(LinearLocator(YAXIS_TICKS))
     ax1.minorticks_off()
     ax1.set_ylabel("Latency (ms)", fontproperties=LABEL_FP)
+    ax1.set_ylim([Y_MIN, Y_MAX])
 
     # X-AXIS
     #ax1.set_xticks(ind + 0.5)
@@ -1533,29 +1557,7 @@ def create_hybrid_line_chart(datasets):
     ax1.set_xticks(major_ticks)
     ax1.set_xlabel("Query Sequence", fontproperties=LABEL_FP)
     #ax1.set_xticklabels(x_values)
-
-    # ADD VLINES
-    plot.axvline(x=72, color='k', linestyle='--', linewidth=1.0)
-    plot.axvline(x=357, color='k', linestyle='--', linewidth=1.0)
-    plot.axvline(x=1412, color='k', linestyle='--', linewidth=1.0)
-    plot.axvline(x=1845, color='k', linestyle='--', linewidth=1.0)
-    plot.axvline(x=3140, color='k', linestyle='--', linewidth=1.0)
-    plot.axvline(x=4091, color='k', linestyle='--', linewidth=1.0)
-
-    # LABELS
-    y_mark = 0.6
-
-    HYBRID_LABELS = (["25%", "50%", "75%", "80%", "90%", "95%"])
-    HYBRID_LABEL_LOCATIONS = ([112.0/5000, 397.0/5000, 1452.0/5000,
-                               1885.0/5000, 3180.0/5000, 4131.0/5000])
-
-    for idx, x_mark in enumerate(HYBRID_LABELS):
-            ax1.text(HYBRID_LABEL_LOCATIONS[idx],
-                     y_mark,
-                     HYBRID_LABELS[idx],
-                     transform=ax1.transAxes,
-                     bbox=dict(facecolor='lightgrey', alpha=0.75))
-
+    
     for label in ax1.get_yticklabels() :
         label.set_fontproperties(TICK_FP)
     for label in ax1.get_xticklabels() :
@@ -1884,8 +1886,9 @@ def holistic_plot():
 # HYBRID -- PLOY
 def hybrid_plot():
 
-    datasets = []
+    idx = 0
     for index_usage_type in HYBRID_EXP_INDEX_USAGE_TYPES:
+        datasets = []
 
         # Get result file
         result_dir_list = [INDEX_USAGE_TYPES_STRINGS[index_usage_type]]
@@ -1893,12 +1896,15 @@ def hybrid_plot():
 
         dataset = loadDataFile(result_file)
         datasets.append(dataset)
+        
+        fig = create_hybrid_line_chart(datasets, idx)
 
-    fig = create_hybrid_line_chart(datasets)
+        file_name = "hybrid" + "-" + \
+                 INDEX_USAGE_TYPES_STRINGS[index_usage_type] +  ".pdf"
 
-    file_name = "hybrid" + ".pdf"
+        idx = idx + 1
 
-    saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH * 2.0, height=OPT_GRAPH_HEIGHT/1.5)
+        saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH * 2.0, height=OPT_GRAPH_HEIGHT/2.0)
 
 # MODEL -- PLOT
 def model_plot():
@@ -2695,5 +2701,5 @@ if __name__ == '__main__':
     #create_legend_index_count()
     #create_legend_layout()
     #create_legend_holistic()
-    #create_legend_hybrid()
+    create_legend_hybrid()
     #create_legend_model()
