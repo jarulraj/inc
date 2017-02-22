@@ -54,7 +54,7 @@ OPT_GRAPH_WIDTH = 400
 NUM_COLORS = 5
 COLOR_MAP = ( '#418259', '#bd5632', '#e1a94c', '#7d6c5b', '#364d38', '#c4e1c6')
 COLOR_MAP_2 = ( '#F58A87', '#80CA86', '#9EC9E9', '#D89761', '#FED113' )
-COLOR_MAP_3 = ( '#2b3742', '#c9b385', '#610606', '#1f1501' )
+COLOR_MAP_3 = ( '#2b3742', '#610606', '#c9b385', '#1f1501' )
 
 OPT_COLORS = COLOR_MAP
 
@@ -72,6 +72,10 @@ OPT_LABEL_WEIGHT = 'bold'
 OPT_LINE_COLORS = COLOR_MAP
 OPT_LINE_WIDTH = 6.0
 OPT_MARKER_SIZE = 10.0
+
+THIN_LINE_WIDTH = 0.3
+MEDIUM_LINE_WIDTH = 2.0
+THICK_LINE_WIDTH = 3.0
 
 AXIS_LINEWIDTH = 1.3
 BAR_LINEWIDTH = 1.2
@@ -387,17 +391,17 @@ MOTIVATION_EXP_DURATION_OF_PAUSE = DEFAULT_DURATION_OF_PAUSE * 5
 MOTIVATION_EXP_TILE_GROUPS_INDEXED_PER_ITERATION = 1
 
 ## HOLISTIC EXPERIMENT
-HOLISTIC_EXPERIMENT_MULTI_STAGE = 1
-HOLISTIC_EXPERIMENT_HOLISTIC_INDEXING = [0, 2]
-HOLISTIC_EXPERIMENT_PHASE_LENGTH = 200
-HOLISTIC_EXPERIMENT_QUERY_COUNT = 1000
-HOLISTIC_EXPERIMENT_SCALE_FACTOR = 1000
-HOLISTIC_EXPERIMENT_COLUMN_COUNT = 60
-HOLISTIC_EXPERIMENT_QUERY_COMPLEXITY = QUERY_COMPLEXITY_MODERATE
-HOLISTIC_EXPERIMENT_WRITE_COMPLEXITY = WRITE_COMPLEXITY_INSERT
-HOLISTIC_EXPERIMENT_WRITE_RATIO_THRESHOLD = 0.5
-HOLISTIC_EXPERIMENT_LAYOUT_MODE = LAYOUT_MODE_COLUMN
-HOLISTIC_EXPERIMENT_HOLISTIC_INDEXING_STRINGS = {
+HOLISTIC_EXP_MULTI_STAGE = 1
+HOLISTIC_EXP_HOLISTIC_INDEXING = [2, 0]
+HOLISTIC_EXP_PHASE_LENGTH = 200
+HOLISTIC_EXP_QUERY_COUNT = 5000 * 3
+HOLISTIC_EXP_SCALE_FACTOR = 1000
+HOLISTIC_EXP_COLUMN_COUNT = 60
+HOLISTIC_EXP_QUERY_COMPLEXITY = QUERY_COMPLEXITY_MODERATE
+HOLISTIC_EXP_WRITE_COMPLEXITY = WRITE_COMPLEXITY_INSERT
+HOLISTIC_EXP_WRITE_RATIO_THRESHOLD = 0.5
+HOLISTIC_EXP_LAYOUT_MODE = LAYOUT_MODE_COLUMN
+HOLISTIC_EXP_HOLISTIC_INDEXING_STRINGS = {
     0 : 'peloton',
     1 : 'adaptive',
     2 : 'holistic'
@@ -786,10 +790,16 @@ def create_legend_holistic():
 
     lines[idx], = ax1.plot(x_values, data, linewidth = 0)
     idx = 1
+    color_idx = idx
 
     for group in xrange(LEGEND_SIZE):
-        lines[idx], = ax1.plot(x_values, data, color=COLOR_MAP_3[idx - 1], linewidth=OPT_LINE_WIDTH,
-                               marker=OPT_MARKERS[idx - 1], markersize=OPT_MARKER_SIZE)
+        if idx == 2:
+            color_idx = 3
+        
+        lines[idx], = ax1.plot(x_values, data, color=COLOR_MAP_3[color_idx - 1], 
+                               linewidth=OPT_LINE_WIDTH,
+                               marker=OPT_MARKERS[idx - 1], 
+                               markersize=OPT_MARKER_SIZE)
         idx = idx + 1
 
     # LEGEND
@@ -980,7 +990,7 @@ def create_time_series_line_chart(datasets, plot_mode):
     N = len(x_values)
     ind = np.arange(N)
 
-    TIME_SERIES_OPT_LINE_WIDTH = 0.1
+    TIME_SERIES_OPT_LINE_WIDTH = THIN_LINE_WIDTH
     TIME_SERIES_OPT_MARKER_SIZE = 5.0
     TIME_SERIES_OPT_MARKER_FREQUENCY = TIME_SERIES_EXP_QUERY_COUNT/10
 
@@ -1044,12 +1054,17 @@ def create_holistic_line_chart(datasets):
     N = len(x_values)
     ind = np.arange(N)
 
-    TIME_SERIES_OPT_LINE_WIDTH = 1.0
-    TIME_SERIES_OPT_MARKER_SIZE = 5.0
-    TIME_SERIES_OPT_MARKER_FREQUENCY = TIME_SERIES_EXP_QUERY_COUNT/30
+    HOLISTIC_OPT_LINE_WIDTH = THIN_LINE_WIDTH
+    HOLISTIC_OPT_MARKER_SIZE = 5.0
+    HOLISTIC_OPT_MARKER_FREQUENCY = HOLISTIC_EXP_QUERY_COUNT/10
 
     idx = 0
+    color_idx = 0
     for group in xrange(len(datasets)):
+        if idx == 1:
+            HOLISTIC_OPT_LINE_WIDTH = MEDIUM_LINE_WIDTH
+            color_idx = 2
+                    
         # GROUP
         y_values = []
         for line in  xrange(len(datasets[group])):
@@ -1059,11 +1074,11 @@ def create_holistic_line_chart(datasets):
         LOG.info("group_data = %s", str(y_values))
         print(len(ind), len(y_values))
         ax1.plot(ind + 0.5, y_values,
-                 color=COLOR_MAP_3[idx],
-                 linewidth=TIME_SERIES_OPT_LINE_WIDTH,
+                 color=COLOR_MAP_3[color_idx],
+                 linewidth=HOLISTIC_OPT_LINE_WIDTH,
                  marker=OPT_MARKERS[idx],
-                 markersize=TIME_SERIES_OPT_MARKER_SIZE,
-                 markevery=TIME_SERIES_OPT_MARKER_FREQUENCY,
+                 markersize=HOLISTIC_OPT_MARKER_SIZE,
+                 markevery=HOLISTIC_OPT_MARKER_FREQUENCY,
                  label=str(group))
         idx = idx + 1
 
@@ -1082,11 +1097,14 @@ def create_holistic_line_chart(datasets):
 
     # X-AXIS
     #ax1.set_xticks(ind + 0.5)
-    major_ticks = np.arange(0, len(x_values) + 1,
-                            300)
+    major_ticks = np.arange(0, HOLISTIC_EXP_QUERY_COUNT + 1,
+                            HOLISTIC_OPT_MARKER_FREQUENCY)
     ax1.set_xticks(major_ticks)
     ax1.set_xlabel("Query Sequence", fontproperties=LABEL_FP)
     #ax1.set_xticklabels(x_values)
+    X_MIN = 1
+    X_MAX = 15000
+    ax1.set_xlim([X_MIN, X_MAX])
 
     # LABELS
     y_mark = 0.8
@@ -1104,8 +1122,8 @@ def create_holistic_line_chart(datasets):
                      bbox=dict(facecolor='lightgrey', alpha=0.75))
 
     # ADD VLINES
-    plot.axvline(x=1000, color='k', linestyle='--', linewidth=1.0)
-    plot.axvline(x=2000, color='k', linestyle='--', linewidth=1.0)
+    plot.axvline(x=5000, color='k', linestyle='--', linewidth=1.0)
+    plot.axvline(x=10000, color='k', linestyle='--', linewidth=1.0)
 
     for label in ax1.get_yticklabels() :
         label.set_fontproperties(TICK_FP)
@@ -1275,7 +1293,7 @@ def create_index_count_line_chart(datasets, plot_mode):
     N = len(x_values)
     ind = np.arange(N)
 
-    INDEX_COUNT_OPT_LINE_WIDTH = 3.0
+    INDEX_COUNT_OPT_LINE_WIDTH = THICK_LINE_WIDTH
     INDEX_COUNT_OPT_MARKER_SIZE = 5.0
     INDEX_COUNT_OPT_MARKER_FREQUENCY = INDEX_COUNT_EXP_QUERY_COUNT/10
 
@@ -1388,7 +1406,7 @@ def create_trend_line_chart(datasets):
     N = len(x_values)
     ind = np.arange(N)
 
-    TREND_OPT_LINE_WIDTH = 1.0
+    TREND_OPT_LINE_WIDTH = THICK_LINE_WIDTH
     TREND_OPT_MARKER_SIZE = 5.0
     TREND_OPT_MARKER_FREQUENCY = TREND_EXP_TUNING_COUNT/10
 
@@ -1443,16 +1461,12 @@ def create_motivation_line_chart(datasets, plot_mode):
     # N = len(x_values)
     ind = np.arange(MOTIVATION_EXP_QUERY_COUNT)
 
-    MOTIVATION_OPT_LINE_WIDTH = 0.1
+    MOTIVATION_OPT_LINE_WIDTH = THIN_LINE_WIDTH
     MOTIVATION_OPT_MARKER_SIZE = 5.0
     MOTIVATION_OPT_MARKER_FREQUENCY = MOTIVATION_EXP_QUERY_COUNT/100
 
     idx = 0
     for group in xrange(len(datasets)):
-        if idx == 0:
-            MOTIVATION_OPT_LINE_WIDTH = 0.1
-        else:
-            MOTIVATION_OPT_LINE_WIDTH = 0.1
 
         # GROUP
         x_values = []
@@ -1517,7 +1531,7 @@ def create_hybrid_line_chart(datasets, plot_offset):
     N = len(x_values)
     ind = np.arange(N)
 
-    HYBRID_OPT_LINE_WIDTH = 0.1
+    HYBRID_OPT_LINE_WIDTH = THIN_LINE_WIDTH
     HYBRID_OPT_MARKER_SIZE = 5.0
     HYBRID_OPT_MARKER_FREQUENCY = HYBRID_EXP_QUERY_COUNT/100
 
@@ -1574,7 +1588,7 @@ def create_model_line_chart(datasets, plot_mode, color_offset):
     N = len(x_values)
     ind = np.arange(N)
 
-    MODEL_OPT_LINE_WIDTH = 1.0
+    MODEL_OPT_LINE_WIDTH = THIN_LINE_WIDTH
     MODEL_OPT_MARKER_SIZE = 5.0
     MODEL_OPT_MARKER_FREQUENCY = MODEL_EXP_QUERY_COUNT/100
 
@@ -1867,8 +1881,8 @@ def layout_plot():
 # HOLISTIC -- PLOT
 def holistic_plot():
     datasets = []
-    for holistic_index_enabled in HOLISTIC_EXPERIMENT_HOLISTIC_INDEXING:
-        result_dir_list = [HOLISTIC_EXPERIMENT_HOLISTIC_INDEXING_STRINGS[holistic_index_enabled]]
+    for holistic_index_enabled in HOLISTIC_EXP_HOLISTIC_INDEXING:
+        result_dir_list = [HOLISTIC_EXP_HOLISTIC_INDEXING_STRINGS[holistic_index_enabled]]
 
         result_file = get_result_file(HOLISTIC_DIR, result_dir_list, HOLISTIC_CSV)
 
@@ -2484,11 +2498,11 @@ def holistic_eval():
     clean_up_dir(HOLISTIC_DIR)
     print("HOLISTIC EVAL")
 
-    for holistic_index_enabled in HOLISTIC_EXPERIMENT_HOLISTIC_INDEXING:
+    for holistic_index_enabled in HOLISTIC_EXP_HOLISTIC_INDEXING:
         print(MAJOR_STRING)
 
         # Get result file
-        result_dir_list = [HOLISTIC_EXPERIMENT_HOLISTIC_INDEXING_STRINGS[holistic_index_enabled]]
+        result_dir_list = [HOLISTIC_EXP_HOLISTIC_INDEXING_STRINGS[holistic_index_enabled]]
         holistic_result_file = get_result_file(HOLISTIC_DIR, result_dir_list, HOLISTIC_CSV)
 
         # Pick appropriate index usage type (slow for adaptive)
@@ -2502,22 +2516,22 @@ def holistic_eval():
             holistic_mode = 1
 
         print("> holistic: " + str(holistic_mode) +
-                " multi_stage: " + str(HOLISTIC_EXPERIMENT_MULTI_STAGE) +
-                " layout: " + LAYOUT_MODE_STRINGS[HOLISTIC_EXPERIMENT_LAYOUT_MODE])
+                " multi_stage: " + str(HOLISTIC_EXP_MULTI_STAGE) +
+                " layout: " + LAYOUT_MODE_STRINGS[HOLISTIC_EXP_LAYOUT_MODE])
 
         # Run experiment
         start = time.time()
         run_experiment(holistic_index_enabled=holistic_mode,
-            multi_stage=HOLISTIC_EXPERIMENT_MULTI_STAGE,
-            query_count=HOLISTIC_EXPERIMENT_QUERY_COUNT,
-            phase_length=HOLISTIC_EXPERIMENT_PHASE_LENGTH,
-            scale_factor=HOLISTIC_EXPERIMENT_SCALE_FACTOR,
-            query_complexity=HOLISTIC_EXPERIMENT_QUERY_COMPLEXITY,
+            multi_stage=HOLISTIC_EXP_MULTI_STAGE,
+            query_count=HOLISTIC_EXP_QUERY_COUNT,
+            phase_length=HOLISTIC_EXP_PHASE_LENGTH,
+            scale_factor=HOLISTIC_EXP_SCALE_FACTOR,
+            query_complexity=HOLISTIC_EXP_QUERY_COMPLEXITY,
             index_usage_type=index_usage_type,
-            write_complexity=HOLISTIC_EXPERIMENT_WRITE_COMPLEXITY,
-            write_ratio_threshold=HOLISTIC_EXPERIMENT_WRITE_RATIO_THRESHOLD,
-            column_count=HOLISTIC_EXPERIMENT_COLUMN_COUNT,
-            layout_mode=HOLISTIC_EXPERIMENT_LAYOUT_MODE)
+            write_complexity=HOLISTIC_EXP_WRITE_COMPLEXITY,
+            write_ratio_threshold=HOLISTIC_EXP_WRITE_RATIO_THRESHOLD,
+            column_count=HOLISTIC_EXP_COLUMN_COUNT,
+            layout_mode=HOLISTIC_EXP_LAYOUT_MODE)
         print("Executed in", time.time() - start, "s")
 
         stat_offset = -1
@@ -2700,6 +2714,6 @@ if __name__ == '__main__':
     #create_legend_index_usage_type_subset()
     #create_legend_index_count()
     #create_legend_layout()
-    #create_legend_holistic()
-    create_legend_hybrid()
-    #create_legend_model()
+    create_legend_holistic()
+    #create_legend_hybrid()
+    create_legend_model()
