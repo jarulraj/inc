@@ -54,7 +54,7 @@ OPT_GRAPH_WIDTH = 400
 NUM_COLORS = 5
 COLOR_MAP = ( '#418259', '#bd5632', '#e1a94c', '#7d6c5b', '#364d38', '#c4e1c6')
 COLOR_MAP_2 = ( '#F58A87', '#80CA86', '#9EC9E9', '#D89761', '#FED113' )
-COLOR_MAP_3 = ( '#2b3742', '#610606', '#c9b385', '#1f1501' )
+COLOR_MAP_3 = ( '#7F878D', '#A06969', '#8FAF93', '#1f1501' )
 
 OPT_COLORS = COLOR_MAP
 
@@ -82,6 +82,7 @@ BAR_LINEWIDTH = 1.2
 
 LABEL_FONT_SIZE = 16
 TICK_FONT_SIZE = 14
+THIN_FONT_SIZE = 12
 TINY_FONT_SIZE = 10
 LEGEND_FONT_SIZE = 18
 
@@ -102,6 +103,7 @@ LABEL_FP = FontProperties(style='normal', size=LABEL_FONT_SIZE, weight='bold')
 TICK_FP = FontProperties(style='normal', size=TICK_FONT_SIZE)
 TINY_FP = FontProperties(style='normal', size=TINY_FONT_SIZE)
 LEGEND_FP = FontProperties(style='normal', size=LEGEND_FONT_SIZE, weight='bold')
+THIN_FP = FontProperties(style='normal', size=THIN_FONT_SIZE, weight='bold')
 
 SMALL_LABEL_FP = FontProperties(style='normal', size=SMALL_LABEL_FONT_SIZE, weight='bold')
 SMALL_LEGEND_FP = FontProperties(style='normal', size=SMALL_LEGEND_FONT_SIZE, weight='bold')
@@ -413,8 +415,7 @@ HYBRID_EXP_INDEX_USAGE_TYPES = [INDEX_USAGE_TYPE_FULL,
                                 INDEX_USAGE_TYPE_VAP,  # VAP
                                 INDEX_USAGE_TYPE_VBP_VERY_HIGH_SKEW,
                                 INDEX_USAGE_TYPE_VBP_HIGH_SKEW,
-                                INDEX_USAGE_TYPE_VBP_MODERATE_SKEW,
-                                INDEX_USAGE_TYPE_VBP_LOW_SKEW
+                                INDEX_USAGE_TYPE_VBP_MODERATE_SKEW
                                 ]
 HYBRID_EXP_QUERY_COUNT = 5000
 HYBRID_CSV = 'hybrid.csv'
@@ -823,9 +824,8 @@ def create_legend_hybrid():
     data = [1]
     x_values = [1]
 
-    TITLE = "SCAN TYPES:"
-    LABELS = [TITLE, "FULL", "VAP", "VBP (V. HIGH)", 
-              "VBP (HIGH)", "VBP (MOD)", "VBP (LOW)"]
+    TITLE = "INDEX USAGE MODE:"
+    LABELS = [TITLE, "FULL", "VAP", "VBP"]
 
     lines[idx], = ax1.plot(x_values, data, linewidth = 0)
     idx = 1
@@ -1535,6 +1535,11 @@ def create_hybrid_line_chart(datasets, plot_offset):
     HYBRID_OPT_MARKER_SIZE = 5.0
     HYBRID_OPT_MARKER_FREQUENCY = HYBRID_EXP_QUERY_COUNT/100
 
+    if plot_offset == 0 or plot_offset == 1:
+        color_offset = plot_offset
+    else:
+        color_offset = 2        
+
     idx = 0
     for group in xrange(len(datasets)):
         # GROUP
@@ -1545,9 +1550,9 @@ def create_hybrid_line_chart(datasets, plot_offset):
                     y_values.append(datasets[group][line][col])
         LOG.info("group_data = %s", str(y_values))
         ax1.plot(ind + 0.5, y_values,
-                 color=OPT_COLORS[plot_offset],
+                 color=OPT_COLORS[color_offset],
                  linewidth=HYBRID_OPT_LINE_WIDTH,
-                 marker=OPT_MARKERS[plot_offset],
+                 marker=OPT_MARKERS[color_offset],
                  markersize=HYBRID_OPT_MARKER_SIZE,
                  markevery=HYBRID_OPT_MARKER_FREQUENCY,
                  label=str(group))
@@ -1561,7 +1566,7 @@ def create_hybrid_line_chart(datasets, plot_offset):
     Y_MAX = 300
     ax1.yaxis.set_major_locator(LinearLocator(YAXIS_TICKS))
     ax1.minorticks_off()
-    ax1.set_ylabel("Latency (ms)", fontproperties=LABEL_FP)
+    ax1.set_ylabel("Latency (ms)", fontproperties=THIN_FP)
     ax1.set_ylim([Y_MIN, Y_MAX])
 
     # X-AXIS
@@ -1569,8 +1574,30 @@ def create_hybrid_line_chart(datasets, plot_offset):
     major_ticks = np.arange(0, HYBRID_EXP_QUERY_COUNT + 1,
                             HYBRID_EXP_QUERY_COUNT/10)
     ax1.set_xticks(major_ticks)
-    ax1.set_xlabel("Query Sequence", fontproperties=LABEL_FP)
-    #ax1.set_xticklabels(x_values)
+    
+    if plot_offset == 4:
+        ax1.set_xlabel("Query Sequence", fontproperties=LABEL_FP)
+        #ax1.set_xticklabels(x_values)
+    
+    # ADD VLINES
+    phase_start = 500
+    phase_end = 4500
+    phase_length = 500
+    
+    for phase_itr in range(phase_start, phase_end, phase_length):
+        plot.axvline(x=phase_itr, color='k', linestyle='--', linewidth=1.0)
+
+    # LABELS
+    y_mark = 0.75
+    x_mark = 0.92
+
+    INDEX_COMPLETED_LABELS = (["100%", "100%", "9%", "15%", "30%"])
+
+    ax1.text(x_mark,
+             y_mark,
+             INDEX_COMPLETED_LABELS[plot_offset],
+             transform=ax1.transAxes,
+             bbox=dict(facecolor='lightgrey', alpha=0.75))
     
     for label in ax1.get_yticklabels() :
         label.set_fontproperties(TICK_FP)
@@ -1619,10 +1646,13 @@ def create_model_line_chart(datasets, plot_mode, color_offset):
 
     # LATENCY
     if plot_mode == MODEL_LATENCY_MODE:
-        ax1.set_ylabel("Latency (ms)", fontproperties=LABEL_FP)
+        YAXIS_MIN = 0
+        YAXIS_MAX = 300
+        ax1.set_ylim([YAXIS_MIN, YAXIS_MAX])
+        ax1.set_ylabel("Latency (ms)", fontproperties=THIN_FP)
     # INDEX
     elif plot_mode == MODEL_INDEX_MODE:
-        ax1.set_ylabel("Index count", fontproperties=LABEL_FP)
+        ax1.set_ylabel("Index count", fontproperties=THIN_FP)
         YAXIS_MIN = 0
         YAXIS_MAX = 10
         ax1.set_ylim([YAXIS_MIN, YAXIS_MAX])
@@ -1632,13 +1662,19 @@ def create_model_line_chart(datasets, plot_mode, color_offset):
     major_ticks = np.arange(0, MODEL_EXP_QUERY_COUNT + 1,
                             MODEL_EXP_QUERY_COUNT/5)
     ax1.set_xticks(major_ticks)
-    ax1.set_xlabel("Query Sequence", fontproperties=LABEL_FP)
-    #ax1.set_xticklabels(x_values)
+    
+    if color_offset == 2:
+        ax1.set_xlabel("Query Sequence", fontproperties=LABEL_FP)
+        #ax1.set_xticklabels(x_values)
 
     # ADD VLINES
-    #plot.axvline(x=1000, color='k', linestyle='--', linewidth=1.0)
-    #plot.axvline(x=5000, color='k', linestyle='--', linewidth=1.0)
-
+    phase_start = 1000
+    phase_end = 4000
+    phase_length = 1000
+    
+    for phase_itr in range(phase_start, phase_end, phase_length):
+        plot.axvline(x=phase_itr, color='k', linestyle='--', linewidth=1.0)
+    
     for label in ax1.get_yticklabels() :
         label.set_fontproperties(TICK_FP)
     for label in ax1.get_xticklabels() :
@@ -1967,7 +2003,7 @@ def model_plot():
                     file_name = "model" + "-" + \
                             TUNER_MODEL_TYPES_STRINGS[tuner_model_type] + ".pdf"
 
-                    saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH * 2.0, height=OPT_GRAPH_HEIGHT/1.5)
+                    saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH * 2.0, height=OPT_GRAPH_HEIGHT/2.0)
 
 
 ###################################################################################
@@ -2715,5 +2751,4 @@ if __name__ == '__main__':
     #create_legend_index_count()
     #create_legend_layout()
     create_legend_holistic()
-    #create_legend_hybrid()
     create_legend_model()
