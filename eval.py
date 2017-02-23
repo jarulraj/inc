@@ -151,13 +151,32 @@ INDEX_USAGE_TYPES_STRINGS = {
 INDEX_USAGE_TYPES_STRINGS_SUBSET = INDEX_USAGE_TYPES_STRINGS.copy()
 INDEX_USAGE_TYPES_STRINGS_SUBSET.pop(4, None)
 
+INDEX_USAGE_TYPES_STRINGS_SUBSET.pop(6, None)
+INDEX_USAGE_TYPES_STRINGS_SUBSET.pop(7, None)
+INDEX_USAGE_TYPES_STRINGS_SUBSET.pop(8, None)
+INDEX_USAGE_TYPES_STRINGS_SUBSET.pop(9, None)
+INDEX_USAGE_TYPES_STRINGS_SUBSET.pop(10, None)
+
 MOTIVATION_STRINGS_SUBSET = INDEX_USAGE_TYPES_STRINGS.copy()
 MOTIVATION_STRINGS_SUBSET.pop(2, None)
+
+MOTIVATION_STRINGS_SUBSET.pop(6, None)
+MOTIVATION_STRINGS_SUBSET.pop(7, None)
+MOTIVATION_STRINGS_SUBSET.pop(8, None)
+MOTIVATION_STRINGS_SUBSET.pop(9, None)
+MOTIVATION_STRINGS_SUBSET.pop(10, None)
 
 INDEX_USAGE_TYPES_SCALE = INDEX_USAGE_TYPES_STRINGS.copy()
 INDEX_USAGE_TYPES_SCALE.pop(2, None)
 INDEX_USAGE_TYPES_SCALE.pop(3, None)
 INDEX_USAGE_TYPES_SCALE.pop(4, None)
+
+INDEX_USAGE_TYPES_SCALE.pop(6, None)
+INDEX_USAGE_TYPES_SCALE.pop(7, None)
+INDEX_USAGE_TYPES_SCALE.pop(8, None)
+INDEX_USAGE_TYPES_SCALE.pop(9, None)
+INDEX_USAGE_TYPES_SCALE.pop(10, None)
+
 
 ## LAYOUT TYPES
 LAYOUT_MODE_ROW = 1
@@ -524,21 +543,24 @@ def create_legend_index_usage_type():
 
     LEGEND_VALUES = INDEX_USAGE_TYPES_STRINGS_SUBSET.values()
 
-    figlegend = pylab.figure(figsize=(17, 0.5))
+    figlegend = pylab.figure(figsize=(13, 0.5))
     idx = 0
     lines = [None] * (len(LEGEND_VALUES) + 1)
     data = [1]
     x_values = [1]
 
-    TITLE = "INDEX USAGE MODE:"
-    LABELS = [TITLE, "PARTIAL-FAST", "PARTIAL-MODERATE", "PARTIAL-SLOW", "DISABLED"]
+    TITLE = "TUNING FREQUENCY:"
+    LABELS = [TITLE, "FAST", "MODERATE", "SLOW", "DISABLED"]
 
     lines[idx], = ax1.plot(x_values, data, linewidth = 0)
     idx = 1
 
     for group in xrange(len(LEGEND_VALUES)):
-        lines[idx], = ax1.plot(x_values, data, color=OPT_LINE_COLORS[idx - 1], linewidth=OPT_LINE_WIDTH,
-                               marker=OPT_MARKERS[idx - 1], markersize=OPT_MARKER_SIZE)
+        lines[idx], = ax1.plot(x_values, data, 
+                               color=OPT_LINE_COLORS[idx - 1], 
+                               linewidth=OPT_LINE_WIDTH,
+                               marker=OPT_MARKERS[idx - 1], 
+                               markersize=OPT_MARKER_SIZE)
         idx = idx + 1
 
     # LEGEND
@@ -576,8 +598,11 @@ def create_legend_motivation():
         elif idx == 3:
             color_idx = 2
 
-        lines[idx], = ax1.plot(x_values, data, color=OPT_LINE_COLORS[color_idx], linewidth=OPT_LINE_WIDTH,
-                               marker=OPT_MARKERS[color_idx], markersize=OPT_MARKER_SIZE)
+        lines[idx], = ax1.plot(x_values, data, 
+                               color=OPT_LINE_COLORS[color_idx], 
+                               linewidth=OPT_LINE_WIDTH,
+                               marker=OPT_MARKERS[color_idx], 
+                               markersize=OPT_MARKER_SIZE)
         idx = idx + 1
 
     # LEGEND
@@ -594,9 +619,9 @@ def create_bar_legend_index_usage_type():
     fig = pylab.figure()
     ax1 = fig.add_subplot(111)
 
-    figlegend = pylab.figure(figsize=(15, 0.5))
+    figlegend = pylab.figure(figsize=(11, 0.5))
 
-    LEGEND_VALUES = INDEX_USAGE_TYPES_STRINGS.values()
+    LEGEND_VALUES = INDEX_USAGE_TYPES_STRINGS_SUBSET.values()
     LEGEND_VALUES = LEGEND_VALUES[:-1]
 
     num_items = len(LEGEND_VALUES) + 1
@@ -621,8 +646,8 @@ def create_bar_legend_index_usage_type():
                               linewidth=BAR_LINEWIDTH)
         idx = idx + 1
 
-    TITLE = "INDEX USAGE MODE:"
-    LABELS = [TITLE, "PARTIAL-FAST", "PARTIAL-MODERATE", "PARTIAL-SLOW"]
+    TITLE = "TUNING FREQUENCY:"
+    LABELS = [TITLE, "FAST", "MODERATE", "SLOW"]
 
     # LEGEND
     figlegend.legend(bars, LABELS, prop=LEGEND_FP,
@@ -680,8 +705,8 @@ def create_legend_index_usage_type_subset():
     data = [1]
     x_values = [1]
 
-    TITLE = "INDEX USAGE MODE:"
-    LABELS = [TITLE, "PARTIAL-FAST", "DISABLED"]
+    TITLE = "TUNING FREQUENCY:"
+    LABELS = [TITLE, "FAST", "DISABLED"]
 
     lines[idx], = ax1.plot(x_values, data, linewidth = 0)
     idx = 1
@@ -1581,7 +1606,7 @@ def create_hybrid_line_chart(datasets, plot_offset):
     
     # ADD VLINES
     phase_start = 500
-    phase_end = 4500
+    phase_end = 5000
     phase_length = 500
     
     for phase_itr in range(phase_start, phase_end, phase_length):
@@ -1681,7 +1706,7 @@ def create_model_line_chart(datasets, plot_mode, color_offset):
 
     # ADD VLINES
     phase_start = 1000
-    phase_end = 4000
+    phase_end = 5000
     phase_length = 1000
     
     for phase_itr in range(phase_start, phase_end, phase_length):
@@ -2755,11 +2780,11 @@ if __name__ == '__main__':
     if args.model_plot:
         model_plot()
 
-    #create_legend_index_usage_type()
+    create_legend_index_usage_type()
     #create_legend_motivation()
-    #create_bar_legend_index_usage_type()
+    create_bar_legend_index_usage_type()
     #create_legend_trend()
-    #create_legend_index_usage_type_subset()
+    create_legend_index_usage_type_subset()
     #create_legend_index_count()
     #create_legend_layout()
     create_legend_holistic()
