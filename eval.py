@@ -385,7 +385,7 @@ LAYOUT_EXP_COLUMN_COUNT = 500
 LAYOUT_EXP_SELECTIVITIES = [0.01, 0.1]
 LAYOUT_EXP_PROJECTIVITIES = [0.01, 0.1]
 LAYOUT_EXP_INDEX_USAGES_TYPES = [INDEX_USAGE_TYPE_NEVER, INDEX_USAGE_TYPE_PARTIAL_MEDIUM]
-LAYOUT_EXP_PHASE_LENGTH = 100
+LAYOUT_EXP_PHASE_LENGTH = 1000
 LAYOUT_EXP_QUERY_COUNT = 1000
 LAYOUT_EXP_SCALE_FACTOR = 100
 LAYOUT_EXP_VARIABILITY_THRESHOLD = 3
@@ -1378,26 +1378,28 @@ def create_layout_bar_chart(datasets, title=""):
     ax1 = fig.add_subplot(111)
 
     # X-AXIS
-    x_values = ['Disabled', 'Index', 'Layout', 'Both']
+    x_values = ['P=1%,S=1%', 'P=1%,S=10%', 'P=10%,S=1%', 'P=10%,S=10%']
     N = len(x_values)
+    M = 4
     ind = np.arange(N)
-    M = 1
-    margin = 0.05
-    margin_left_right = 0.3
+    margin = 0.1
     width = (1.-2.*margin)/M
-    bars = [None] * 1
+    bars = [None] * N
 
-    for group in xrange(len(datasets)):
+    transposed = [[j[i] for j in datasets] for i in range(len(datasets))]
+
+    for group in xrange(len(transposed)):
         # GROUP
         y_values = []
-        for line in  xrange(len(datasets[group])):
-            for col in  xrange(len(datasets[group][line])):
+        for line in  xrange(len(transposed[group])):
+            for col in  xrange(len(transposed[group][line])):
                 if col == 1:
-                    y_values.append(datasets[group][line][col])
+                    y_values.append(transposed[group][line][col])
         LOG.info("group_data = %s", str(y_values))
-        bars[group] =  ax1.bar(ind + margin_left_right + (group * width),
+        bars[group] =  ax1.bar(ind + margin + (group * width),
                                y_values, width,
-                               color=COLOR_MAP_2,
+                               color=COLOR_MAP_2[group],
+                               hatch=OPT_PATTERNS[group],
                                linewidth=BAR_LINEWIDTH)
 
     # GRID
@@ -1406,14 +1408,12 @@ def create_layout_bar_chart(datasets, title=""):
     # Y-AXIS
     ax1.yaxis.set_major_locator(LinearLocator(YAXIS_TICKS))
     ax1.minorticks_off()
-    ax1.set_ylabel("Total time (ms)", fontproperties=LABEL_FP)
-    #ax1.set_yscale('log', basey=10)
+    ax1.set_ylabel("Total time (ms)", fontproperties=LABEL_FP)    
 
     # X-AXIS
-    ax1.set_xticks(np.arange(N)+0.75)
+    ax1.set_xticks(np.arange(N)+0.5)
     ax1.set_xticklabels(x_values)
     ax1.set_xlabel('Tuning Mode', fontproperties=LABEL_FP)
-    #ax1.set_xlim([XAXIS_MIN, XAXIS_MAX])
 
     for label in ax1.get_yticklabels() :
         label.set_fontproperties(TICK_FP)
@@ -1934,10 +1934,9 @@ def trend_plot():
 # LAYOUT -- PLOT
 def layout_plot():
 
+    datasets = []
     for projectivity in LAYOUT_EXP_PROJECTIVITIES:
         for selectivity in LAYOUT_EXP_SELECTIVITIES:
-
-            datasets = []
 
             # Get result file
             result_dir_list = [str(selectivity), str(projectivity)]
@@ -1946,10 +1945,10 @@ def layout_plot():
             dataset = loadDataFile(result_file)
             datasets.append(dataset)
 
-            fig = create_layout_bar_chart(datasets)
+    fig = create_layout_bar_chart(datasets)
 
-            file_name = "layout-" + str(projectivity) + "-" + str(selectivity) + ".pdf"
-            saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH, height=OPT_GRAPH_HEIGHT)
+    file_name = "layout" + ".pdf"
+    saveGraph(fig, file_name, width=OPT_GRAPH_WIDTH * 2.0, height=OPT_GRAPH_HEIGHT)
 
 # HOLISTIC -- PLOT
 def holistic_plot():
@@ -2780,12 +2779,12 @@ if __name__ == '__main__':
     if args.model_plot:
         model_plot()
 
-    create_legend_index_usage_type()
+    #create_legend_index_usage_type()
     #create_legend_motivation()
-    create_bar_legend_index_usage_type()
+    #create_bar_legend_index_usage_type()
     #create_legend_trend()
-    create_legend_index_usage_type_subset()
+    #create_legend_index_usage_type_subset()
     #create_legend_index_count()
     #create_legend_layout()
-    create_legend_holistic()
-    create_legend_model()
+    #create_legend_holistic()
+    #create_legend_model()
