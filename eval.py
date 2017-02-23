@@ -1588,7 +1588,7 @@ def create_hybrid_line_chart(datasets, plot_offset):
         plot.axvline(x=phase_itr, color='k', linestyle='--', linewidth=1.0)
 
     # LABELS
-    y_mark = 0.75
+    y_mark = 0.6
     x_mark = 0.92
 
     INDEX_COMPLETED_LABELS = (["100%", "100%", "9%", "15%", "30%"])
@@ -1596,6 +1596,18 @@ def create_hybrid_line_chart(datasets, plot_offset):
     ax1.text(x_mark,
              y_mark,
              INDEX_COMPLETED_LABELS[plot_offset],
+             transform=ax1.transAxes,
+             bbox=dict(facecolor='lightgrey', alpha=0.75))
+
+    # LABELS
+    y_mark = 0.6
+    x_mark = 0.7
+
+    SKEW_LABELS = (["ALL", "ALL", "VERY HIGH", "HIGH", "MODERATE"])
+
+    ax1.text(x_mark,
+             y_mark,
+             SKEW_LABELS[plot_offset],
              transform=ax1.transAxes,
              bbox=dict(facecolor='lightgrey', alpha=0.75))
     
