@@ -381,10 +381,10 @@ INDEX_COUNT_INDEX_CSV = "index_count_index.csv"
 LAYOUT_EXP_LAYOUT_MODES = [LAYOUT_MODE_ROW, LAYOUT_MODE_HYBRID]
 LAYOUT_EXP_WRITE_RATIO = WRITE_RATIO_READ_ONLY
 LAYOUT_EXP_QUERY_COMPLEXITY = QUERY_COMPLEXITY_MODERATE
-LAYOUT_EXP_COLUMN_COUNT = 100
-LAYOUT_EXP_SELECTIVITIES = [0.01, 0.1]
+LAYOUT_EXP_COLUMN_COUNT = 500
+LAYOUT_EXP_SELECTIVITIES = [0.001, 0.01]
 LAYOUT_EXP_PROJECTIVITIES = [0.01, 0.1]
-LAYOUT_EXP_INDEX_USAGES_TYPES = [INDEX_USAGE_TYPE_NEVER, INDEX_USAGE_TYPE_PARTIAL_MEDIUM]
+LAYOUT_EXP_INDEX_USAGES_TYPES = [INDEX_USAGE_TYPE_NEVER, INDEX_USAGE_TYPE_PARTIAL_FAST]
 LAYOUT_EXP_PHASE_LENGTH = 5000
 LAYOUT_EXP_QUERY_COUNT = 5000
 LAYOUT_EXP_SCALE_FACTOR = 100
@@ -430,7 +430,7 @@ HOLISTIC_EXP_HOLISTIC_INDEXING_STRINGS = {
 HOLISTIC_CSV = 'holistic.csv'
 
 ## HYBRID EXPERIMENT
-HYBRID_EXP_INDEX_USAGE_TYPES = [INDEX_USAGE_TYPE_FULL, 
+HYBRID_EXP_INDEX_USAGE_TYPES = [INDEX_USAGE_TYPE_FULL,
                                 INDEX_USAGE_TYPE_VAP,  # VAP
                                 INDEX_USAGE_TYPE_VBP_VERY_HIGH_SKEW,
                                 INDEX_USAGE_TYPE_VBP_HIGH_SKEW,
@@ -556,10 +556,10 @@ def create_legend_index_usage_type():
     idx = 1
 
     for group in xrange(len(LEGEND_VALUES)):
-        lines[idx], = ax1.plot(x_values, data, 
-                               color=OPT_LINE_COLORS[idx - 1], 
+        lines[idx], = ax1.plot(x_values, data,
+                               color=OPT_LINE_COLORS[idx - 1],
                                linewidth=OPT_LINE_WIDTH,
-                               marker=OPT_MARKERS[idx - 1], 
+                               marker=OPT_MARKERS[idx - 1],
                                markersize=OPT_MARKER_SIZE)
         idx = idx + 1
 
@@ -598,10 +598,10 @@ def create_legend_motivation():
         elif idx == 3:
             color_idx = 2
 
-        lines[idx], = ax1.plot(x_values, data, 
-                               color=OPT_LINE_COLORS[color_idx], 
+        lines[idx], = ax1.plot(x_values, data,
+                               color=OPT_LINE_COLORS[color_idx],
                                linewidth=OPT_LINE_WIDTH,
-                               marker=OPT_MARKERS[color_idx], 
+                               marker=OPT_MARKERS[color_idx],
                                markersize=OPT_MARKER_SIZE)
         idx = idx + 1
 
@@ -821,10 +821,10 @@ def create_legend_holistic():
     for group in xrange(LEGEND_SIZE):
         if idx == 2:
             color_idx = 3
-        
-        lines[idx], = ax1.plot(x_values, data, color=COLOR_MAP_3[color_idx - 1], 
+
+        lines[idx], = ax1.plot(x_values, data, color=COLOR_MAP_3[color_idx - 1],
                                linewidth=OPT_LINE_WIDTH,
-                               marker=OPT_MARKERS[idx - 1], 
+                               marker=OPT_MARKERS[idx - 1],
                                markersize=OPT_MARKER_SIZE)
         idx = idx + 1
 
@@ -856,10 +856,10 @@ def create_legend_hybrid():
     idx = 1
 
     for group in xrange(LEGEND_SIZE):
-        lines[idx], = ax1.plot(x_values, data, 
-                               color=OPT_COLORS[idx - 1], 
+        lines[idx], = ax1.plot(x_values, data,
+                               color=OPT_COLORS[idx - 1],
                                linewidth=OPT_LINE_WIDTH,
-                               marker=OPT_MARKERS[idx - 1], 
+                               marker=OPT_MARKERS[idx - 1],
                                markersize=OPT_MARKER_SIZE)
         idx = idx + 1
 
@@ -1089,7 +1089,7 @@ def create_holistic_line_chart(datasets):
         if idx == 1:
             HOLISTIC_OPT_LINE_WIDTH = MEDIUM_LINE_WIDTH
             color_idx = 2
-                    
+
         # GROUP
         y_values = []
         for line in  xrange(len(datasets[group])):
@@ -1408,7 +1408,7 @@ def create_layout_bar_chart(datasets, title=""):
     # Y-AXIS
     ax1.yaxis.set_major_locator(LinearLocator(YAXIS_TICKS))
     ax1.minorticks_off()
-    ax1.set_ylabel("Total time (ms)", fontproperties=LABEL_FP)    
+    ax1.set_ylabel("Total time (ms)", fontproperties=LABEL_FP)
 
     # X-AXIS
     ax1.set_xticks(np.arange(N)+0.5)
@@ -1563,7 +1563,7 @@ def create_hybrid_line_chart(datasets, plot_offset):
     if plot_offset == 0 or plot_offset == 1:
         color_offset = plot_offset
     else:
-        color_offset = 2        
+        color_offset = 2
 
     idx = 0
     for group in xrange(len(datasets)):
@@ -1599,16 +1599,16 @@ def create_hybrid_line_chart(datasets, plot_offset):
     major_ticks = np.arange(0, HYBRID_EXP_QUERY_COUNT + 1,
                             HYBRID_EXP_QUERY_COUNT/10)
     ax1.set_xticks(major_ticks)
-    
+
     if plot_offset == 4:
         ax1.set_xlabel("Query Sequence", fontproperties=LABEL_FP)
         #ax1.set_xticklabels(x_values)
-    
+
     # ADD VLINES
     phase_start = 500
     phase_end = 5000
     phase_length = 500
-    
+
     for phase_itr in range(phase_start, phase_end, phase_length):
         plot.axvline(x=phase_itr, color='k', linestyle='--', linewidth=1.0)
 
@@ -1635,7 +1635,7 @@ def create_hybrid_line_chart(datasets, plot_offset):
              SKEW_LABELS[plot_offset],
              transform=ax1.transAxes,
              bbox=dict(facecolor='lightgrey', alpha=0.75))
-    
+
     for label in ax1.get_yticklabels() :
         label.set_fontproperties(TICK_FP)
     for label in ax1.get_xticklabels() :
@@ -1699,7 +1699,7 @@ def create_model_line_chart(datasets, plot_mode, color_offset):
     major_ticks = np.arange(0, MODEL_EXP_QUERY_COUNT + 1,
                             MODEL_EXP_QUERY_COUNT/5)
     ax1.set_xticks(major_ticks)
-    
+
     if color_offset == 2:
         ax1.set_xlabel("Query Sequence", fontproperties=LABEL_FP)
         #ax1.set_xticklabels(x_values)
@@ -1708,10 +1708,10 @@ def create_model_line_chart(datasets, plot_mode, color_offset):
     phase_start = 1000
     phase_end = 5000
     phase_length = 1000
-    
+
     for phase_itr in range(phase_start, phase_end, phase_length):
         plot.axvline(x=phase_itr, color='k', linestyle='--', linewidth=1.0)
-    
+
     for label in ax1.get_yticklabels() :
         label.set_fontproperties(TICK_FP)
     for label in ax1.get_xticklabels() :
@@ -1982,7 +1982,7 @@ def hybrid_plot():
 
         dataset = loadDataFile(result_file)
         datasets.append(dataset)
-        
+
         fig = create_hybrid_line_chart(datasets, idx)
 
         file_name = "hybrid" + "-" + \
