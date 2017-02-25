@@ -1383,7 +1383,7 @@ def create_layout_bar_chart(datasets, title=""):
     ax1 = fig.add_subplot(111)
 
     # X-AXIS
-    x_values = ['P=1%,S=1%', 'P=1%,S=10%', 'P=10%,S=1%', 'P=10%,S=10%']
+    x_values = ['Proj.=1%, Sel.=1%', 'Proj.=1%, Sel.=10%', 'Proj.=10%, Sel.=1%', 'Proj.=10%, Sel.=10%']
     N = len(x_values)
     M = 4
     ind = np.arange(N)
