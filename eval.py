@@ -787,6 +787,7 @@ def create_legend_layout():
     for group in xrange(len(LABELS)):
         bars[idx] = ax1.bar(ind + margin + (idx * width), data, width,
                               color=COLOR_MAP_2[idx - 1],
+                              hatch=OPT_PATTERNS[idx - 1],
                               linewidth=BAR_LINEWIDTH)
         idx = idx + 1
 
@@ -939,10 +940,12 @@ def create_query_line_chart(datasets):
 
     # Y-AXIS
     YAXIS_MIN = 0
+    YAXIS_MAX = 90000
     ax1.yaxis.set_major_locator(LinearLocator(YAXIS_TICKS))
     ax1.minorticks_off()
     ax1.set_ylabel("Execution time (ms)", fontproperties=LABEL_FP)
     ax1.set_ylim(bottom=YAXIS_MIN)
+    ax1.set_ylim(top=YAXIS_MAX)
 
     # X-AXIS
     ax1.set_xticks(ind + 0.5)
@@ -991,6 +994,8 @@ def create_convergence_bar_chart(datasets):
     ax1.yaxis.set_major_locator(LinearLocator(YAXIS_TICKS))
     ax1.minorticks_off()
     ax1.set_ylabel("Convergence time (ms)", fontproperties=LABEL_FP)
+    YAXIS_MAX = 70000
+    ax1.set_ylim(top=YAXIS_MAX)
 
     # X-AXIS
     ax1.set_xticks(ind + 0.5)
