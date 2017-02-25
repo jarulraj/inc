@@ -1195,6 +1195,9 @@ def create_variability_line_chart(datasets):
     ax1.yaxis.set_major_locator(LinearLocator(YAXIS_TICKS))
     ax1.minorticks_off()
     ax1.set_ylabel("Execution time (ms)", fontproperties=LABEL_FP)
+    YAXIS_MIN = 0
+    YAXIS_MAX = 60000
+    ax1.set_ylim([YAXIS_MIN, YAXIS_MAX])
 
     # X-AXIS
     ax1.set_xticks(ind + 0.5)
