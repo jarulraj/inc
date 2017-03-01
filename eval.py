@@ -349,7 +349,7 @@ SELECTIVITY_EXP_INDEX_USAGE_TYPES = INDEX_USAGE_TYPES_SCALE
 SELECTIVITY_EXP_WRITE_RATIO = WRITE_RATIO_READ_ONLY
 SELECTIVITY_EXP_QUERY_COMPLEXITY = QUERY_COMPLEXITY_SIMPLE
 SELECTIVITY_EXP_QUERY_COUNT = 5000
-SELECTIVITY_EXP_PHASE_LENGTH = 5000
+SELECTIVITY_EXP_PHASE_LENGTH = 5000 * 5
 SELECTIVITY_EXP_SELECTIVITYS = [0.0005, 0.005, 0.05, 0.5]
 SELECTIVITY_CSV = "selectivity.csv"
 
@@ -1626,10 +1626,10 @@ def create_hybrid_line_chart(datasets, plot_offset):
     y_mark = 0.5
     x_mark = 0.6
 
-    INDEX_COMPLETED_LABELS = (["\% OF INDEX BUILT: 100\%", 
-                               "\% OF INDEX BUILT: 100\%", 
-                               "\% OF INDEX BUILT: 4\%", 
-                               "\% OF INDEX BUILT: 10\%", 
+    INDEX_COMPLETED_LABELS = (["\% OF INDEX BUILT: 100\%",
+                               "\% OF INDEX BUILT: 100\%",
+                               "\% OF INDEX BUILT: 4\%",
+                               "\% OF INDEX BUILT: 10\%",
                                "\% OF INDEX BUILT: 20\%"])
 
     ax1.text(x_mark,
@@ -1642,10 +1642,10 @@ def create_hybrid_line_chart(datasets, plot_offset):
     y_mark = 0.5
     x_mark = 0.1
 
-    SKEW_LABELS = (["AFFINITY LEVEL: ALL", 
-                    "AFFINITY LEVEL: ALL", 
-                    "AFFINITY LEVEL: VERY HIGH", 
-                    "AFFINITY LEVEL: HIGH", 
+    SKEW_LABELS = (["AFFINITY LEVEL: ALL",
+                    "AFFINITY LEVEL: ALL",
+                    "AFFINITY LEVEL: VERY HIGH",
+                    "AFFINITY LEVEL: HIGH",
                     "AFFINITY LEVEL: MODERATE"])
 
     ax1.text(x_mark,
