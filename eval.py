@@ -357,7 +357,8 @@ SELECTIVITY_CSV = "selectivity.csv"
 SCALE_EXP_INDEX_USAGE_TYPES = INDEX_USAGE_TYPES_SCALE
 SCALE_EXP_WRITE_RATIO = WRITE_RATIO_READ_ONLY
 SCALE_EXP_QUERY_COMPLEXITY = QUERY_COMPLEXITY_SIMPLE
-SCALE_EXP_PHASE_LENGTH = 500
+SCALE_EXP_QUERY_COUNT = 5000
+SCALE_EXP_PHASE_LENGTH = 5000 * 5
 SCALE_EXP_SCALES = [1, 10, 100, 1000]
 SCALE_CSV = "scale.csv"
 
@@ -1252,11 +1253,14 @@ def create_selectivity_line_chart(datasets):
     ax1.minorticks_off()
     ax1.set_ylabel(get_label("Execution time (ms)"), fontproperties=LABEL_FP)
     ax1.set_ylim(bottom=YAXIS_MIN)
-
+    
     # X-AXIS
+
+    SELECTIVITY_LABELS = ["0.05\%", "0.5\%", "5\%", "50\%"]
+
     ax1.set_xticks(ind + 0.5)
     ax1.set_xlabel(get_label("Selectivity"), fontproperties=LABEL_FP)
-    ax1.set_xticklabels(x_values)
+    ax1.set_xticklabels(SELECTIVITY_LABELS)
     ax1.set_xlim([XAXIS_MIN, XAXIS_MAX])
 
     for label in ax1.get_yticklabels() :
@@ -2480,6 +2484,7 @@ def scale_eval():
                            query_complexity=SCALE_EXP_QUERY_COMPLEXITY,
                            index_usage_type=index_usage_type,
                            scale_factor=scale_factor,
+                           query_count=SCALE_EXP_QUERY_COUNT,                          
                            phase_length=SCALE_EXP_PHASE_LENGTH)
 
             # Collect stat
