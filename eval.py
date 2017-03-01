@@ -1662,7 +1662,7 @@ def create_model_line_chart(datasets, plot_mode, color_offset):
 
     MODEL_OPT_LINE_WIDTH = THIN_LINE_WIDTH
     MODEL_OPT_MARKER_SIZE = 5.0
-    MODEL_OPT_MARKER_FREQUENCY = MODEL_EXP_QUERY_COUNT/100
+    MODEL_OPT_MARKER_FREQUENCY = MODEL_EXP_QUERY_COUNT/200
 
     idx = 0
     for group in xrange(len(datasets)):
@@ -1705,7 +1705,7 @@ def create_model_line_chart(datasets, plot_mode, color_offset):
     # X-AXIS
     #ax1.set_xticks(ind + 0.5)
     major_ticks = np.arange(0, MODEL_EXP_QUERY_COUNT + 1,
-                            MODEL_EXP_QUERY_COUNT/5)
+                            MODEL_EXP_QUERY_COUNT/10)
     ax1.set_xticks(major_ticks)
 
     if color_offset == 2:
@@ -1713,9 +1713,9 @@ def create_model_line_chart(datasets, plot_mode, color_offset):
         #ax1.set_xticklabels(x_values)
 
     # ADD VLINES
-    phase_start = 1000
-    phase_end = 5000
-    phase_length = 1000
+    phase_start = 0
+    phase_end = MODEL_EXP_QUERY_COUNT
+    phase_length = 500
 
     for phase_itr in range(phase_start, phase_end, phase_length):
         plot.axvline(x=phase_itr, color='k', linestyle='--', linewidth=1.0)
