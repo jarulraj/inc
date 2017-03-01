@@ -1387,7 +1387,7 @@ def create_layout_bar_chart(datasets, title=""):
     ax1 = fig.add_subplot(111)
 
     # X-AXIS
-    x_values = ['Proj.=1%, Sel.=1%', 'Proj.=1%, Sel.=10%', 'Proj.=10%, Sel.=1%', 'Proj.=10%, Sel.=10%']
+    x_values = ['Proj.=1\%, Sel.=1\%', 'Proj.=1\%, Sel.=10\%', 'Proj.=10\%, Sel.=1\%', 'Proj.=10\%, Sel.=10\%']
     N = len(x_values)
     M = 4
     ind = np.arange(N)
@@ -1622,10 +1622,14 @@ def create_hybrid_line_chart(datasets, plot_offset):
         plot.axvline(x=phase_itr, color='k', linestyle='--', linewidth=1.0)
 
     # LABELS
-    y_mark = 0.6
-    x_mark = 0.92
+    y_mark = 0.5
+    x_mark = 0.6
 
-    INDEX_COMPLETED_LABELS = (["100%", "100%", "9%", "15%", "30%"])
+    INDEX_COMPLETED_LABELS = (["\% OF INDEX BUILT: 100\%", 
+                               "\% OF INDEX BUILT: 100\%", 
+                               "\% OF INDEX BUILT: 4\%", 
+                               "\% OF INDEX BUILT: 10\%", 
+                               "\% OF INDEX BUILT: 20\%"])
 
     ax1.text(x_mark,
              y_mark,
@@ -1634,10 +1638,14 @@ def create_hybrid_line_chart(datasets, plot_offset):
              bbox=dict(facecolor='lightgrey', alpha=0.75))
 
     # LABELS
-    y_mark = 0.6
-    x_mark = 0.7
+    y_mark = 0.5
+    x_mark = 0.1
 
-    SKEW_LABELS = (["ALL", "ALL", "VERY HIGH", "HIGH", "MODERATE"])
+    SKEW_LABELS = (["AFFINITY LEVEL: ALL", 
+                    "AFFINITY LEVEL: ALL", 
+                    "AFFINITY LEVEL: VERY HIGH", 
+                    "AFFINITY LEVEL: HIGH", 
+                    "AFFINITY LEVEL: MODERATE"])
 
     ax1.text(x_mark,
              y_mark,
