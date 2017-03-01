@@ -1308,12 +1308,12 @@ def create_scale_line_chart(datasets):
     ax1.set_ylabel(get_label("Execution time (s)"), fontproperties=LABEL_FP)
     ax1.set_yscale('log', nonposy='clip')
     ax1.tick_params(axis='y', which='minor', left='off', right='off')
-    ax1.set_yticklabels(["", "", "1", "10", "100", "1000"])
+    ax1.set_yticklabels(["", "10", "100", "1000", "10000"])
 
     # X-AXIS
     ax1.set_xticks(ind + 0.5)
-    ax1.set_xlabel(get_label("Scale factor"), fontproperties=LABEL_FP)
-    ax1.set_xticklabels(x_values)
+    ax1.set_xlabel(get_label("Table Size"), fontproperties=LABEL_FP)
+    ax1.set_xticklabels(["10K", "100K", "1M", "10M"])
     ax1.set_xlim([XAXIS_MIN, XAXIS_MAX])
 
     for label in ax1.get_yticklabels() :
