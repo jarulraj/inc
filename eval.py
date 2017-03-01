@@ -348,7 +348,8 @@ VARIABILITY_CSV = "variability.csv"
 SELECTIVITY_EXP_INDEX_USAGE_TYPES = INDEX_USAGE_TYPES_SCALE
 SELECTIVITY_EXP_WRITE_RATIO = WRITE_RATIO_READ_ONLY
 SELECTIVITY_EXP_QUERY_COMPLEXITY = QUERY_COMPLEXITY_SIMPLE
-SELECTIVITY_EXP_PHASE_LENGTH = 500
+SELECTIVITY_EXP_QUERY_COUNT = 5000
+SELECTIVITY_EXP_PHASE_LENGTH = 5000
 SELECTIVITY_EXP_SELECTIVITYS = [0.0005, 0.005, 0.05, 0.5]
 SELECTIVITY_CSV = "selectivity.csv"
 
@@ -2450,6 +2451,7 @@ def selectivity_eval():
                            query_complexity=SELECTIVITY_EXP_QUERY_COMPLEXITY,
                            index_usage_type=index_usage_type,
                            selectivity=selectivity,
+                           query_count=SELECTIVITY_EXP_QUERY_COUNT,
                            phase_length=SELECTIVITY_EXP_PHASE_LENGTH)
 
             # Collect stat
