@@ -86,27 +86,24 @@ THIN_FONT_SIZE = 12
 TINY_FONT_SIZE = 10
 LEGEND_FONT_SIZE = 18
 
-SMALL_LABEL_FONT_SIZE = 10
-SMALL_LEGEND_FONT_SIZE = 10
-
 XAXIS_MIN = 0.25
 XAXIS_MAX = 3.75
 
 # SET TYPE1 FONTS
 matplotlib.rcParams['ps.useafm'] = True
-matplotlib.rcParams['font.family'] = OPT_FONT_NAME
 matplotlib.rcParams['pdf.use14corefonts'] = True
-#matplotlib.rcParams['text.usetex'] = True
-#matplotlib.rcParams['text.latex.preamble']=[r'\usepackage{euler}']
+matplotlib.rcParams['text.usetex'] = True
+matplotlib.rcParams['text.latex.preamble']= [
+    r'\usepackage{helvet}',    # set the normal font here
+    r'\usepackage{sansmath}',  # load up the sansmath so that math -> helvet
+    r'\sansmath'               # <- tricky! -- gotta actually tell tex to use!
+]
 
-LABEL_FP = FontProperties(style='normal', size=LABEL_FONT_SIZE, weight='bold')
-TICK_FP = FontProperties(style='normal', size=TICK_FONT_SIZE)
-TINY_FP = FontProperties(style='normal', size=TINY_FONT_SIZE)
-LEGEND_FP = FontProperties(style='normal', size=LEGEND_FONT_SIZE, weight='bold')
-THIN_FP = FontProperties(style='normal', size=THIN_FONT_SIZE, weight='bold')
-
-SMALL_LABEL_FP = FontProperties(style='normal', size=SMALL_LABEL_FONT_SIZE, weight='bold')
-SMALL_LEGEND_FP = FontProperties(style='normal', size=SMALL_LEGEND_FONT_SIZE, weight='bold')
+LABEL_FP = FontProperties(family=OPT_FONT_NAME, style='normal', size=LABEL_FONT_SIZE, weight='bold')
+TICK_FP = FontProperties(family=OPT_FONT_NAME, style='normal', size=TICK_FONT_SIZE)
+TINY_FP = FontProperties(family=OPT_FONT_NAME, style='normal', size=TINY_FONT_SIZE)
+LEGEND_FP = FontProperties(family=OPT_FONT_NAME, style='normal', size=LEGEND_FONT_SIZE, weight='bold')
+THIN_FP = FontProperties(family=OPT_FONT_NAME, style='normal', size=THIN_FONT_SIZE, weight='bold')
 
 YAXIS_TICKS = 3
 YAXIS_ROUND = 1000.0
@@ -599,7 +596,7 @@ def create_legend_motivation():
             color_idx = 2
 
         lines[idx], = ax1.plot(x_values, data,
-                               color=OPT_LINE_COLORS[color_idx],
+                               color=COLOR_MAP_3[color_idx],
                                linewidth=OPT_LINE_WIDTH,
                                marker=OPT_MARKERS[color_idx],
                                markersize=OPT_MARKER_SIZE)
@@ -909,6 +906,10 @@ def create_legend_model():
 # PLOT
 ###################################################################################
 
+def get_label(label):
+    bold_label = "\\textbf{" + label + "}"
+    return bold_label
+
 def create_query_line_chart(datasets):
     fig = plot.figure()
     ax1 = fig.add_subplot(111)
@@ -943,13 +944,13 @@ def create_query_line_chart(datasets):
     YAXIS_MAX = 90000
     ax1.yaxis.set_major_locator(LinearLocator(YAXIS_TICKS))
     ax1.minorticks_off()
-    ax1.set_ylabel("Execution time (ms)", fontproperties=LABEL_FP)
+    ax1.set_ylabel(get_label('Execution time (ms)'), fontproperties=LABEL_FP)
     ax1.set_ylim(bottom=YAXIS_MIN)
     ax1.set_ylim(top=YAXIS_MAX)
 
     # X-AXIS
     ax1.set_xticks(ind + 0.5)
-    ax1.set_xlabel("Phase Lengths", fontproperties=LABEL_FP)
+    ax1.set_xlabel(get_label('Phase Lengths'), fontproperties=LABEL_FP)
     ax1.set_xticklabels(x_values)
     ax1.set_xlim([XAXIS_MIN, XAXIS_MAX])
 
@@ -993,13 +994,13 @@ def create_convergence_bar_chart(datasets):
     # Y-AXIS
     ax1.yaxis.set_major_locator(LinearLocator(YAXIS_TICKS))
     ax1.minorticks_off()
-    ax1.set_ylabel("Convergence time (ms)", fontproperties=LABEL_FP)
+    ax1.set_ylabel(get_label("Convergence time (ms)"), fontproperties=LABEL_FP)
     YAXIS_MAX = 70000
     ax1.set_ylim(top=YAXIS_MAX)
 
     # X-AXIS
     ax1.set_xticks(ind + 0.5)
-    ax1.set_xlabel("Fraction of updates", fontproperties=LABEL_FP)
+    ax1.set_xlabel(get_label("Fraction of updates"), fontproperties=LABEL_FP)
     ax1.set_xticklabels(x_values)
     #ax1.set_xlim([XAXIS_MIN, XAXIS_MAX])
 
@@ -1051,10 +1052,10 @@ def create_time_series_line_chart(datasets, plot_mode):
 
     # LATENCY
     if plot_mode == TIME_SERIES_LATENCY_MODE:
-        ax1.set_ylabel("Latency (ms)", fontproperties=LABEL_FP)
+        ax1.set_ylabel(get_label("Latency (ms)"), fontproperties=LABEL_FP)
     # INDEX
     elif plot_mode == TIME_SERIES_INDEX_MODE:
-        ax1.set_ylabel("Index count", fontproperties=LABEL_FP)
+        ax1.set_ylabel(get_label("Index count"), fontproperties=LABEL_FP)
         YAXIS_MIN = 0
         YAXIS_MAX = 10
         ax1.set_ylim([YAXIS_MIN, YAXIS_MAX])
@@ -1065,7 +1066,7 @@ def create_time_series_line_chart(datasets, plot_mode):
     major_ticks = np.arange(0, TIME_SERIES_EXP_QUERY_COUNT + 1,
                             TIME_SERIES_OPT_MARKER_FREQUENCY)
     ax1.set_xticks(major_ticks)
-    ax1.set_xlabel("Query Sequence", fontproperties=LABEL_FP)
+    ax1.set_xlabel(get_label("Query Sequence"), fontproperties=LABEL_FP)
     #ax1.set_xticklabels(x_values)
 
     for label in ax1.get_yticklabels() :
@@ -1123,14 +1124,14 @@ def create_holistic_line_chart(datasets):
     ax1.set_yticklabels(["", "1", "10", "100", "1000", "10000"])
 
     # LATENCY
-    ax1.set_ylabel("Latency (ms)", fontproperties=LABEL_FP)
+    ax1.set_ylabel(get_label("Latency (ms)"), fontproperties=LABEL_FP)
 
     # X-AXIS
     #ax1.set_xticks(ind + 0.5)
     major_ticks = np.arange(0, HOLISTIC_EXP_QUERY_COUNT + 1,
                             HOLISTIC_OPT_MARKER_FREQUENCY)
     ax1.set_xticks(major_ticks)
-    ax1.set_xlabel("Query Sequence", fontproperties=LABEL_FP)
+    ax1.set_xlabel(get_label("Query Sequence"), fontproperties=LABEL_FP)
     #ax1.set_xticklabels(x_values)
     X_MIN = 1
     X_MAX = 15000
@@ -1194,14 +1195,14 @@ def create_variability_line_chart(datasets):
     # Y-AXIS
     ax1.yaxis.set_major_locator(LinearLocator(YAXIS_TICKS))
     ax1.minorticks_off()
-    ax1.set_ylabel("Execution time (ms)", fontproperties=LABEL_FP)
+    ax1.set_ylabel(get_label("Execution time (ms)"), fontproperties=LABEL_FP)
     YAXIS_MIN = 0
     YAXIS_MAX = 60000
     ax1.set_ylim([YAXIS_MIN, YAXIS_MAX])
 
     # X-AXIS
     ax1.set_xticks(ind + 0.5)
-    ax1.set_xlabel("Variability Threshold", fontproperties=LABEL_FP)
+    ax1.set_xlabel(get_label("Variability Threshold"), fontproperties=LABEL_FP)
     ax1.set_xticklabels(x_values)
     ax1.set_xlim([XAXIS_MIN, XAXIS_MAX])
 
@@ -1248,12 +1249,12 @@ def create_selectivity_line_chart(datasets):
     YAXIS_MIN = 0
     ax1.yaxis.set_major_locator(LinearLocator(YAXIS_TICKS))
     ax1.minorticks_off()
-    ax1.set_ylabel("Execution time (ms)", fontproperties=LABEL_FP)
+    ax1.set_ylabel(get_label("Execution time (ms)"), fontproperties=LABEL_FP)
     ax1.set_ylim(bottom=YAXIS_MIN)
 
     # X-AXIS
     ax1.set_xticks(ind + 0.5)
-    ax1.set_xlabel("Selectivity", fontproperties=LABEL_FP)
+    ax1.set_xlabel(get_label("Selectivity"), fontproperties=LABEL_FP)
     ax1.set_xticklabels(x_values)
     ax1.set_xlim([XAXIS_MIN, XAXIS_MAX])
 
@@ -1299,14 +1300,14 @@ def create_scale_line_chart(datasets):
     # Y-AXIS
     ax1.yaxis.set_major_locator(LinearLocator(YAXIS_TICKS))
     ax1.minorticks_off()
-    ax1.set_ylabel("Execution time (s)", fontproperties=LABEL_FP)
+    ax1.set_ylabel(get_label("Execution time (s)"), fontproperties=LABEL_FP)
     ax1.set_yscale('log', nonposy='clip')
     ax1.tick_params(axis='y', which='minor', left='off', right='off')
     ax1.set_yticklabels(["", "", "1", "10", "100", "1000"])
 
     # X-AXIS
     ax1.set_xticks(ind + 0.5)
-    ax1.set_xlabel("Scale factor", fontproperties=LABEL_FP)
+    ax1.set_xlabel(get_label("Scale factor"), fontproperties=LABEL_FP)
     ax1.set_xticklabels(x_values)
     ax1.set_xlim([XAXIS_MIN, XAXIS_MAX])
 
@@ -1357,10 +1358,10 @@ def create_index_count_line_chart(datasets, plot_mode):
 
     # LATENCY
     if plot_mode == INDEX_COUNT_LATENCY_MODE:
-        ax1.set_ylabel("Latency (ms)", fontproperties=LABEL_FP)
+        ax1.set_ylabel(get_label("Latency (ms)"), fontproperties=LABEL_FP)
     # INDEX
     elif plot_mode == INDEX_COUNT_INDEX_MODE:
-        ax1.set_ylabel("Index count", fontproperties=LABEL_FP)
+        ax1.set_ylabel(get_label("Index count"), fontproperties=LABEL_FP)
         YAXIS_MIN = 0
         YAXIS_MAX = 8
         ax1.set_ylim([YAXIS_MIN, YAXIS_MAX])
@@ -1370,7 +1371,7 @@ def create_index_count_line_chart(datasets, plot_mode):
     major_ticks = np.arange(0, INDEX_COUNT_EXP_QUERY_COUNT + 1,
                             INDEX_COUNT_OPT_MARKER_FREQUENCY)
     ax1.set_xticks(major_ticks)
-    ax1.set_xlabel("Query Sequence", fontproperties=LABEL_FP)
+    ax1.set_xlabel(get_label("Query Sequence"), fontproperties=LABEL_FP)
     #ax1.set_xticklabels(x_values)
 
     for label in ax1.get_yticklabels() :
@@ -1416,12 +1417,12 @@ def create_layout_bar_chart(datasets, title=""):
     # Y-AXIS
     ax1.yaxis.set_major_locator(LinearLocator(YAXIS_TICKS))
     ax1.minorticks_off()
-    ax1.set_ylabel("Total time (ms)", fontproperties=LABEL_FP)
+    ax1.set_ylabel(get_label("Total time (ms)"), fontproperties=LABEL_FP)
 
     # X-AXIS
     ax1.set_xticks(np.arange(N)+0.5)
     ax1.set_xticklabels(x_values)
-    ax1.set_xlabel('Tuning Mode', fontproperties=LABEL_FP)
+    ax1.set_xlabel(get_label('Tuning Mode'), fontproperties=LABEL_FP)
 
     for label in ax1.get_yticklabels() :
         label.set_fontproperties(TICK_FP)
@@ -1467,7 +1468,7 @@ def create_trend_line_chart(datasets):
     # Y-AXIS
     ax1.yaxis.set_major_locator(LinearLocator(YAXIS_TICKS))
     ax1.minorticks_off()
-    ax1.set_ylabel("Index Utility", fontproperties=LABEL_FP)
+    ax1.set_ylabel(get_label("Index Utility"), fontproperties=LABEL_FP)
     YAXIS_MIN = 0
     ax1.set_ylim(bottom=YAXIS_MIN)
 
@@ -1475,7 +1476,7 @@ def create_trend_line_chart(datasets):
     major_ticks = np.arange(0, TREND_EXP_TUNING_COUNT + 1,
                             TREND_OPT_MARKER_FREQUENCY)
     ax1.set_xticks(major_ticks)
-    ax1.set_xlabel("Tuning Period", fontproperties=LABEL_FP)
+    ax1.set_xlabel(get_label("Tuning Period"), fontproperties=LABEL_FP)
     #ax1.set_xlim([XAXIS_MIN, XAXIS_MAX])
 
     for label in ax1.get_yticklabels() :
@@ -1516,7 +1517,7 @@ def create_motivation_line_chart(datasets, plot_mode):
         x_values = [float(x_val / 1000.0) for x_val in x_values]
         LOG.info("group_data = %s", str(y_values))
         ax1.plot(ind + 0.5, y_values,
-                 color=OPT_COLORS[idx],
+                 color=COLOR_MAP_3[idx],
                  linewidth=MOTIVATION_OPT_LINE_WIDTH,
                  marker=OPT_MARKERS[idx],
                  markersize=MOTIVATION_OPT_MARKER_SIZE,
@@ -1534,13 +1535,13 @@ def create_motivation_line_chart(datasets, plot_mode):
 
     # LATENCY
     if plot_mode == MOTIVATION_LATENCY_MODE:
-        ax1.set_ylabel("Latency (ms)", fontproperties=LABEL_FP)
+        ax1.set_ylabel(get_label("Latency (ms)"), fontproperties=LABEL_FP)
 
     # X-AXIS
     #ax1.set_xticks(ind + 0.5)
     #major_ticks = np.arange(0, 151, 150/10)
     #ax1.set_xticks(major_ticks)
-    ax1.set_xlabel("Query sequence", fontproperties=LABEL_FP)
+    ax1.set_xlabel(get_label("Query sequence"), fontproperties=LABEL_FP)
     #ax1.set_xticklabels(x_values)
 
     # ADD VLINES
@@ -1599,7 +1600,7 @@ def create_hybrid_line_chart(datasets, plot_offset):
     Y_MAX = 300
     ax1.yaxis.set_major_locator(LinearLocator(YAXIS_TICKS))
     ax1.minorticks_off()
-    ax1.set_ylabel("Latency (ms)", fontproperties=THIN_FP)
+    ax1.set_ylabel(get_label("Latency (ms)"), fontproperties=THIN_FP)
     ax1.set_ylim([Y_MIN, Y_MAX])
 
     # X-AXIS
@@ -1609,7 +1610,7 @@ def create_hybrid_line_chart(datasets, plot_offset):
     ax1.set_xticks(major_ticks)
 
     if plot_offset == 4:
-        ax1.set_xlabel("Query Sequence", fontproperties=LABEL_FP)
+        ax1.set_xlabel(get_label("Query Sequence"), fontproperties=LABEL_FP)
         #ax1.set_xticklabels(x_values)
 
     # ADD VLINES
@@ -1694,10 +1695,10 @@ def create_model_line_chart(datasets, plot_mode, color_offset):
         YAXIS_MIN = 0
         YAXIS_MAX = 300
         ax1.set_ylim([YAXIS_MIN, YAXIS_MAX])
-        ax1.set_ylabel("Latency (ms)", fontproperties=THIN_FP)
+        ax1.set_ylabel(get_label("Latency (ms)"), fontproperties=THIN_FP)
     # INDEX
     elif plot_mode == MODEL_INDEX_MODE:
-        ax1.set_ylabel("Index count", fontproperties=THIN_FP)
+        ax1.set_ylabel(get_label("Index count"), fontproperties=THIN_FP)
         YAXIS_MIN = 0
         YAXIS_MAX = 10
         ax1.set_ylim([YAXIS_MIN, YAXIS_MAX])
@@ -1709,7 +1710,7 @@ def create_model_line_chart(datasets, plot_mode, color_offset):
     ax1.set_xticks(major_ticks)
 
     if color_offset == 2:
-        ax1.set_xlabel("Query Sequence", fontproperties=LABEL_FP)
+        ax1.set_xlabel(get_label("Query Sequence"), fontproperties=LABEL_FP)
         #ax1.set_xticklabels(x_values)
 
     # ADD VLINES
