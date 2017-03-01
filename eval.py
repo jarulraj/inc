@@ -1584,7 +1584,7 @@ def create_hybrid_line_chart(datasets, plot_offset):
                     y_values.append(datasets[group][line][col])
         LOG.info("group_data = %s", str(y_values))
         ax1.plot(ind + 0.5, y_values,
-                 color=OPT_COLORS[color_offset],
+                 color=COLOR_MAP_3[color_offset],
                  linewidth=HYBRID_OPT_LINE_WIDTH,
                  marker=OPT_MARKERS[color_offset],
                  markersize=HYBRID_OPT_MARKER_SIZE,
