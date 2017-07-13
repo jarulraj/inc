@@ -1574,8 +1574,10 @@ def create_hybrid_line_chart(datasets, plot_offset):
     HYBRID_OPT_MARKER_SIZE = 5.0
     HYBRID_OPT_MARKER_FREQUENCY = HYBRID_EXP_QUERY_COUNT/100
 
-    if plot_offset == 0 or plot_offset == 1:
-        color_offset = plot_offset
+    if plot_offset == 0:
+        color_offset = 1
+    elif plot_offset == 1:
+        color_offset = 0
     else:
         color_offset = 2
 
